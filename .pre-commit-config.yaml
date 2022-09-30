@@ -1,0 +1,51 @@
+---
+ci:
+  autoupdate_schedule: monthly
+
+default_language_version:
+  python: python3.10
+
+repos:
+  - repo: https://github.com/psf/black
+    rev: 22.8.0
+    hooks:
+      - id: black
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.38.0
+    hooks:
+      - id: pyupgrade
+        args: [--py37-plus]
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        additional_dependencies: [toml]
+
+  - repo: https://github.com/asottile/yesqa
+    rev: v1.4.0
+    hooks:
+      - id: yesqa
+        additional_dependencies: [flake8-bugbear]
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 5.0.4
+    hooks:
+      - id: flake8
+        exclude: docs/code_examples
+        additional_dependencies: [flake8-bugbear]
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.1
+    hooks:
+      - id: codespell
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: debug-statements
+      - id: check-toml
+      - id: check-yaml

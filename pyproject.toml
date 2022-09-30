@@ -1,0 +1,105 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs", "hatch-fancy-pypi-readme"]
+build-backend = "hatchling.build"
+
+
+[project]
+dynamic = ["version", "readme"]
+name = "stamina"
+description = "Easy mode for Tenacity."
+requires-python = ">=3.8"
+license = "MIT"
+keywords = ["retry", "retries", "reliability", "tenacity"]
+authors = [{ name = "Hynek Schlawack", email = "hs@ox.cx" }]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "License :: OSI Approved :: MIT License",
+]
+dependencies = ["tenacity", "typing-extensions; python_version<'3.10'"]
+
+[project.optional-dependencies]
+tests = ["pytest", "pytest-asyncio"]
+typing = ["mypy"]
+dev = ["stamina[tests,typing]", "nox"]
+
+[project.urls]
+Documentation = "https://github.com/hynek/stamina#readme"
+Source = "https://github.com/hynek/stamina"
+Changelog = "https://github.com/hynek/stamina/blob/main/CHANGELOG.md"
+Funding = "https://github.com/sponsors/hynek"
+Ko-fi = "https://ko-fi.com/the_hynek"
+
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = { version_scheme = "no-guess-dev" }
+
+
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+end-before = "## Usage"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+start-after = "<!-- end-of-usage -->\n\n"
+
+
+[tool.pytest.ini_options]
+addopts = ["-ra", "--strict-markers", "--strict-config"]
+testpaths = "tests"
+xfail_strict = true
+filterwarnings = ["once::Warning"]
+asyncio_mode = "auto"
+
+
+[tool.coverage.run]
+branch = true
+parallel = true
+source = ["stamina"]
+
+[tool.coverage.paths]
+source = ["src", ".nox/*/site-packages"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
+
+
+[tool.mypy]
+strict = true
+
+show_error_codes = true
+enable_error_code = ["ignore-without-code"]
+
+follow_imports = "normal"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "tenacity.*"
+follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+module = "nox.*"
+follow_imports = "skip"
+
+
+[tool.black]
+line-length = 79
+
+
+[tool.isort]
+profile = "attrs"

@@ -1,0 +1,5 @@
+.direnv
+.envrc
+.vscode
+__pycache__
+.coverage*
