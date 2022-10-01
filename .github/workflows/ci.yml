@@ -39,7 +39,7 @@ jobs:
       - run: nox --python ${{ matrix.python.nox }} -e tests
 
       - name: Upload coverage data
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: coverage-data
           path: .coverage.*
@@ -70,7 +70,7 @@ jobs:
           python -m coverage report --fail-under=100
 
       - name: Upload HTML report if check failed.
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: html-report
           path: htmlcov
