@@ -75,7 +75,6 @@ If all retries fail, the *last* exception is let through.
  `stamina.is_active()` and `stamina.set_active()` (it's idempotent: you can call `set_active(True)` as many times as you want in a row).
  This is useful in tests.
 
-<!-- end-of-usage -->
 
 ## License
 

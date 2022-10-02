@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs", "hatch-fancy-pypi-readme"]
+requires = ["hatchling", "hatch-vcs", "hatch-fancy-pypi-readme>=22.8.0"]
 build-backend = "hatchling.build"
 
 
@@ -50,7 +50,7 @@ end-before = "## Usage"
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 path = "README.md"
-start-after = "<!-- end-of-usage -->\n\n"
+start-at = "## License"
 
 
 [tool.pytest.ini_options]
