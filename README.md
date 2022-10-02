@@ -16,8 +16,12 @@ In practice, I've found myself to use only very few knobs and wished it wouldn't
 - Preserve type hints.
 - Easy deactivation for testing.
 
-If you need more sophisticated features, you probably should use *Tenacity* directly.
-Of course, it's possible that I'll add more features that **I** need.
+> **Warning**
+> While *stamina* is as stable and as backwards-compatible as you'd expect from me, it is also _opinionated_.
+> That means that it's not optimized for versatility but for my workflows.
+> It also means it will pull in dependencies that I use in all my projects in the future – you can expect [*prometheus*](https://github.com/prometheus/client_python) and [*structlog*](https://www.structlog.org/) integrations soon.
+>
+> If you need more flexibility or more sophisticated features, you should use *Tenacity* directly.
 
 
 ## Usage
