@@ -11,7 +11,7 @@ The **third number** is for emergencies when we need to start branches for older
 <!-- changelog follows -->
 
 
-## [Unreleased](https://github.com/hynek/stamina/)
+## [22.1.0](https://github.com/hynek/stamina/tree/22.1.0) - 2022-10-02
 
 ### Added
 
