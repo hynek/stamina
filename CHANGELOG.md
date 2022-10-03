@@ -13,6 +13,13 @@ The **third number** is for emergencies when we need to start branches for older
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/22.1.0...HEAD)
 
+### Added
+
+- Retries are now instrumented.
+  If [*prometheus-client*](https://github.com/prometheus/client_python) is installed, retries are counted using the *Prometheus* counter `stamina_retries_total`.
+  If [*structlog*](https://www.structlog.org/) is installed, they are logged using a *structlog* logger at warning level.
+  These two instrumentations are *independent* from each other.
+
 
 ## [22.1.0](https://github.com/hynek/stamina/tree/22.1.0) - 2022-10-02
 

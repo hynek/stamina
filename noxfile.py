@@ -9,7 +9,7 @@ import os
 import nox
 
 
-nox.options.sessions = ["pre_commit", "tests", "mypy"]
+nox.options.sessions = ["pre_commit", "tests", "tests_no_deps", "mypy"]
 nox.options.reuse_existing_virtualenvs = True
 nox.options.error_on_external_run = True
 
@@ -25,13 +25,25 @@ def pre_commit(session: nox.Session) -> None:
 
 @nox.session(python=ALL_SUPPORTED)
 def mypy(session: nox.Session) -> None:
-    session.install(".[typing]")
+    session.install(".[typing]", "structlog", "prometheus-client")
 
     session.run("mypy", "src", "typing_examples.py")
 
 
 @nox.session(python=ALL_SUPPORTED)
 def tests(session: nox.Session) -> None:
+    session.install(
+        ".[tests]", "coverage[toml]", "structlog", "prometheus-client"
+    )
+
+    session.run("coverage", "run", "-m", "pytest", *session.posargs)
+
+    if os.environ.get("CI") != "true":
+        session.notify("coverage_report")
+
+
+@nox.session
+def tests_no_deps(session: nox.Session) -> None:
     session.install(".[tests]", "coverage[toml]")
 
     session.run("coverage", "run", "-m", "pytest", *session.posargs)

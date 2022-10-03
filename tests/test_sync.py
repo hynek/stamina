@@ -25,6 +25,25 @@ def test_ok(attempts, timeout):
     assert 42 == f()
 
 
+def test_retries():
+    """
+    Retries if the specific error is raised.
+    """
+    i = 0
+
+    @stamina.retry(on=ValueError, wait_max=0)
+    def f():
+        nonlocal i
+        if i == 0:
+            i += 1
+            raise ValueError
+
+        return 42
+
+    assert 42 == f()
+    assert 1 == i
+
+
 def test_wrong_exception():
     """
     Exceptions that are not passed as `on` are left through.
@@ -50,7 +69,7 @@ def test_retry_inactive(monkeypatch):
     stamina.set_active(False)
 
     retrying = Mock()
-    monkeypatch.setattr(stamina._sync.tenacity, "Retrying", retrying)
+    monkeypatch.setattr(stamina._sync._t, "Retrying", retrying)
 
     with pytest.raises(Exception, match="passed"):
         f()

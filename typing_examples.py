@@ -2,6 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
+from __future__ import annotations
+
+from typing import Any
+
+from tenacity import RetryCallState
+
 from stamina import is_active, retry, set_active
 
 
@@ -53,3 +59,9 @@ if is_active() is True:
     ...
 
 set_active(False)
+
+
+def hook(
+    retry_state: RetryCallState, name: str, args: Any, kwargs: Any
+) -> None:
+    return None
