@@ -66,9 +66,11 @@ Can be combined with *attempts* (default: `45`).
 
 The backoff for retry attempt number _attempt_ is computed as:
 
-$$\text{backoff}(\text{attempt}) = \text{wait\\_initial} * \text{wait\\_exp\\_base}^{\textbf{attempt} - 1} + \text{random}(0, \text{wait\\_jitter})$$
+```
+wait_initial * wait_exp_base ** (attempt - 1) + random(0, wait_jitter)
+```
 
-Since $x^{0}$ is always 1, the first backoff is within $\mathopen{[}\text{wait\\_initial},\text{wait\\_initial} + \text{wait\\_jitter}\mathclose{]}$.
+Since `x**0` is always 1, the first backoff is within the interval `[wait_initial,wait_initial+wait_jitter]`.
 Thus, with default values between 0.1 and 1.1 seconds.
 
 ---
