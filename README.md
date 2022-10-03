@@ -12,10 +12,10 @@ In practice, I've found myself to use only very few knobs and wished it wouldn't
 
 *stamina* is a very thin layer around *Tenacity* that I've been copy-pasting between my projects for a long time:
 
-- Retry on certain exceptions ([`retry_if_exception_type`](https://tenacity.readthedocs.io/en/latest/api.html#tenacity.retry.retry_if_exception_type)).
-- Wait exponentially with jitter (`wait_exponential_jitter`).
-- Limit the number of retries and total time. ([`stop_after_attempt`](https://tenacity.readthedocs.io/en/latest/api.html#tenacity.stop.stop_after_attempt) and [`stop_after_delay`](https://tenacity.readthedocs.io/en/latest/api.html#tenacity.stop.stop_after_delay)).
-- Preserve type hints.
+- Retry only on certain exceptions.
+- [Exponential backoff with _jitter_](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) between retries.
+- Limit the number of retries **and** total time.
+- Preserve type hints of the decorated callable.
 - Easy deactivation for testing.
 
 > **Warning**
@@ -60,7 +60,7 @@ Can be combined with *attempts* (default: `45`).
 
 **wait_max**: Maximum backoff between retries (default: `5`).
 
-**wait_jitter**: Maximum [_jitter_](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) that is added to retry back-off delays (the actual jitter added is a random number between 0 and *wait_jitter*) (default: `1`).
+**wait_jitter**: Maximum _jitter_ that is added to retry back-off delays (the actual jitter added is a random number between 0 and *wait_jitter*) (default: `1`).
 
 **wait_exp_base**: The exponential base used to compute the retry backoff (default: `2`).
 
