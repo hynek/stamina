@@ -10,7 +10,7 @@ To deal with them, you need to **retry** failed operations.
 [*Tenacity*](https://tenacity.readthedocs.io/) is an *amazing* and beautifully *composable* toolkit for handling retries that I've been using it for years.
 In practice, I've found myself to use only very few knobs and wished it wouldn't erase the types of the callables that I decorate with `@tenacity.retry`.
 
-*stamina* is a very thin layer around *Tenacity* that I've been copy-pasting between my projects for a long time:
+*stamina* is an **opinionated** thin layer around *Tenacity* that I've been copy-pasting between my projects for a long time:
 
 - Retry only on certain exceptions.
 - [Exponential backoff with _jitter_](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) between retries.
@@ -18,12 +18,6 @@ In practice, I've found myself to use only very few knobs and wished it wouldn't
 - Preserve type hints of the decorated callable.
 - Count ([*Prometheus*](https://github.com/prometheus/client_python)) and log ([*structlog*](https://www.structlog.org/)) retries with basic metadata (if they're installed).
 - Easy deactivation for testing.
-
-> **Warning**
-> While *stamina* is as stable and as backwards-compatible as you'd expect from me, it is also _opinionated_.
-> That means that it's not optimized for versatility but for my workflows.
->
-> I think they're good workflows, but if you need more flexibility or more sophisticated features, you should use *Tenacity* directly.
 
 
 ## Usage
