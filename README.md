@@ -6,7 +6,7 @@
 
 
 Transient failures are common in distributed systems.
-To deal with them, you need to **retry** failed operations.
+To make your systems resilient, you need to [**retry** failed operations](https://blog.pragmaticengineer.com/resiliency-in-distributed-systems/#retry).
 [*Tenacity*](https://tenacity.readthedocs.io/) is an *amazing* and beautifully *composable* toolkit for handling retries that I've been using it for years.
 In practice, I've found myself to use only very few knobs and wished it wouldn't erase the types of the callables that I decorate with `@tenacity.retry`.
 
