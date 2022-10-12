@@ -76,6 +76,13 @@ If all retries fail, the *last* exception is let through.
  There's also two helpers for controlling and inspecting whether retrying is active:
  `stamina.is_active()` and `stamina.set_active()` (it's idempotent: you can call `set_active(True)` as many times as you want in a row).
  This is useful in tests.
+ For example, here's a *pytest* fixture that automatically disables retries at the beginning of a test run:
+
+ ```python
+ @pytest.fixture(autouse=True, scope="session")
+def deactivate_retries():
+    stamina.set_active(False)
+```
 
 
 ## License
