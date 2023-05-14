@@ -43,7 +43,7 @@ def do_it(code: int) -> httpx.Response:
 The decorator takes the following arguments (all time-based arguments are floats of seconds):
 
 **on**: An Exception or a tuple of Exceptions on which the decorated callable will be retried.
-There is no default, you _must_ pass this explicitly.
+There is no default – you _must_ pass this explicitly.
 
 **attempts**: Maximum number of attempts (default: `10`).
 
