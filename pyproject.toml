@@ -6,19 +6,18 @@ build-backend = "hatchling.build"
 [project]
 dynamic = ["version", "readme"]
 name = "stamina"
-description = "Easy mode for Tenacity."
+description = "Production-grade retries made easy."
 requires-python = ">=3.8"
 license = "MIT"
 keywords = ["retry", "retries", "reliability", "tenacity"]
 authors = [{ name = "Hynek Schlawack", email = "hs@ox.cx" }]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: Implementation :: CPython",
   "License :: OSI Approved :: MIT License",
 ]
 dependencies = ["tenacity", "typing-extensions; python_version<'3.10'"]
@@ -33,13 +32,11 @@ Documentation = "https://github.com/hynek/stamina#readme"
 Source = "https://github.com/hynek/stamina"
 Changelog = "https://github.com/hynek/stamina/blob/main/CHANGELOG.md"
 Funding = "https://github.com/sponsors/hynek"
-Ko-fi = "https://ko-fi.com/the_hynek"
 
 
 [tool.hatch.version]
 source = "vcs"
-raw-options = { version_scheme = "no-guess-dev" }
-
+raw-options = { local_scheme = "no-local-version" }
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
 content-type = "text/markdown"
