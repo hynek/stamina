@@ -17,30 +17,23 @@ env:
 
 jobs:
   tests:
-    name: Tests on ${{ matrix.python.nox }}
+    name: Tests on ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python:
-          - setup: "3.8"
-            nox: "3.8"
-          - setup: "3.9"
-            nox: "3.9"
-          - setup: "3.10"
-            nox: "3.10"
-          - setup: "3.11"
-            nox: "3.11"
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python.setup }}
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
 
-      - run: python -m pip install --upgrade wheel nox
+      - run: python -Im pip install --upgrade wheel nox
 
-      - run: nox --python ${{ matrix.python.nox }} -e tests
+      - run: nox --python ${{ matrix.python-version }} -e tests
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v3
@@ -59,7 +52,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_LATEST }}
 
-      - run: python -m pip install --upgrade wheel nox
+      - run: python -Im pip install --upgrade wheel nox
 
       - run: nox -e tests_no_deps
 
@@ -102,30 +95,23 @@ jobs:
         if: ${{ failure() }}
 
   mypy:
-    name: Mypy on ${{ matrix.python.nox }}
+    name: Mypy on ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python:
-          - setup: "3.8"
-            nox: "3.8"
-          - setup: "3.9"
-            nox: "3.9"
-          - setup: "3.10"
-            nox: "3.10"
-          - setup: "3.11"
-            nox: "3.11"
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python.setup }}
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
 
       - run: python -m pip install --upgrade wheel nox
 
-      - run: nox --python ${{ matrix.python.nox }} -e mypy
+      - run: nox --python ${{ matrix.python-version }} -e mypy
 
   package:
     name: Build & verify package
