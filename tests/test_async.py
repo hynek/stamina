@@ -15,11 +15,17 @@ async def test_ok(attempts, timeout):
     No error, no problem.
     """
 
+    class C:
+        @stamina.retry(on=Exception, attempts=attempts, timeout=timeout)
+        async def f(self):
+            return 42
+
     @stamina.retry(on=Exception, attempts=attempts, timeout=timeout)
     async def f():
         return 42
 
     assert 42 == await f()
+    assert 42 == await C().f()
 
 
 async def test_retries():
@@ -38,6 +44,26 @@ async def test_retries():
         return 42
 
     assert 42 == await f()
+    assert 1 == i
+
+
+async def test_retries_method():
+    """
+    Retries if the specific error is raised.
+    """
+    i = 0
+
+    class C:
+        @stamina.retry(on=ValueError, wait_max=0)
+        async def f(self):
+            nonlocal i
+            if i == 0:
+                i += 1
+                raise ValueError
+
+            return 42
+
+    assert 42 == await C().f()
     assert 1 == i
 
 
@@ -66,7 +92,7 @@ async def test_retry_inactive(monkeypatch):
     stamina.set_active(False)
 
     retrying = Mock()
-    monkeypatch.setattr(stamina._sync._t, "Retrying", retrying)
+    monkeypatch.setattr(stamina._sync._t, "AsyncRetrying", retrying)
 
     with pytest.raises(Exception, match="passed"):
         await f()
