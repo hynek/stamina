@@ -26,7 +26,7 @@ dependencies = ["tenacity", "typing-extensions; python_version<'3.10'"]
 [project.optional-dependencies]
 tests = ["pytest", "pytest-asyncio"]
 typing = ["mypy"]
-dev = ["stamina[tests,typing]", "nox"]
+dev = ["stamina[tests,typing]", "nox", "structlog", "prometheus-client"]
 
 [project.urls]
 Documentation = "https://github.com/hynek/stamina#readme"

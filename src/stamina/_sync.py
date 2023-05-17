@@ -8,7 +8,8 @@ import sys
 
 from collections.abc import Callable
 from functools import wraps
-from typing import TypeVar
+from inspect import isawaitable, iscoroutinefunction
+from typing import Awaitable, TypeVar, cast, overload
 
 import tenacity as _t
 
@@ -68,13 +69,76 @@ def retry(
     )
     stop = _make_stop(attempts=attempts, timeout=timeout)
 
+    @overload
+    def retry_decorator(
+        wrapped: Callable[P, Awaitable[T]]
+    ) -> Callable[P, Awaitable[T]]:
+        ...
+
+    @overload
     def retry_decorator(wrapped: Callable[P, T]) -> Callable[P, T]:
+        ...
+
+    def retry_decorator(
+        wrapped: Callable[P, T] | Callable[P, Awaitable[T]]
+    ) -> Callable[P, T] | Callable[P, Awaitable[T]]:
         name = guess_name(wrapped)
 
+        if not (iscoroutinefunction(wrapped) or isawaitable(wrapped)):
+            wrapped = cast("Callable[P, T]", wrapped)
+
+            @wraps(wrapped)
+            def sync_inner(*args: P.args, **kw: P.kwargs) -> T:
+                nonlocal wrapped
+                wrapped = cast("Callable[P, T]", wrapped)
+
+                if not _CONFIG.is_active:
+                    return wrapped(*args, **kw)
+
+                before_sleep: Callable[[_t.RetryCallState], None] | None
+                if _CONFIG.on_retry:
+
+                    def before_sleep(rcs: _t.RetryCallState) -> None:
+                        attempt = rcs.attempt_number
+                        exc = rcs.outcome.exception()
+                        backoff = rcs.idle_for
+
+                        for hook in _CONFIG.on_retry:
+                            hook(
+                                attempt=attempt,
+                                backoff=backoff,
+                                exc=exc,
+                                name=name,
+                                args=args,
+                                kwargs=kw,
+                            )
+
+                else:
+                    before_sleep = None
+
+                for attempt in _t.Retrying(
+                    retry=retry_,
+                    wait=wait,
+                    stop=stop,
+                    reraise=True,
+                    before_sleep=before_sleep,
+                ):
+                    with attempt:
+                        res = wrapped(*args, **kw)
+
+                return res
+
+            return sync_inner
+
+        wrapped = cast("Callable[P, Awaitable[T]]", wrapped)
+
         @wraps(wrapped)
-        def inner(*args: P.args, **kw: P.kwargs) -> T:
+        async def async_inner(*args: P.args, **kw: P.kwargs) -> T:
+            nonlocal wrapped
+            wrapped = cast("Callable[P, Awaitable[T]]", wrapped)
+
             if not _CONFIG.is_active:
-                return wrapped(*args, **kw)
+                return await wrapped(*args, **kw)
 
             before_sleep: Callable[[_t.RetryCallState], None] | None
             if _CONFIG.on_retry:
@@ -97,7 +161,7 @@ def retry(
             else:
                 before_sleep = None
 
-            for attempt in _t.Retrying(
+            async for attempt in _t.AsyncRetrying(
                 retry=retry_,
                 wait=wait,
                 stop=stop,
@@ -105,11 +169,11 @@ def retry(
                 before_sleep=before_sleep,
             ):
                 with attempt:
-                    res = wrapped(*args, **kw)
+                    res = await wrapped(*args, **kw)
 
             return res
 
-        return inner
+        return async_inner
 
     return retry_decorator
 

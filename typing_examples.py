@@ -16,6 +16,11 @@ def just_exc() -> None:
     ...
 
 
+@retry(on=TypeError)
+async def just_exc_async() -> None:
+    ...
+
+
 @retry(on=TypeError, timeout=13.0)
 def exc_timeout() -> None:
     ...
