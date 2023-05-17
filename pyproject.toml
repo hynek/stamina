@@ -155,6 +155,7 @@ select = [
 ]
 ignore = [
   "RUF001", # leave my smart characters alone
+  "E501",   # enforce line lengths using Black
 ]
 
 [tool.ruff.per-file-ignores]

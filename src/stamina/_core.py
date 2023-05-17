@@ -9,7 +9,7 @@ import sys
 from collections.abc import Callable
 from functools import wraps
 from inspect import iscoroutinefunction
-from typing import Any, TypeVar
+from typing import TypeVar
 
 import tenacity as _t
 
@@ -116,7 +116,7 @@ def retry(
             return sync_inner
 
         @wraps(wrapped)
-        async def async_inner(*args: P.args, **kw: P.kwargs) -> T:
+        async def async_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[return]
             if not _CONFIG.is_active:
                 return await wrapped(*args, **kw)  # type: ignore[no-any-return,misc]
 
@@ -141,7 +141,7 @@ def retry(
             else:
                 before_sleep = None
 
-            async for attempt in _t.AsyncRetrying(
+            async for attempt in _t.AsyncRetrying(  # noqa: RET503
                 retry=retry_,
                 wait=wait,
                 stop=stop,
@@ -149,9 +149,7 @@ def retry(
                 before_sleep=before_sleep,
             ):
                 with attempt:
-                    res = await wrapped(*args, **kw)  # type: ignore[misc]
-
-            return res  # type: ignore[no-any-return]
+                    return await wrapped(*args, **kw)  # type: ignore[misc,no-any-return]
 
         return async_inner  # type: ignore[return-value]
 
@@ -176,7 +174,3 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
         return _t.stop_never
 
     return stops[0]
-
-
-def _make_retrying_kws() -> dict[str, Any]:
-    return {}
