@@ -7,22 +7,22 @@
 
 Transient failures are common in distributed systems.
 To make your systems resilient, you need to [**retry** failed operations](https://blog.pragmaticengineer.com/resiliency-in-distributed-systems/#retry).
-[*Tenacity*](https://tenacity.readthedocs.io/) is an *amazing* and beautifully *composable* toolkit for handling retries that I've been using it for years.
-In practice, I've found myself to use only very few knobs and wished it wouldn't erase the types of the callables that I decorate with `@tenacity.retry`.
+[Tenacity](https://tenacity.readthedocs.io/) is a *robust* and beautifully *composable* toolkit for handling retries.
+In practice, only a few knobs are needed (repeatedly!), though.
 
-*stamina* is an **opinionated** thin layer around *Tenacity* that I've been copy-pasting between my projects for a long time:
+*stamina* is an **opinionated** thin layer around Tenacity based on best practices to avoid constant copy-pasting and shrink the user error surface:
 
 - Retry only on certain exceptions.
 - [Exponential backoff with _jitter_](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) between retries.
 - Limit the number of retries **and** total time.
 - Preserve type hints of the decorated callable.
-- Count ([*Prometheus*](https://github.com/prometheus/client_python)) and log ([*structlog*](https://www.structlog.org/)) retries with basic metadata (if they're installed).
+- Count ([Prometheus](https://github.com/prometheus/client_python)) and log ([*structlog*](https://www.structlog.org/)) retries with basic metadata (if they're installed).
 - Easy deactivation for testing.
 
 
 ## Usage
 
-The API consists of a `stamina.retry()` decorator:
+The API consists mainly of the `stamina.retry()` decorator:
 
 ```python
 import httpx
@@ -52,7 +52,7 @@ Can be combined with *attempts* (default: `45`).
 
 **wait_initial**: Minimum first backoff before first retry (default: `0.1`).
 
-**wait_max**: Maximum backoff between retries (default: `5`).
+**wait_max**: Maximum backoff time between retries (default: `5`).
 
 **wait_jitter**: Maximum _jitter_ that is added to retry back-off delays (the actual jitter added is a random number between 0 and *wait_jitter*) (default: `1`).
 
@@ -73,13 +73,13 @@ If all retries fail, the *last* exception is let through.
 
 ---
 
- There's also two helpers for controlling and inspecting whether retrying is active:
- `stamina.is_active()` and `stamina.set_active()` (it's idempotent: you can call `set_active(True)` as many times as you want in a row).
- This is useful in tests.
- For example, here's a *pytest* fixture that automatically disables retries at the beginning of a test run:
+There's also two helpers for controlling and inspecting whether retrying is active:
+`stamina.is_active()` and `stamina.set_active()` (it's idempotent: you can call `set_active(True)` as many times as you want in a row).
+This is useful in tests.
+For example, here's a *pytest* fixture that automatically disables retries at the beginning of a test run:
 
- ```python
- @pytest.fixture(autouse=True, scope="session")
+```python
+@pytest.fixture(autouse=True, scope="session")
 def deactivate_retries():
     stamina.set_active(False)
 ```
