@@ -76,7 +76,7 @@ def retry(
         if not iscoroutinefunction(wrapped):
 
             @wraps(wrapped)
-            def sync_inner(*args: P.args, **kw: P.kwargs) -> T:
+            def sync_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[return]
                 if not _CONFIG.is_active:
                     return wrapped(*args, **kw)
 
@@ -101,7 +101,7 @@ def retry(
                 else:
                     before_sleep = None
 
-                for attempt in _t.Retrying(
+                for attempt in _t.Retrying(  # noqa: RET503
                     retry=retry_,
                     wait=wait,
                     stop=stop,
@@ -109,9 +109,7 @@ def retry(
                     before_sleep=before_sleep,
                 ):
                     with attempt:
-                        res = wrapped(*args, **kw)
-
-                return res
+                        return wrapped(*args, **kw)
 
             return sync_inner
 
