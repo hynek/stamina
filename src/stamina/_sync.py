@@ -27,6 +27,7 @@ __all__ = ["retry"]
 
 
 T = TypeVar("T")
+A = TypeVar("A")
 P = ParamSpec("P")
 
 
@@ -71,8 +72,8 @@ def retry(
 
     @overload
     def retry_decorator(
-        wrapped: Callable[P, Awaitable[T]]
-    ) -> Callable[P, Awaitable[T]]:
+        wrapped: Callable[P, Awaitable[A]]
+    ) -> Callable[P, Awaitable[A]]:
         ...
 
     @overload
@@ -80,8 +81,8 @@ def retry(
         ...
 
     def retry_decorator(
-        wrapped: Callable[P, T] | Callable[P, Awaitable[T]]
-    ) -> Callable[P, T] | Callable[P, Awaitable[T]]:
+        wrapped: Callable[P, T] | Callable[P, Awaitable[A]]
+    ) -> Callable[P, T] | Callable[P, Awaitable[A]]:
         name = guess_name(wrapped)
 
         if not iscoroutinefunction(wrapped):
@@ -130,12 +131,12 @@ def retry(
 
             return sync_inner
 
-        wrapped = cast("Callable[P, Awaitable[T]]", wrapped)
+        wrapped = cast("Callable[P, Awaitable[A]]", wrapped)
 
         @wraps(wrapped)
-        async def async_inner(*args: P.args, **kw: P.kwargs) -> T:
+        async def async_inner(*args: P.args, **kw: P.kwargs) -> A:
             nonlocal wrapped
-            wrapped = cast("Callable[P, Awaitable[T]]", wrapped)
+            wrapped = cast("Callable[P, Awaitable[A]]", wrapped)
 
             if not _CONFIG.is_active:
                 return await wrapped(*args, **kw)
