@@ -43,7 +43,11 @@ raw-options = { local_scheme = "no-local-version" }
 content-type = "text/markdown"
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+text = "# *stamina*: Production-grade Retries Made Easy"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 path = "README.md"
+start-after = "## Production-grade Retries Made Easy"
 end-before = "## Usage"
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]

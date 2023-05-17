@@ -5,6 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-C06524)](https://github.com/hynek/stamina/blob/main/LICENSE)
 
 
+## Production-grade Retries Made Easy
+
 Transient failures are common in distributed systems.
 To make your systems resilient, you need to [**retry** failed operations](https://blog.pragmaticengineer.com/resiliency-in-distributed-systems/#retry).
 [Tenacity](https://tenacity.readthedocs.io/) is a *robust* and beautifully *composable* toolkit for handling retries.
