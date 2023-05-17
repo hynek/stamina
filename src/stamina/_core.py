@@ -9,7 +9,7 @@ import sys
 from collections.abc import Callable
 from functools import wraps
 from inspect import iscoroutinefunction
-from typing import Awaitable, TypeVar, cast, overload
+from typing import Any, TypeVar
 
 import tenacity as _t
 
@@ -70,29 +70,13 @@ def retry(
     )
     stop = _make_stop(attempts=attempts, timeout=timeout)
 
-    @overload
-    def retry_decorator(
-        wrapped: Callable[P, Awaitable[A]]
-    ) -> Callable[P, Awaitable[A]]:
-        ...
-
-    @overload
     def retry_decorator(wrapped: Callable[P, T]) -> Callable[P, T]:
-        ...
-
-    def retry_decorator(
-        wrapped: Callable[P, T] | Callable[P, Awaitable[A]]
-    ) -> Callable[P, T] | Callable[P, Awaitable[A]]:
         name = guess_name(wrapped)
 
         if not iscoroutinefunction(wrapped):
-            wrapped = cast("Callable[P, T]", wrapped)
 
             @wraps(wrapped)
             def sync_inner(*args: P.args, **kw: P.kwargs) -> T:
-                nonlocal wrapped
-                wrapped = cast("Callable[P, T]", wrapped)
-
                 if not _CONFIG.is_active:
                     return wrapped(*args, **kw)
 
@@ -131,15 +115,10 @@ def retry(
 
             return sync_inner
 
-        wrapped = cast("Callable[P, Awaitable[A]]", wrapped)
-
         @wraps(wrapped)
-        async def async_inner(*args: P.args, **kw: P.kwargs) -> A:
-            nonlocal wrapped
-            wrapped = cast("Callable[P, Awaitable[A]]", wrapped)
-
+        async def async_inner(*args: P.args, **kw: P.kwargs) -> T:
             if not _CONFIG.is_active:
-                return await wrapped(*args, **kw)
+                return await wrapped(*args, **kw)  # type: ignore[no-any-return,misc]
 
             before_sleep: Callable[[_t.RetryCallState], None] | None
             if _CONFIG.on_retry:
@@ -170,11 +149,11 @@ def retry(
                 before_sleep=before_sleep,
             ):
                 with attempt:
-                    res = await wrapped(*args, **kw)
+                    res = await wrapped(*args, **kw)  # type: ignore[misc]
 
-            return res
+            return res  # type: ignore[no-any-return]
 
-        return async_inner
+        return async_inner  # type: ignore[return-value]
 
     return retry_decorator
 
@@ -197,3 +176,7 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
         return _t.stop_never
 
     return stops[0]
+
+
+def _make_retrying_kws() -> dict[str, Any]:
+    return {}
