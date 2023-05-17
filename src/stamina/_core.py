@@ -8,7 +8,8 @@ import sys
 
 from collections.abc import Callable
 from functools import wraps
-from typing import TypeVar
+from inspect import iscoroutinefunction
+from typing import Any, TypeVar
 
 import tenacity as _t
 
@@ -71,45 +72,45 @@ def retry(
     def retry_decorator(wrapped: Callable[P, T]) -> Callable[P, T]:
         name = guess_name(wrapped)
 
+        if not iscoroutinefunction(wrapped):
+
+            @wraps(wrapped)
+            def sync_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[return]
+                if not _CONFIG.is_active:
+                    return wrapped(*args, **kw)
+
+                for attempt in _t.Retrying(  # noqa: RET503
+                    retry=retry_,
+                    wait=wait,
+                    stop=stop,
+                    reraise=True,
+                    before_sleep=_make_before_sleep(name, args, kw)
+                    if _CONFIG.on_retry
+                    else None,
+                ):
+                    with attempt:
+                        return wrapped(*args, **kw)
+
+            return sync_inner
+
         @wraps(wrapped)
-        def inner(*args: P.args, **kw: P.kwargs) -> T:
+        async def async_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[return]
             if not _CONFIG.is_active:
-                return wrapped(*args, **kw)
+                return await wrapped(*args, **kw)  # type: ignore[no-any-return,misc]
 
-            before_sleep: Callable[[_t.RetryCallState], None] | None
-            if _CONFIG.on_retry:
-
-                def before_sleep(rcs: _t.RetryCallState) -> None:
-                    attempt = rcs.attempt_number
-                    exc = rcs.outcome.exception()
-                    backoff = rcs.idle_for
-
-                    for hook in _CONFIG.on_retry:
-                        hook(
-                            attempt=attempt,
-                            backoff=backoff,
-                            exc=exc,
-                            name=name,
-                            args=args,
-                            kwargs=kw,
-                        )
-
-            else:
-                before_sleep = None
-
-            for attempt in _t.Retrying(
+            async for attempt in _t.AsyncRetrying(  # noqa: RET503
                 retry=retry_,
                 wait=wait,
                 stop=stop,
                 reraise=True,
-                before_sleep=before_sleep,
+                before_sleep=_make_before_sleep(name, args, kw)
+                if _CONFIG.on_retry
+                else None,
             ):
                 with attempt:
-                    res = wrapped(*args, **kw)
+                    return await wrapped(*args, **kw)  # type: ignore[misc,no-any-return]
 
-            return res
-
-        return inner
+        return async_inner  # type: ignore[return-value]
 
     return retry_decorator
 
@@ -132,3 +133,24 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
         return _t.stop_never
 
     return stops[0]
+
+
+def _make_before_sleep(
+    name: str, args: Any, kw: Any
+) -> Callable[[_t.RetryCallState], None]:
+    def before_sleep(rcs: _t.RetryCallState) -> None:
+        attempt = rcs.attempt_number
+        exc = rcs.outcome.exception()
+        backoff = rcs.idle_for
+
+        for hook in _CONFIG.on_retry:
+            hook(
+                attempt=attempt,
+                backoff=backoff,
+                exc=exc,
+                name=name,
+                args=args,
+                kwargs=kw,
+            )
+
+    return before_sleep

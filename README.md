@@ -17,7 +17,8 @@ In practice, only a few knobs are needed (repeatedly!), though.
 - Retry only on certain exceptions.
 - [Exponential backoff with _jitter_](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) between retries.
 - Limit the number of retries **and** total time.
-- Preserve type hints of the decorated callable.
+- Automatic **async** support.
+- Preserve **type hints** of the decorated callable.
 - Count ([Prometheus](https://github.com/prometheus/client_python)) and log ([*structlog*](https://www.structlog.org/)) retries with basic metadata (if they're installed).
 - Easy deactivation for testing.
 
@@ -41,6 +42,17 @@ def do_it(code: int) -> httpx.Response:
 
 # reveal_type(do_it)
 # note: Revealed type is "def (code: builtins.int) -> httpx._models.Response"
+
+@retry(on=httpx.HTTPError, attempts=3)
+async def do_it_async(code: int) -> httpx.Response:
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(f"https://httpbin.org/status/{code}")
+    resp.raise_for_status()
+
+    return resp
+
+# reveal_type(do_it_async)
+# note: Revealed type is "def (code: builtins.int) -> typing.Coroutine[Any, Any, httpx._models.Response]"
 ```
 <!-- example-end -->
 
