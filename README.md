@@ -26,7 +26,7 @@ In practice, only a few knobs are needed (repeatedly!), though.
 
 The API consists mainly of the `stamina.retry()` decorator:
 
-<!-- examole-start -->
+<!-- example-start -->
 ```python
 import httpx
 
