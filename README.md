@@ -26,6 +26,7 @@ In practice, only a few knobs are needed (repeatedly!), though.
 
 The API consists mainly of the `stamina.retry()` decorator:
 
+<!-- examole-start -->
 ```python
 import httpx
 
@@ -41,6 +42,7 @@ def do_it(code: int) -> httpx.Response:
 # reveal_type(do_it)
 # note: Revealed type is "def (code: builtins.int) -> httpx._models.Response"
 ```
+<!-- example-end -->
 
 The decorator takes the following arguments (**all time-based arguments are floats of seconds**):
 

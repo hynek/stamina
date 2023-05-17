@@ -51,6 +51,15 @@ start-after = "## Production-grade Retries Made Easy"
 end-before = "## Usage"
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+text = "\n\nFor example:"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+start-after = "<!-- examole-start -->"
+end-before = "<!-- example-end -->"
+
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 text = """
 ## Release Information
 
