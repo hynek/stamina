@@ -13,7 +13,7 @@ nox.options.sessions = ["pre_commit", "tests", "tests_no_deps", "mypy"]
 nox.options.reuse_existing_virtualenvs = True
 nox.options.error_on_external_run = True
 
-ALL_SUPPORTED = ["3.8", "3.9", "3.10", "3.11"]
+ALL_SUPPORTED = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 
 @nox.session
