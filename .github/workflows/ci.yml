@@ -75,7 +75,7 @@ jobs:
           # Use latest Python, so it understands all syntax.
           python-version: ${{ env.PYTHON_LATEST }}
 
-      - run: python -m pip install --upgrade coverage[toml]
+      - run: python -Im pip install --upgrade coverage[toml]
 
       - uses: actions/download-artifact@v3
         with:
@@ -83,9 +83,9 @@ jobs:
 
       - name: Combine coverage & fail if it's <100%.
         run: |
-          python -m coverage combine
-          python -m coverage html --skip-covered --skip-empty
-          python -m coverage report --fail-under=100
+          python -Im coverage combine
+          python -Im coverage html --skip-covered --skip-empty
+          python -Im coverage report --fail-under=100
 
       - name: Upload HTML report if check failed.
         uses: actions/upload-artifact@v3
@@ -109,7 +109,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
 
-      - run: python -m pip install --upgrade wheel nox
+      - run: python -Im pip install --upgrade wheel nox
 
       - run: nox --python ${{ matrix.python-version }} -e mypy
 
@@ -137,7 +137,7 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: ${{env.PYTHON_LATEST}}
-      - run: python -m pip install -e .[dev]
+      - run: python -Im pip install -e .[dev]
       - run: python -c 'import stamina'
 
   # Ensure everything required is passing for branch protection.
