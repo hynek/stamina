@@ -9,9 +9,11 @@ import sys
 from collections.abc import Callable
 from functools import wraps
 from inspect import iscoroutinefunction
-from typing import Any, TypeVar
+from typing import Any, Iterable, TypeVar
 
 import tenacity as _t
+
+from stamina.typing import RetryHook
 
 from ._config import _CONFIG
 from ._instrumentation import guess_name
@@ -84,7 +86,9 @@ def retry(
                     wait=wait,
                     stop=stop,
                     reraise=True,
-                    before_sleep=_make_before_sleep(name, args, kw)
+                    before_sleep=_make_before_sleep(
+                        name, _CONFIG.on_retry, args, kw
+                    )
                     if _CONFIG.on_retry
                     else None,
                 ):
@@ -103,7 +107,9 @@ def retry(
                 wait=wait,
                 stop=stop,
                 reraise=True,
-                before_sleep=_make_before_sleep(name, args, kw)
+                before_sleep=_make_before_sleep(
+                    name, _CONFIG.on_retry, args, kw
+                )
                 if _CONFIG.on_retry
                 else None,
             ):
@@ -136,14 +142,14 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
 
 
 def _make_before_sleep(
-    name: str, args: Any, kw: Any
+    name: str, on_retry: Iterable[RetryHook], args: Any, kw: Any
 ) -> Callable[[_t.RetryCallState], None]:
     def before_sleep(rcs: _t.RetryCallState) -> None:
         attempt = rcs.attempt_number
         exc = rcs.outcome.exception()
         backoff = rcs.idle_for
 
-        for hook in _CONFIG.on_retry:
+        for hook in on_retry:
             hook(
                 attempt=attempt,
                 backoff=backoff,
