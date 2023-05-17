@@ -13,6 +13,10 @@ The **third number** is for emergencies when we need to start branches for older
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/22.2.0...HEAD)
 
+### Added
+
+- Official Python 3.12 support.
+
 
 ## [22.2.0](https://github.com/hynek/stamina/compare/22.1.0...22.2.0) - 2022-10-06
 
