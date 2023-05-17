@@ -57,7 +57,7 @@ def log_retries(
         backoff=backoff,
         error=repr(exc),
         args=tuple(repr(a) for a in args),
-        kwargs={k: v for k, v in kwargs.items()},
+        kwargs=dict(kwargs.items()),
     )
 
 
