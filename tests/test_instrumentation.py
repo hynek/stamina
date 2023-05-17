@@ -36,7 +36,7 @@ class TestGuessName:
             (async_function, "test_instrumentation.async_function"),
             (foo.method, "test_instrumentation.Foo.method"),
             (foo.async_method, "test_instrumentation.Foo.async_method"),
-            (Foo.async_method, "test_instrumentation.Foo.async_method"),
+            (Foo.method, "test_instrumentation.Foo.method"),
             (Foo.async_method, "test_instrumentation.Foo.async_method"),
         ],
     )
