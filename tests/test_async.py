@@ -72,4 +72,3 @@ async def test_retry_inactive(monkeypatch):
         await f()
 
     retrying.assert_not_called()
-
