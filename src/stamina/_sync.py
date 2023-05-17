@@ -8,7 +8,7 @@ import sys
 
 from collections.abc import Callable
 from functools import wraps
-from inspect import isawaitable, iscoroutinefunction
+from inspect import iscoroutinefunction
 from typing import Awaitable, TypeVar, cast, overload
 
 import tenacity as _t
@@ -84,7 +84,7 @@ def retry(
     ) -> Callable[P, T] | Callable[P, Awaitable[T]]:
         name = guess_name(wrapped)
 
-        if not (iscoroutinefunction(wrapped) or isawaitable(wrapped)):
+        if not iscoroutinefunction(wrapped):
             wrapped = cast("Callable[P, T]", wrapped)
 
             @wraps(wrapped)
