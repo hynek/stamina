@@ -9,7 +9,7 @@ import tenacity
 
 import stamina
 
-from stamina._sync import _make_stop
+from stamina._core import _make_stop
 
 
 @pytest.mark.parametrize("attempts,timeout", [(None, 1), (1, None)])
@@ -69,7 +69,7 @@ def test_retry_inactive(monkeypatch):
     stamina.set_active(False)
 
     retrying = Mock()
-    monkeypatch.setattr(stamina._sync._t, "Retrying", retrying)
+    monkeypatch.setattr(stamina._core._t, "Retrying", retrying)
 
     with pytest.raises(Exception, match="passed"):
         f()

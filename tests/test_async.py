@@ -92,7 +92,7 @@ async def test_retry_inactive(monkeypatch):
     stamina.set_active(False)
 
     retrying = Mock()
-    monkeypatch.setattr(stamina._sync._t, "AsyncRetrying", retrying)
+    monkeypatch.setattr(stamina._core._t, "AsyncRetrying", retrying)
 
     with pytest.raises(Exception, match="passed"):
         await f()
