@@ -17,8 +17,8 @@ In practice, only a few knobs are needed (repeatedly!), though.
 - Retry only on certain exceptions.
 - [Exponential backoff with _jitter_](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) between retries.
 - Limit the number of retries **and** total time.
-- Automatic async support.
-- Preserve type hints of the decorated callable.
+- Automatic **async** support.
+- Preserve **type hints** of the decorated callable.
 - Count ([Prometheus](https://github.com/prometheus/client_python)) and log ([*structlog*](https://www.structlog.org/)) retries with basic metadata (if they're installed).
 - Easy deactivation for testing.
 
