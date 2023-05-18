@@ -71,7 +71,6 @@ path = "CHANGELOG.md"
 start-after = "<!-- changelog follows -->"
 pattern = "\n(###.+?\n)## "
 
-
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 path = "README.md"
 start-at = "## License"
@@ -164,7 +163,6 @@ ignore = [
   "SIM300",  # Yoda rocks in tests
   "PLC1901", # empty strings are falsey, but are less specific in tests
 ]
-
 
 [tool.ruff.isort]
 lines-between-types = 1
