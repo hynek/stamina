@@ -35,47 +35,6 @@ Changelog = "https://github.com/hynek/stamina/blob/main/CHANGELOG.md"
 Funding = "https://github.com/sponsors/hynek"
 
 
-[tool.hatch.version]
-source = "vcs"
-raw-options = { local_scheme = "no-local-version" }
-
-[tool.hatch.metadata.hooks.fancy-pypi-readme]
-content-type = "text/markdown"
-
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-text = "# *stamina*: Production-grade Retries Made Easy"
-
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-path = "README.md"
-start-after = "## Production-grade Retries Made Easy"
-end-before = "## Usage"
-
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-text = "For example:\n"
-
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-path = "README.md"
-start-after = "<!-- example-start -->"
-end-before = "<!-- example-end -->"
-
-
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-text = """
-
-## Release Information
-
-"""
-
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-path = "CHANGELOG.md"
-start-after = "<!-- changelog follows -->"
-pattern = "\n(###.+?\n)## "
-
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-path = "README.md"
-start-at = "## License"
-
-
 [tool.pytest.ini_options]
 addopts = ["-ra", "--strict-markers", "--strict-config"]
 testpaths = "tests"

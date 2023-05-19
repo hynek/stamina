@@ -1,0 +1,39 @@
+[version]
+source = "vcs"
+raw-options = { local_scheme = "no-local-version" }
+
+
+[metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[metadata.hooks.fancy-pypi-readme.fragments]]
+text = "# *stamina*: Production-grade Retries Made Easy"
+
+[[metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+start-after = "## Production-grade Retries Made Easy"
+end-before = "## Usage"
+
+[[metadata.hooks.fancy-pypi-readme.fragments]]
+text = "For example:\n"
+
+[[metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+start-after = "<!-- example-start -->"
+end-before = "<!-- example-end -->"
+
+[[metadata.hooks.fancy-pypi-readme.fragments]]
+text = """
+
+## Release Information
+
+"""
+
+[[metadata.hooks.fancy-pypi-readme.fragments]]
+path = "CHANGELOG.md"
+start-after = "<!-- changelog follows -->"
+pattern = "\n(###.+?\n)## "
+
+[[metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+start-at = "## License"
