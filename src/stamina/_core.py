@@ -144,6 +144,11 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
 def _make_before_sleep(
     name: str, on_retry: Iterable[RetryHook], args: Any, kw: Any
 ) -> Callable[[_t.RetryCallState], None]:
+    """
+    Create a `before_sleep` callback function that runs out `RetryHook`s with
+    the necessary arguments.
+    """
+
     def before_sleep(rcs: _t.RetryCallState) -> None:
         attempt = rcs.attempt_number
         exc = rcs.outcome.exception()
