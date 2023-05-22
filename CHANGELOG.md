@@ -17,7 +17,7 @@ The **third number** is for emergencies when we need to start branches for older
 
 - Official Python 3.12 support.
   [#9](https://github.com/hynek/stamina/pull/9)
-- Automatic async support.
+- Async support.
   [#10](https://github.com/hynek/stamina/pull/10)
 
 

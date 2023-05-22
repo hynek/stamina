@@ -42,7 +42,11 @@ def do_it(code: int) -> httpx.Response:
 
 # reveal_type(do_it)
 # note: Revealed type is "def (code: builtins.int) -> httpx._models.Response"
+```
 
+Async works the same way:
+
+```python
 @retry(on=httpx.HTTPError, attempts=3)
 async def do_it_async(code: int) -> httpx.Response:
     async with httpx.AsyncClient() as client:
