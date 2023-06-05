@@ -13,7 +13,9 @@ env:
   SETUPTOOLS_SCM_PRETEND_VERSION: "1.0" # avoid warnings about shallow checkout
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
   PIP_NO_PYTHON_VERSION_WARNING: "1"
-  PYTHON_LATEST: "3.11"
+  # N.B. default Python version for setup-python comes from the .python-version
+  # file at the root of the project.
+
 
 jobs:
   tests:
@@ -49,8 +51,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_LATEST }}
 
       - run: python -Im pip install --upgrade wheel nox
 
@@ -72,9 +72,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
-        with:
-          # Use latest Python, so it understands all syntax.
-          python-version: ${{ env.PYTHON_LATEST }}
 
       - run: python -Im pip install --upgrade coverage[toml]
 
@@ -129,8 +126,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
-        with:
-          python-version: ${{env.PYTHON_LATEST}}
+
       - run: python -Im pip install -e .[dev]
       - run: python -c 'import stamina'
 
