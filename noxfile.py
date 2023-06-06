@@ -35,12 +35,10 @@ def cog(session: nox.Session) -> None:
     session.install("cogapp")
 
     session.run(
-        "cog",
-        *session.posargs,
-        "-r",
-        "pyproject.toml",
-        "noxfile.py",
-        ".github/workflows/ci.yml",
+        # fmt: off
+        "cog", *session.posargs, "-r",
+        "pyproject.toml", "noxfile.py", ".github/workflows/ci.yml",
+        # fmt: on
     )
 
 
