@@ -9,11 +9,33 @@ import os
 import nox
 
 
-nox.options.sessions = ["pre_commit", "tests", "tests_no_deps", "mypy"]
+nox.options.sessions = ["cog", "pre_commit", "tests", "tests_no_deps", "mypy"]
 nox.options.reuse_existing_virtualenvs = True
 nox.options.error_on_external_run = True
 
-ALL_SUPPORTED = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+ALL_SUPPORTED = [
+    # [[[cog
+    # for line in open("pyproject.toml"):
+    #     if "Programming Language :: Python :: " in line:
+    #         cog.outl(f'"{line.rsplit(" ")[-1][:-3]}",')
+    # ]]]
+    "3.8",
+    "3.9",
+    "3.10",
+    "3.11",
+    "3.12",
+    # [[[end]]]
+]
+
+
+@nox.session
+def cog(session: nox.Session) -> None:
+    session.install("cogapp")
+
+    session.run(
+        "cog", *session.posargs, "-r", "noxfile.py", ".github/workflows/ci.yml"
+    )
 
 
 @nox.session

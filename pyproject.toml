@@ -13,7 +13,6 @@ keywords = ["retry", "retries", "reliability", "tenacity"]
 authors = [{ name = "Hynek Schlawack", email = "hs@ox.cx" }]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
-  "Programming Language :: Python",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
