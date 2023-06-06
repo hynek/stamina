@@ -76,6 +76,10 @@ module = "tests.*"
 ignore_errors = true
 
 [[tool.mypy.overrides]]
+module = "tests.typing.*"
+ignore_errors = false
+
+[[tool.mypy.overrides]]
 module = "tenacity.*"
 follow_imports = "skip"
 

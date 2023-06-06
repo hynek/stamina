@@ -27,7 +27,7 @@ def pre_commit(session: nox.Session) -> None:
 def mypy(session: nox.Session) -> None:
     session.install(".[typing]", "structlog", "prometheus-client")
 
-    session.run("mypy", "src", "typing_examples.py")
+    session.run("mypy", "src", "tests/typing")
 
 
 @nox.session(python=ALL_SUPPORTED)
