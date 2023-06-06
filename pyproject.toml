@@ -3,6 +3,19 @@ requires = ["hatchling", "hatch-vcs", "hatch-fancy-pypi-readme>=22.8.0"]
 build-backend = "hatchling.build"
 
 
+[tool.hynek]
+max-supported-python = "3.12"
+# [[[cog
+# import tomllib, pathlib
+# pyp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
+# minv = int(pyp['project']['requires-python'].split('.')[1])
+# maxv = int(pyp["tool"]["hynek"]["max-supported-python"].split('.')[1])
+# cog.outl(f'supported-pythons = {list(f"3.{v}" for v in range(minv, maxv+1))}')
+# ]]]
+supported-pythons = ['3.8', '3.9', '3.10', '3.11', '3.12']
+# [[[end]]]
+
+
 [project]
 dynamic = ["version", "readme"]
 name = "stamina"
@@ -13,11 +26,18 @@ keywords = ["retry", "retries", "reliability", "tenacity"]
 authors = [{ name = "Hynek Schlawack", email = "hs@ox.cx" }]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
+  # [[[cog
+  # import tomllib, pathlib
+  # pyp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
+  # for v in pyp["tool"]["hynek"]["supported-pythons"]:
+  #     cog.outl(f'"Programming Language :: Python :: {v}",')
+  # ]]]
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  # [[[end]]]
   "License :: OSI Approved :: MIT License",
   "Typing :: Typed",
 ]

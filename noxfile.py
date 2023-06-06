@@ -16,9 +16,10 @@ nox.options.error_on_external_run = True
 
 ALL_SUPPORTED = [
     # [[[cog
-    # for line in open("pyproject.toml"):
-    #     if "Programming Language :: Python :: " in line:
-    #         cog.outl(f'"{line.rsplit(" ")[-1][:-3]}",')
+    # import tomllib, pathlib
+    # pyp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
+    # for v in pyp["tool"]["hynek"]["supported-pythons"]:
+    #     cog.outl(f'"{v}",')
     # ]]]
     "3.8",
     "3.9",
@@ -34,7 +35,12 @@ def cog(session: nox.Session) -> None:
     session.install("cogapp")
 
     session.run(
-        "cog", *session.posargs, "-r", "noxfile.py", ".github/workflows/ci.yml"
+        "cog",
+        *session.posargs,
+        "-r",
+        "pyproject.toml",
+        "noxfile.py",
+        ".github/workflows/ci.yml",
     )
 
 

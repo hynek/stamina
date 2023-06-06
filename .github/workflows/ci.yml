@@ -37,9 +37,10 @@ jobs:
       matrix:
         python-version:
           # [[[cog
-          # for line in open("pyproject.toml"):
-          #     if "Programming Language :: Python :: " in line:
-          #         cog.outl(f'- "{line.rsplit(" ")[-1][:-3]}"')
+          # import tomllib, pathlib
+          # pyp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
+          # for v in pyp["tool"]["hynek"]["supported-pythons"]:
+          #     cog.outl(f'- "{v}"')
           # ]]]
           - "3.8"
           - "3.9"
@@ -127,9 +128,10 @@ jobs:
       matrix:
         python-version:
           # [[[cog
-          # for line in open("pyproject.toml"):
-          #     if "Programming Language :: Python :: " in line:
-          #         cog.outl(f'- "{line.rsplit(" ")[-1][:-3]}"')
+          # import tomllib, pathlib
+          # pyp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
+          # for v in pyp["tool"]["hynek"]["supported-pythons"]:
+          #     cog.outl(f'- "{v}"')
           # ]]]
           - "3.8"
           - "3.9"
