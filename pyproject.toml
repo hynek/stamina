@@ -4,11 +4,14 @@ build-backend = "hatchling.build"
 
 
 [tool.hynek]
+# These are canonical truth that is then used by Cog to generate metadata & CI
+# config.
+min-supported-python = "3.8"
 max-supported-python = "3.12"
 # [[[cog
 # import tomllib, pathlib
 # pyp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
-# minv = int(pyp['project']['requires-python'].split('.')[1])
+# minv = int(pyp["tool"]["hynek"]["min-supported-python"].split('.')[1])
 # maxv = int(pyp["tool"]["hynek"]["max-supported-python"].split('.')[1])
 # cog.outl(f'supported-pythons = {list(f"3.{v}" for v in range(minv, maxv+1))}')
 # ]]]
@@ -20,7 +23,13 @@ supported-pythons = ['3.8', '3.9', '3.10', '3.11', '3.12']
 dynamic = ["version", "readme"]
 name = "stamina"
 description = "Production-grade retries made easy."
+# [[[cog
+# import tomllib, pathlib
+# pyp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
+# cog.outl(f'requires-python = ">={pyp["tool"]["hynek"]["min-supported-python"]}"')
+# ]]]
 requires-python = ">=3.8"
+# [[[end]]]
 license = "MIT"
 keywords = ["retry", "retries", "reliability", "tenacity"]
 authors = [{ name = "Hynek Schlawack", email = "hs@ox.cx" }]
