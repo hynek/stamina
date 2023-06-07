@@ -3,19 +3,19 @@ requires = ["hatchling", "hatch-vcs", "hatch-fancy-pypi-readme>=22.8.0"]
 build-backend = "hatchling.build"
 
 
-[tool.hynek]
+[tool.supported-pythons]
 # These are canonical truth that is then used by Cog to generate metadata & CI
 # config.
-min-supported-python = "3.8"
-max-supported-python = "3.12"
+min = "3.8"
+max = "3.12"
 # [[[cog
 # import tomllib, pathlib
-# pyp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
-# minv = int(pyp["tool"]["hynek"]["min-supported-python"].split('.')[1])
-# maxv = int(pyp["tool"]["hynek"]["max-supported-python"].split('.')[1])
-# cog.outl(f'supported-pythons = {list(f"3.{v}" for v in range(minv, maxv+1))}')
+# sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
+# minv = int(sup["min"].split('.')[1])
+# maxv = int(sup["max"].split('.')[1])
+# cog.outl(f'all = {list(f"3.{v}" for v in range(minv, maxv+1))}')
 # ]]]
-supported-pythons = ['3.8', '3.9', '3.10', '3.11', '3.12']
+all = ['3.8', '3.9', '3.10', '3.11', '3.12']
 # [[[end]]]
 
 
@@ -25,8 +25,8 @@ name = "stamina"
 description = "Production-grade retries made easy."
 # [[[cog
 # import tomllib, pathlib
-# pyp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
-# cog.outl(f'requires-python = ">={pyp["tool"]["hynek"]["min-supported-python"]}"')
+# sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
+# cog.outl(f'requires-python = ">={sup["min"]}"')
 # ]]]
 requires-python = ">=3.8"
 # [[[end]]]
@@ -37,8 +37,8 @@ classifiers = [
   "Development Status :: 5 - Production/Stable",
   # [[[cog
   # import tomllib, pathlib
-  # pyp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
-  # for v in pyp["tool"]["hynek"]["supported-pythons"]:
+  # sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
+  # for v in sup["all"]:
   #     cog.outl(f'"Programming Language :: Python :: {v}",')
   # ]]]
   "Programming Language :: Python :: 3.8",

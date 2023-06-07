@@ -17,8 +17,8 @@ nox.options.error_on_external_run = True
 ALL_SUPPORTED = [
     # [[[cog
     # import tomllib, pathlib
-    # pyp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
-    # for v in pyp["tool"]["hynek"]["supported-pythons"]:
+    # sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
+    # for v in sup["all"]:
     #     cog.outl(f'"{v}",')
     # ]]]
     "3.8",
