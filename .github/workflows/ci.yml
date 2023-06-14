@@ -13,8 +13,6 @@ env:
   SETUPTOOLS_SCM_PRETEND_VERSION: "1.0" # avoid warnings about shallow checkout
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
   PIP_NO_PYTHON_VERSION_WARNING: "1"
-  # N.B. default Python version for setup-python comes from the .python-version
-  # file at the root of the project.
 
 
 jobs:
@@ -24,13 +22,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
+        with:
+          cache: pip
 
-      - run: python -Im pip install --upgrade wheel nox
-
-      - run: python -Im nox -e cog -- --check
+      - name: Prepare & run nox
+      - run: |
+          python -Im pip install --upgrade wheel nox
+          python -Im nox -e cog -- --check
 
   tests:
-    name: Tests on ${{ matrix.python-version }}
+    name: Tests & Mypy on ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -55,10 +56,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
+          cache: pip
 
-      - run: python -Im pip install --upgrade wheel nox
+      - name: Prepare & run tests
+        run: |
+          python -Im pip install nox
 
-      - run: nox --python ${{ matrix.python-version }} -e tests
+          python -Im nox --python ${{ matrix.python-version }} -e tests
+      - run: python -Im nox --python ${{ matrix.python-version }} -e mypy
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v3
@@ -74,10 +79,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
+        with:
+          cache: pip
 
-      - run: python -Im pip install --upgrade wheel nox
-
-      - run: nox -e tests_no_deps
+      - name: Prepare & run tests
+        run: |
+          python -Im pip install nox
+          python -Im nox -e tests_no_deps
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v3
@@ -95,8 +103,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
-
-      - run: python -Im pip install --upgrade coverage[toml]
+        with:
+          cache: pip
 
       - uses: actions/download-artifact@v3
         with:
@@ -104,6 +112,8 @@ jobs:
 
       - name: Combine coverage & fail if it's <100%.
         run: |
+          python -Im pip install --upgrade coverage[toml]
+
           python -Im coverage combine
           python -Im coverage html --skip-covered --skip-empty
 
@@ -120,37 +130,6 @@ jobs:
           path: htmlcov
         if: ${{ failure() }}
 
-  mypy:
-    name: Mypy on ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version:
-          # [[[cog
-          # import tomllib, pathlib
-          # sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
-          # for v in sup["all"]:
-          #     cog.outl(f'- "{v}"')
-          # ]]]
-          - "3.8"
-          - "3.9"
-          - "3.10"
-          - "3.11"
-          - "3.12"
-          # [[[end]]]
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          allow-prereleases: true
-
-      - run: python -Im pip install --upgrade wheel nox
-
-      - run: nox --python ${{ matrix.python-version }} -e mypy
-
   install-dev:
     name: Verify dev env
     runs-on: ${{ matrix.os }}
@@ -161,9 +140,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
+        with:
+          cache: pip
 
-      - run: python -Im pip install -e .[dev]
-      - run: python -c 'import stamina'
+      - name: Install in dev mode & import
+        run: |
+          python -Im pip install -e .[dev]
+          python -c 'import stamina'
 
   # Ensure everything required is passing for branch protection.
   required-checks-pass:
