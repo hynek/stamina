@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Protocol
+from typing import Protocol
 
 
 class RetryHook(Protocol):
@@ -19,7 +19,7 @@ class RetryHook(Protocol):
         backoff: float,
         exc: Exception,
         name: str,
-        args: Any,
-        kwargs: Any,
+        args: object,
+        kwargs: object,
     ) -> None:
         ...

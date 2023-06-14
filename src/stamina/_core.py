@@ -9,7 +9,7 @@ import sys
 from collections.abc import Callable
 from functools import wraps
 from inspect import iscoroutinefunction
-from typing import Any, Iterable, TypeVar
+from typing import Iterable, TypeVar
 
 import tenacity as _t
 
@@ -142,10 +142,10 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
 
 
 def _make_before_sleep(
-    name: str, on_retry: Iterable[RetryHook], args: Any, kw: Any
+    name: str, on_retry: Iterable[RetryHook], args: object, kw: object
 ) -> Callable[[_t.RetryCallState], None]:
     """
-    Create a `before_sleep` callback function that runs out `RetryHook`s with
+    Create a `before_sleep` callback function that runs our `RetryHook`s with
     the necessary arguments.
     """
 
