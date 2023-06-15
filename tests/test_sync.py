@@ -77,6 +77,21 @@ def test_retry_inactive(monkeypatch):
     retrying.assert_not_called()
 
 
+def test_retry_block():
+    """
+    Sync retry_context blocks are retried.
+    """
+    i = 0
+
+    for attempt in stamina.retry_context(on=ValueError, wait_max=0):
+        with attempt:
+            i += 1
+            if i < 2:
+                raise ValueError
+
+    assert 2 == i
+
+
 class TestMakeStop:
     def test_never(self):
         """

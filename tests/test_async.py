@@ -98,3 +98,18 @@ async def test_retry_inactive(monkeypatch):
         await f()
 
     retrying.assert_not_called()
+
+
+async def test_retry_block():
+    """
+    Async retry_context blocks are retried.
+    """
+    i = 0
+
+    async for attempt in stamina.retry_context(on=ValueError, wait_max=0):
+        with attempt:
+            i += 1
+            if i < 2:
+                raise ValueError
+
+    assert 2 == i
