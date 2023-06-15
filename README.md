@@ -20,7 +20,7 @@ In practice, only a few knobs are needed (repeatedly!), though.
 - Automatic **async** support.
 - Preserve **type hints** of the decorated callable.
 - Count ([Prometheus](https://github.com/prometheus/client_python)) and log ([*structlog*](https://www.structlog.org/)) retries with basic metadata (if they're installed).
-- Easy deactivation for testing.
+- Easy _global_ deactivation for testing.
 
 
 ## Usage
