@@ -26,7 +26,7 @@ jobs:
           cache: pip
 
       - name: Prepare & run nox
-      - run: |
+        run: |
           python -Im pip install --upgrade wheel nox
           python -Im nox -e cog -- --check
 
@@ -154,7 +154,6 @@ jobs:
 
     needs:
       - coverage
-      - mypy
       - install-dev
 
     runs-on: ubuntu-latest
