@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-from unittest.mock import Mock
 
 import pytest
 
@@ -80,36 +79,52 @@ async def test_wrong_exception():
         await f()
 
 
-async def test_retry_inactive(monkeypatch):
+async def test_retry_inactive():
     """
     If inactive, don't retry.
     """
+    num_called = 0
 
     @stamina.retry(on=Exception)
     async def f():
+        nonlocal num_called
+        num_called += 1
         raise Exception("passed")
 
     stamina.set_active(False)
 
-    retrying = Mock()
-    monkeypatch.setattr(stamina._core._t, "AsyncRetrying", retrying)
-
     with pytest.raises(Exception, match="passed"):
         await f()
 
-    retrying.assert_not_called()
+    assert 1 == num_called
 
 
 async def test_retry_block():
     """
     Async retry_context blocks are retried.
     """
-    i = 0
+    num_called = 0
 
     async for attempt in stamina.retry_context(on=ValueError, wait_max=0):
         with attempt:
-            i += 1
-            if i < 2:
+            num_called += 1
+            if num_called < 2:
                 raise ValueError
 
-    assert 2 == i
+    assert 2 == num_called
+
+
+async def test_retry_blocks_can_be_disabled():
+    """
+    Async context retries respect the config.
+    """
+    stamina.set_active(False)
+    num_called = 0
+
+    with pytest.raises(Exception, match="passed"):
+        async for attempt in stamina.retry_context(on=Exception, attempts=2):
+            with attempt:
+                num_called += 1
+                raise Exception("passed")
+
+    assert 1 == num_called

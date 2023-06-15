@@ -105,6 +105,11 @@ class _RetryContextIterator:
         )
 
     def __iter__(self) -> _t.Retrying:
+        if not _CONFIG.is_active:
+            return _t.Retrying(
+                reraise=True, stop=_t.stop_after_attempt(1)
+            ).__iter__()
+
         return _t.Retrying(
             before_sleep=_make_before_sleep(
                 self._name, _CONFIG.on_retry, self._args, self._kw
@@ -115,6 +120,11 @@ class _RetryContextIterator:
         ).__iter__()
 
     def __aiter__(self) -> _t.AsyncRetrying:
+        if not _CONFIG.is_active:
+            return _t.AsyncRetrying(
+                reraise=True, stop=_t.stop_after_attempt(1)
+            ).__aiter__()
+
         return _t.AsyncRetrying(
             before_sleep=_make_before_sleep(
                 self._name, _CONFIG.on_retry, self._args, self._kw
@@ -229,9 +239,6 @@ def retry(
 
             @wraps(wrapped)
             def sync_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[return]
-                if not _CONFIG.is_active:
-                    return wrapped(*args, **kw)
-
                 for attempt in retry_ctx.with_name(  # noqa: RET503
                     name, args, kw
                 ):
@@ -242,9 +249,6 @@ def retry(
 
         @wraps(wrapped)
         async def async_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[return]
-            if not _CONFIG.is_active:
-                return await wrapped(*args, **kw)  # type: ignore[no-any-return,misc]
-
             async for attempt in retry_ctx.with_name(  # noqa: RET503
                 name, args, kw
             ):
