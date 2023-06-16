@@ -8,7 +8,7 @@ from typing import Any
 
 from tenacity import RetryCallState
 
-from stamina import is_active, retry, set_active
+from stamina import is_active, retry, retry_context, set_active
 
 
 @retry(on=ValueError)
@@ -70,3 +70,14 @@ def hook(
     retry_state: RetryCallState, name: str, args: Any, kwargs: Any
 ) -> None:
     return None
+
+
+for attempt in retry_context(on=ValueError):
+    with attempt:
+        ...
+
+
+async def f() -> None:
+    async for attempt in retry_context(on=ValueError):
+        with attempt:
+            ...
