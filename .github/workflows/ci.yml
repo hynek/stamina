@@ -213,6 +213,7 @@ jobs:
       - coverage
       - install-dev
       - cog-check
+      - build-package
 
     runs-on: ubuntu-latest
 
