@@ -76,10 +76,9 @@ jobs:
       - name: Prepare & run Nox
         run: |
           python -Im pip install nox
-
-          nox \
+          python -Im nox \
             --python ${{ matrix.python-version }} \
-            -e tests \
+            --sessions tests \
             -- --use-wheel dist/*.whl
 
       - name: Upload coverage data
@@ -163,7 +162,9 @@ jobs:
         run: |
           python -Im pip install nox
 
-          nox --python ${{ matrix.python-version }} -e mypy
+          python -Im nox \
+            --python ${{ matrix.python-version }} \
+            --sessions mypy
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v3
