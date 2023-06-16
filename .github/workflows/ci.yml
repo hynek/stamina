@@ -163,7 +163,6 @@ jobs:
       - name: Prepare & run Nox
         run: |
           python -Im pip install nox
-
           python -Im nox \
             --python ${{ matrix.python-version }} \
             --sessions mypy
