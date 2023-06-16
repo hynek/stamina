@@ -10,11 +10,17 @@ import stamina
 
 
 @pytest.mark.parametrize("attempts", [None, 1])
-@pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
-@pytest.mark.parametrize("wait_initial", [None, 1, dt.timedelta(days=1)])
-@pytest.mark.parametrize("wait_max", [None, 1, dt.timedelta(days=1)])
-@pytest.mark.parametrize("wait_jitter", [None, 1, dt.timedelta(days=1)])
-async def test_ok(attempts, timeout, wait_initial, wait_max, wait_jitter):
+@pytest.mark.parametrize(
+    "timeout",
+    [
+        None,
+        1,
+        dt.timedelta(days=1),
+        dt.datetime.now(tz=dt.timezone.utc) + dt.timedelta(days=1),
+    ],
+)
+@pytest.mark.parametrize("duration", [1, dt.timedelta(days=1)])
+async def test_ok(attempts, timeout, duration):
     """
     No error, no problem.
     """
@@ -24,9 +30,9 @@ async def test_ok(attempts, timeout, wait_initial, wait_max, wait_jitter):
             on=Exception,
             attempts=attempts,
             timeout=timeout,
-            wait_initial=wait_initial,
-            wait_max=wait_max,
-            wait_jitter=wait_jitter,
+            wait_initial=duration,
+            wait_max=duration,
+            wait_jitter=duration,
         )
         async def f(self):
             return 42
@@ -35,9 +41,9 @@ async def test_ok(attempts, timeout, wait_initial, wait_max, wait_jitter):
         on=Exception,
         attempts=attempts,
         timeout=timeout,
-        wait_initial=wait_initial,
-        wait_max=wait_max,
-        wait_jitter=wait_jitter,
+        wait_initial=duration,
+        wait_max=duration,
+        wait_jitter=duration,
     )
     async def f():
         return 42
@@ -46,13 +52,30 @@ async def test_ok(attempts, timeout, wait_initial, wait_max, wait_jitter):
     assert 42 == await C().f()
 
 
-async def test_retries():
+@pytest.mark.parametrize(
+    "timeout",
+    [
+        None,
+        1,
+        dt.timedelta(days=1),
+        dt.datetime.now(tz=dt.timezone.utc) + dt.timedelta(days=1),
+        dt.datetime.now().astimezone() + dt.timedelta(days=1),  # noqa: DTZ005
+    ],
+)
+@pytest.mark.parametrize("duration", [0, dt.timedelta(days=0)])
+async def test_retries(duration, timeout):
     """
     Retries if the specific error is raised.
     """
     i = 0
 
-    @stamina.retry(on=ValueError, wait_max=0)
+    @stamina.retry(
+        on=ValueError,
+        timeout=timeout,
+        wait_max=duration,
+        wait_initial=duration,
+        wait_jitter=duration,
+    )
     async def f():
         nonlocal i
         if i == 0:

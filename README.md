@@ -29,11 +29,14 @@ The API consists mainly of the `stamina.retry()` decorator for retrying function
 
 <!-- example-start -->
 ```python
+import datetime as dt
+
 import httpx
 
-from stamina import retry
+import stamina
 
-@retry(on=httpx.HTTPError, attempts=3)
+
+@stamina.retry(on=httpx.HTTPError, attempts=3)
 def do_it(code: int) -> httpx.Response:
     resp = httpx.get(f"https://httpbin.org/status/{code}")
     resp.raise_for_status()
@@ -43,16 +46,22 @@ def do_it(code: int) -> httpx.Response:
 # reveal_type(do_it)
 # note: Revealed type is "def (code: builtins.int) -> httpx._models.Response"
 
-for attempt in stamina.retry_context(on=httpx.HTTPError, attempts=3):
+for attempt in stamina.retry_context(
+    on=httpx.HTTPError,
+    # Absolute deadlines are also supported:
+    timeout=dt.datetime.now().astimezone() + dt.timedelta(seconds=10),
+):
     with attempt:
-        resp = httpx.get(f"https://httpbin.org/status/{code}")
+        resp = httpx.get(f"https://httpbin.org/status/404")
         resp.raise_for_status()
 ```
 
-Async works the same way:
+Async works with the exact same functions and arguments:
 
 ```python
-@retry(on=httpx.HTTPError, attempts=3)
+@stamina.retry(
+    on=httpx.HTTPError, attempts=3, timeout=dt.timedelta(seconds=10)
+)
 async def do_it_async(code: int) -> httpx.Response:
     async with httpx.AsyncClient() as client:
         resp = await client.get(f"https://httpbin.org/status/{code}")
@@ -63,11 +72,14 @@ async def do_it_async(code: int) -> httpx.Response:
 # reveal_type(do_it_async)
 # note: Revealed type is "def (code: builtins.int) -> typing.Coroutine[Any, Any, httpx._models.Response]"
 
-async for attempt in stamina.retry_context(on=httpx.HTTPError, attempts=3):
-    with attempt:
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(f"https://httpbin.org/status/{code}")
-        resp.raise_for_status()
+async def with_block(code: int) -> httpx.Response:
+    async for attempt in stamina.retry_context(on=httpx.HTTPError, attempts=3):
+        with attempt:
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(f"https://httpbin.org/status/{code}")
+            resp.raise_for_status()
+
+    return resp
 ```
 <!-- example-end -->
 
@@ -79,6 +91,11 @@ There is no default – you _must_ pass this explicitly.
 **attempts**: Maximum number of attempts (default: `10`).
 
 **timeout**: Maximum time for all retries.
+
+Can also be a [`datetime.datetime()`](https://docs.python.org/3/library/datetime.html#datetime.datetime) that is used as a deadline.
+If the next sleep could possibly exceed the timeout (longest-possible _jitter_ is assumed), no retry is scheduled.
+This means that the retries almost always stop **before** the deadline.
+
 Can be combined with *attempts* (default: `45`).
 
 **wait_initial**: Minimum first backoff before first retry (default: `0.1`).
