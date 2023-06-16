@@ -36,6 +36,11 @@ def exc_timeout_timedelta() -> None:
     ...
 
 
+@retry(on=TypeError, timeout=dt.datetime.now(tz=dt.timezone.utc))
+def exc_timeout_datetime() -> None:
+    ...
+
+
 @retry(on=TypeError, timeout=13.0, attempts=10)
 def exc_timeout_attempts() -> None:
     ...
@@ -97,6 +102,12 @@ def hook(
 
 
 for attempt in retry_context(on=ValueError, timeout=13):
+    with attempt:
+        ...
+
+for attempt in retry_context(
+    on=ValueError, timeout=dt.datetime.now(tz=dt.timezone.utc)
+):
     with attempt:
         ...
 
