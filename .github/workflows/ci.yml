@@ -65,6 +65,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: Packages
+      - run: tar xf  --strip-components=1 Packages/*.tar.gz  # needed for config files
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -73,7 +74,6 @@ jobs:
 
       - name: Prepare & run Nox
         run: |
-          tar xf Packages/*.tar.gz  # needed for config files
           python -Im pip install nox
 
           nox \
@@ -148,7 +148,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: Packages
-      - run: tar xf Packages/*.tar.gz
+      - run: tar xf --strip-components=1 Packages/*.tar.gz
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
