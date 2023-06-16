@@ -61,6 +61,7 @@ jobs:
           # [[[end]]]
 
     steps:
+      - uses: actions/checkout@v3  # needed for config
       - name: Download pre-built packages
         uses: actions/download-artifact@v3
         with:
@@ -91,6 +92,7 @@ jobs:
     needs: build-package
 
     steps:
+      - uses: actions/checkout@v3  # needed for config
       - name: Download pre-built packages
         uses: actions/download-artifact@v3
         with:
