@@ -36,7 +36,7 @@ jobs:
 
       - name: Prepare & run nox
         run: |
-          python -Im pip install --upgrade wheel nox
+          python -Im pip install nox
           python -Im nox -e cog -- --check
 
   tests:
@@ -78,7 +78,7 @@ jobs:
           python -Im pip install nox
 
           nox \
-            --python ${{ matrix.python-version }}
+            --python ${{ matrix.python-version }} \
             -e tests \
             -- --use-wheel dist/*.whl
 
