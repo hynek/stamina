@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import datetime as dt
 import sys
 
 from collections.abc import Callable
@@ -36,11 +37,11 @@ P = ParamSpec("P")
 def retry_context(
     on: type[Exception] | tuple[type[Exception], ...],
     attempts: int | None = 10,
-    timeout: float | int | None = 45.0,
-    wait_initial: float | int = 0.1,
-    wait_max: float | int = 5.0,
-    wait_jitter: float | int = 1.0,
-    wait_exp_base: float | int = 2.0,
+    timeout: float | dt.timedelta | None = 45.0,
+    wait_initial: float | dt.timedelta = 0.1,
+    wait_max: float | dt.timedelta = 5.0,
+    wait_jitter: float | dt.timedelta = 1.0,
+    wait_exp_base: float = 2.0,
 ) -> _RetryContextIterator:
     """
     Iterator that yields context managers that can be used to retry code
@@ -78,11 +79,11 @@ class _RetryContextIterator:
         cls,
         on: type[Exception] | tuple[type[Exception], ...],
         attempts: int | None,
-        timeout: float | int | None,
-        wait_initial: float | int,
-        wait_max: float | int,
-        wait_jitter: float | int,
-        wait_exp_base: float | int,
+        timeout: float | dt.timedelta | None,
+        wait_initial: float | dt.timedelta,
+        wait_max: float | dt.timedelta,
+        wait_jitter: float | dt.timedelta,
+        wait_exp_base: float,
         name: str,
         args: tuple[object, ...],
         kw: dict[str, object],
@@ -94,10 +95,16 @@ class _RetryContextIterator:
             _tenacity_kw={
                 "retry": _t.retry_if_exception_type(on),
                 "wait": _t.wait_exponential_jitter(
-                    initial=wait_initial,
-                    max=wait_max,
+                    initial=wait_initial.total_seconds()
+                    if isinstance(wait_initial, dt.timedelta)
+                    else wait_initial,
+                    max=wait_max.total_seconds()
+                    if isinstance(wait_max, dt.timedelta)
+                    else wait_max,
                     exp_base=wait_exp_base,
-                    jitter=wait_jitter,
+                    jitter=wait_jitter.total_seconds()
+                    if isinstance(wait_jitter, dt.timedelta)
+                    else wait_jitter,
                 ),
                 "stop": _make_stop(attempts=attempts, timeout=timeout),
                 "reraise": True,
@@ -174,7 +181,9 @@ def _make_before_sleep(
     return before_sleep
 
 
-def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
+def _make_stop(
+    *, attempts: int | None, timeout: float | dt.timedelta | None
+) -> _t.stop_base:
     """
     Combine *attempts* and *timeout* into one stop condition.
     """
@@ -198,11 +207,11 @@ def retry(
     *,
     on: type[Exception] | tuple[type[Exception], ...],
     attempts: int | None = 10,
-    timeout: float | int | None = 45.0,
-    wait_initial: float | int = 0.1,
-    wait_max: float | int = 5.0,
-    wait_jitter: float | int = 1.0,
-    wait_exp_base: float | int = 2.0,
+    timeout: float | dt.timedelta | None = 45.0,
+    wait_initial: float | dt.timedelta = 0.1,
+    wait_max: float | dt.timedelta = 5.0,
+    wait_jitter: float | dt.timedelta = 1.0,
+    wait_exp_base: float = 2.0,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """
     Retry if one of configured exceptions are raised.

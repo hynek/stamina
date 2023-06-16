@@ -71,7 +71,7 @@ async for attempt in stamina.retry_context(on=httpx.HTTPError, attempts=3):
 ```
 <!-- example-end -->
 
-Both `retry()` and `retry_context()` take the following arguments (**all time-based arguments are floats of seconds**):
+Both `retry()` and `retry_context()` take the following arguments (unless stated otherwise, **all time-based arguments are floats of seconds or [`datetime.timedelta`](https://docs.python.org/3/library/datetime.html#datetime.timedelta)s**):
 
 **on**: An Exception or a tuple of Exceptions on which the decorated callable will be retried.
 There is no default – you _must_ pass this explicitly.

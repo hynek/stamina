@@ -2,9 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 
+"""
+This file is used to test the type annotations of the public API. It is NOT
+meant to be executed.
+"""
+
 from __future__ import annotations
 
-from typing import Any
+import datetime as dt
 
 from tenacity import RetryCallState
 
@@ -23,6 +28,11 @@ async def just_exc_async() -> None:
 
 @retry(on=TypeError, timeout=13.0)
 def exc_timeout() -> None:
+    ...
+
+
+@retry(on=TypeError, timeout=dt.timedelta(seconds=13.0))
+def exc_timeout_timedelta() -> None:
     ...
 
 
@@ -58,6 +68,20 @@ def exc_tune_waiting_ints() -> None:
     ...
 
 
+one_sec = dt.timedelta(seconds=1.0)
+
+
+@retry(
+    on=TypeError,
+    timeout=one_sec,
+    wait_initial=one_sec,
+    wait_max=one_sec,
+    wait_jitter=one_sec,
+)
+def exc_tune_waiting_timedelta() -> None:
+    ...
+
+
 set_active(False)
 
 if is_active() is True:
@@ -67,17 +91,23 @@ set_active(False)
 
 
 def hook(
-    retry_state: RetryCallState, name: str, args: Any, kwargs: Any
+    retry_state: RetryCallState, name: str, args: object, kwargs: object
 ) -> None:
     return None
 
 
-for attempt in retry_context(on=ValueError):
+for attempt in retry_context(on=ValueError, timeout=13):
     with attempt:
         ...
 
 
 async def f() -> None:
-    async for attempt in retry_context(on=ValueError):
+    async for attempt in retry_context(
+        on=ValueError,
+        timeout=one_sec,
+        wait_initial=one_sec,
+        wait_max=one_sec,
+        wait_jitter=one_sec,
+    ):
         with attempt:
             ...

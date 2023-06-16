@@ -2,24 +2,43 @@
 #
 # SPDX-License-Identifier: MIT
 
+import datetime as dt
 
 import pytest
 
 import stamina
 
 
-@pytest.mark.parametrize("attempts,timeout", [(None, 1), (1, None)])
-async def test_ok(attempts, timeout):
+@pytest.mark.parametrize("attempts", [None, 1])
+@pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
+@pytest.mark.parametrize("wait_initial", [None, 1, dt.timedelta(days=1)])
+@pytest.mark.parametrize("wait_max", [None, 1, dt.timedelta(days=1)])
+@pytest.mark.parametrize("wait_jitter", [None, 1, dt.timedelta(days=1)])
+async def test_ok(attempts, timeout, wait_initial, wait_max, wait_jitter):
     """
     No error, no problem.
     """
 
     class C:
-        @stamina.retry(on=Exception, attempts=attempts, timeout=timeout)
+        @stamina.retry(
+            on=Exception,
+            attempts=attempts,
+            timeout=timeout,
+            wait_initial=wait_initial,
+            wait_max=wait_max,
+            wait_jitter=wait_jitter,
+        )
         async def f(self):
             return 42
 
-    @stamina.retry(on=Exception, attempts=attempts, timeout=timeout)
+    @stamina.retry(
+        on=Exception,
+        attempts=attempts,
+        timeout=timeout,
+        wait_initial=wait_initial,
+        wait_max=wait_max,
+        wait_jitter=wait_jitter,
+    )
     async def f():
         return 42
 

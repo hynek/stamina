@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
+import datetime as dt
 
 import pytest
 import tenacity
@@ -11,26 +12,41 @@ import stamina
 from stamina._core import _make_stop
 
 
-@pytest.mark.parametrize("attempts,timeout", [(None, 1), (1, None)])
-def test_ok(attempts, timeout):
+@pytest.mark.parametrize("attempts", [None, 1])
+@pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
+@pytest.mark.parametrize("duration", [1, dt.timedelta(days=1)])
+def test_ok(attempts, timeout, duration):
     """
     No error, no problem.
     """
 
-    @stamina.retry(on=Exception, attempts=attempts, timeout=timeout)
+    @stamina.retry(
+        on=Exception,
+        attempts=attempts,
+        timeout=timeout,
+        wait_initial=duration,
+        wait_max=duration,
+        wait_jitter=duration,
+    )
     def f():
         return 42
 
     assert 42 == f()
 
 
-def test_retries():
+@pytest.mark.parametrize("duration", [0, dt.timedelta(days=0)])
+def test_retries(duration):
     """
     Retries if the specific error is raised.
     """
     i = 0
 
-    @stamina.retry(on=ValueError, wait_max=0)
+    @stamina.retry(
+        on=ValueError,
+        wait_max=duration,
+        wait_initial=duration,
+        wait_jitter=duration,
+    )
     def f():
         nonlocal i
         if i == 0:

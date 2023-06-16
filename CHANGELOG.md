@@ -23,6 +23,11 @@ The **third number** is for emergencies when we need to start branches for older
   [#12](https://github.com/hynek/stamina/pull/12)
 
 
+### Changed
+
+- The *timeout*, *wait_initial*, *wait_max*, and *wait_jitter* arguments can now also be of type [`datetime.timedelta`](https://docs.python.org/3/library/datetime.html#datetime.timedelta).
+
+
 ## [22.2.0](https://github.com/hynek/stamina/compare/22.1.0...22.2.0) - 2022-10-06
 
 ### Added
