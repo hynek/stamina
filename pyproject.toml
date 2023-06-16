@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 
 [tool.supported-pythons]
-# These are canonical truth that is then used by Cog to generate metadata & CI
+# This is the canonical truth that is then used by Cog to generate metadata & CI
 # config.
 min = "3.8"
 max = "3.12"
