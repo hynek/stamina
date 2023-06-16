@@ -67,9 +67,9 @@ def _get_pkg(posargs) -> tuple[str, list]:
         pkg = posargs[i + 1]
         del posargs[i : i + 2]
     except ValueError:
-        pkg = ".[tests]"
+        pkg = "."
 
-    return pkg, posargs
+    return pkg + "[tests]", posargs
 
 
 @nox.session(python=ALL_SUPPORTED)
