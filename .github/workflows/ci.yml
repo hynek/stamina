@@ -65,7 +65,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: Packages
-      - run: tar xf  --strip-components=1 Packages/*.tar.gz  # needed for config files
+      - run: tar --strip-components=1 xf Packages/*.tar.gz  # needed for config files
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -148,7 +148,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: Packages
-      - run: tar xf --strip-components=1 Packages/*.tar.gz
+      - run: tar --strip-components=1 xf Packages/*.tar.gz  # needed for config files
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
