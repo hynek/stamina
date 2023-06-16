@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-from unittest.mock import Mock
 
 import pytest
 import tenacity
@@ -57,24 +56,39 @@ def test_wrong_exception():
         f()
 
 
-def test_retry_inactive(monkeypatch):
+def test_retry_inactive():
     """
     If inactive, don't retry.
     """
+    num_called = 0
 
     @stamina.retry(on=Exception)
     def f():
+        nonlocal num_called
+        num_called += 1
         raise Exception("passed")
 
     stamina.set_active(False)
 
-    retrying = Mock()
-    monkeypatch.setattr(stamina._core._t, "Retrying", retrying)
-
     with pytest.raises(Exception, match="passed"):
         f()
 
-    retrying.assert_not_called()
+    assert 1 == num_called
+
+
+def test_retry_block():
+    """
+    Sync retry_context blocks are retried.
+    """
+    i = 0
+
+    for attempt in stamina.retry_context(on=ValueError, wait_max=0):
+        with attempt:
+            i += 1
+            if i < 2:
+                raise ValueError
+
+    assert 2 == i
 
 
 class TestMakeStop:

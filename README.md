@@ -25,7 +25,7 @@ In practice, only a few knobs are needed (repeatedly!), though.
 
 ## Usage
 
-The API consists mainly of the `stamina.retry()` decorator:
+The API consists mainly of the `stamina.retry()` decorator for retrying functions and methods, and the `stamina.retry_context()` iterator / context manager combo for retrying arbitrary code blocks:
 
 <!-- example-start -->
 ```python
@@ -42,6 +42,11 @@ def do_it(code: int) -> httpx.Response:
 
 # reveal_type(do_it)
 # note: Revealed type is "def (code: builtins.int) -> httpx._models.Response"
+
+for attempt in stamina.retry_context(on=httpx.HTTPError, attempts=3):
+    with attempt:
+        resp = httpx.get(f"https://httpbin.org/status/{code}")
+        resp.raise_for_status()
 ```
 
 Async works the same way:
@@ -57,10 +62,16 @@ async def do_it_async(code: int) -> httpx.Response:
 
 # reveal_type(do_it_async)
 # note: Revealed type is "def (code: builtins.int) -> typing.Coroutine[Any, Any, httpx._models.Response]"
+
+async for attempt in stamina.retry_context(on=httpx.HTTPError, attempts=3):
+    with attempt:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(f"https://httpbin.org/status/{code}")
+        resp.raise_for_status()
 ```
 <!-- example-end -->
 
-The decorator takes the following arguments (**all time-based arguments are floats of seconds**):
+Both `retry()` and `retry_context()` take the following arguments (**all time-based arguments are floats of seconds**):
 
 **on**: An Exception or a tuple of Exceptions on which the decorated callable will be retried.
 There is no default – you _must_ pass this explicitly.
