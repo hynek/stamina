@@ -65,7 +65,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: Packages
-      - run: tar --strip-components=1 xf Packages/*.tar.gz  # needed for config files
+      - run: tar xf Packages/*.tar.gz --strip-components=1  # needed for config files
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -127,6 +127,7 @@ jobs:
   mypy-api:
     name: Type-check API on ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    needs: build-package
     strategy:
       fail-fast: false
       matrix:
@@ -145,10 +146,11 @@ jobs:
           # [[[end]]]
 
     steps:
-      - uses: actions/download-artifact@v3
+      - name: Download pre-built packages
+        uses: actions/download-artifact@v3
         with:
           name: Packages
-      - run: tar --strip-components=1 xf Packages/*.tar.gz  # needed for config files
+      - run: tar xf Packages/*.tar.gz --strip-components=1  # needed for config files
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
