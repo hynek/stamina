@@ -9,7 +9,7 @@ import os
 import nox
 
 
-nox.options.sessions = ["cog", "pre_commit", "tests", "tests_no_deps", "mypy"]
+nox.options.sessions = ["cog", "pre_commit", "tests", "mypy"]
 nox.options.reuse_existing_virtualenvs = True
 nox.options.error_on_external_run = True
 
@@ -73,21 +73,11 @@ def _get_pkg(posargs) -> tuple[str, list]:
 
 
 @nox.session(python=ALL_SUPPORTED)
-def tests(session: nox.Session) -> None:
-    pkg, posargs = _get_pkg(session.posargs)
-    session.install(pkg, "coverage[toml]", "structlog", "prometheus-client")
-
-    session.run("coverage", "run", "-m", "pytest", *posargs)
-
-    if os.environ.get("CI") != "true":
-        session.notify("coverage_report")
-
-
-@nox.session
-def tests_no_deps(session: nox.Session) -> None:
+@nox.parametrize("opt_deps", [[], ["structlog", "prometheus-client"]])
+def tests(session: nox.Session, opt_deps: list[str]) -> None:
     pkg, posargs = _get_pkg(session.posargs)
 
-    session.install(pkg, "coverage[toml]")
+    session.install(pkg, "coverage[toml]", *opt_deps)
 
     session.run("coverage", "run", "-m", "pytest", *posargs)
 

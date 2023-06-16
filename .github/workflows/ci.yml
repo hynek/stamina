@@ -61,12 +61,10 @@ jobs:
           # [[[end]]]
 
     steps:
-      - uses: actions/checkout@v3  # needed for config
       - name: Download pre-built packages
         uses: actions/download-artifact@v3
         with:
           name: Packages
-          path: dist
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -75,37 +73,13 @@ jobs:
 
       - name: Prepare & run Nox
         run: |
+          tar xf Packages/*.tar.gz  # needed for config files
           python -Im pip install nox
 
-          nox --python ${{ matrix.python-version }} -e tests -- --use-wheel dist/*.whl
-
-      - name: Upload coverage data
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-data
-          path: .coverage.*
-          if-no-files-found: ignore
-
-  tests-no-deps:
-    name: Tests without optional dependencies
-    runs-on: ubuntu-latest
-    needs: build-package
-
-    steps:
-      - uses: actions/checkout@v3  # needed for config
-      - name: Download pre-built packages
-        uses: actions/download-artifact@v3
-        with:
-          name: Packages
-          path: dist
-      - uses: actions/setup-python@v4
-        with:
-          cache: pip
-
-      - name: Prepare & run tests
-        run: |
-          python -Im pip install nox
-          python -Im nox -e tests_no_deps -- --use-wheel dist/*.whl
+          nox \
+            --python ${{ matrix.python-version }}
+            -e tests \
+            -- --use-wheel Packages/*.whl
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v3
@@ -171,7 +145,10 @@ jobs:
           # [[[end]]]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: Packages
+      - run: tar xf Packages/*.tar.gz
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
