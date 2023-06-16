@@ -62,7 +62,7 @@ jobs:
 
     steps:
       - name: Download pre-built packages
-        uses: download-artifact@v3
+        uses: actions/download-artifact@v3
         with:
           name: dist
       - uses: actions/setup-python@v4
@@ -91,7 +91,7 @@ jobs:
 
     steps:
       - name: Download pre-built packages
-        uses: download-artifact@v3
+        uses: actions/download-artifact@v3
         with:
           name: dist
       - uses: actions/setup-python@v4
