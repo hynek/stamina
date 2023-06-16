@@ -104,10 +104,12 @@ class _RetryContextIterator:
             },
         )
 
+    _STOP_NO_RETRY = _t.stop_after_attempt(1)
+
     def __iter__(self) -> _t.Retrying:
         if not _CONFIG.is_active:
             return _t.Retrying(
-                reraise=True, stop=_t.stop_after_attempt(1)
+                reraise=True, stop=self._STOP_NO_RETRY
             ).__iter__()
 
         return _t.Retrying(
@@ -122,7 +124,7 @@ class _RetryContextIterator:
     def __aiter__(self) -> _t.AsyncRetrying:
         if not _CONFIG.is_active:
             return _t.AsyncRetrying(
-                reraise=True, stop=_t.stop_after_attempt(1)
+                reraise=True, stop=self._STOP_NO_RETRY
             ).__aiter__()
 
         return _t.AsyncRetrying(
