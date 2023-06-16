@@ -9,7 +9,7 @@ import os
 import nox
 
 
-nox.options.sessions = ["cog", "pre_commit", "tests", "tests_no_deps", "mypy"]
+nox.options.sessions = ["cog", "pre_commit", "tests", "mypy"]
 nox.options.reuse_existing_virtualenvs = True
 nox.options.error_on_external_run = True
 
@@ -56,23 +56,30 @@ def mypy(session: nox.Session) -> None:
     session.run("mypy", "src", "tests/typing")
 
 
+def _get_pkg(posargs) -> tuple[str, list]:
+    """
+    Allow `--use-wheel path/to/wheel.whl` to be passed.
+    """
+    posargs = list(posargs)
+
+    try:
+        i = posargs.index("--use-wheel")
+        pkg = posargs[i + 1]
+        del posargs[i : i + 2]
+    except ValueError:
+        pkg = "."
+
+    return pkg + "[tests]", posargs
+
+
 @nox.session(python=ALL_SUPPORTED)
-def tests(session: nox.Session) -> None:
-    session.install(
-        ".[tests]", "coverage[toml]", "structlog", "prometheus-client"
-    )
+@nox.parametrize("opt_deps", [[], ["structlog", "prometheus-client"]])
+def tests(session: nox.Session, opt_deps: list[str]) -> None:
+    pkg, posargs = _get_pkg(session.posargs)
 
-    session.run("coverage", "run", "-m", "pytest", *session.posargs)
+    session.install(pkg, "coverage[toml]", *opt_deps)
 
-    if os.environ.get("CI") != "true":
-        session.notify("coverage_report")
-
-
-@nox.session
-def tests_no_deps(session: nox.Session) -> None:
-    session.install(".[tests]", "coverage[toml]")
-
-    session.run("coverage", "run", "-m", "pytest", *session.posargs)
+    session.run("coverage", "run", "-m", "pytest", *posargs)
 
     if os.environ.get("CI") != "true":
         session.notify("coverage_report")
