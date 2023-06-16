@@ -46,6 +46,7 @@ jobs:
   cog-check:
     name: Ensure cogified files are up-to-date
     runs-on: ubuntu-latest
+    needs: build-sdist
     steps:
       - name: Get source code from pre-built sdist
         uses: re-actors/checkout-python-sdist@release/v1
@@ -64,6 +65,7 @@ jobs:
   tests:
     name: Tests & Mypy on ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    needs: build-sdist
     strategy:
       fail-fast: false
       matrix:
@@ -110,6 +112,7 @@ jobs:
   tests-no-deps:
     name: Tests without optional dependencies
     runs-on: ubuntu-latest
+    needs: build-sdist
 
     steps:
       - name: Get source code from pre-built sdist
@@ -181,11 +184,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - name: Get source code from pre-built sdist
-        uses: re-actors/checkout-python-sdist@release/v1
-        with:
-          source-tarball-name: ${{ env.sdist-name }}
-          workflow-artifact-name: ${{ env.sdist-artifact }}
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           cache: pip
@@ -195,8 +194,8 @@ jobs:
           python -Im pip install -e .[dev]
           python -c 'import stamina'
 
-  # Ensure everything required is passing for branch protection.
   required-checks-pass:
+    name: Ensure everything required is passing for branch protection.
     if: always()
 
     needs:
