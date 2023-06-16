@@ -106,7 +106,12 @@ class _RetryContextIterator:
                     if isinstance(wait_jitter, dt.timedelta)
                     else wait_jitter,
                 ),
-                "stop": _make_stop(attempts=attempts, timeout=timeout),
+                "stop": _make_stop(
+                    attempts=attempts,
+                    timeout=timeout.total_seconds()
+                    if isinstance(timeout, dt.timedelta)
+                    else timeout,
+                ),
                 "reraise": True,
             },
         )
@@ -181,9 +186,7 @@ def _make_before_sleep(
     return before_sleep
 
 
-def _make_stop(
-    *, attempts: int | None, timeout: float | dt.timedelta | None
-) -> _t.stop_base:
+def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
     """
     Combine *attempts* and *timeout* into one stop condition.
     """
