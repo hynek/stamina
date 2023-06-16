@@ -171,12 +171,12 @@ def _make_before_sleep(
     def before_sleep(rcs: _t.RetryCallState) -> None:
         attempt = rcs.attempt_number
         exc = rcs.outcome.exception()
-        backoff = rcs.idle_for
+        idle_for = rcs.idle_for
 
         for hook in on_retry:
             hook(
                 attempt=attempt,
-                backoff=backoff,
+                idle_for=idle_for,
                 exc=exc,
                 name=name,
                 args=args,

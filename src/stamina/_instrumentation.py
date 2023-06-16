@@ -26,7 +26,7 @@ except ImportError:
 
 def count_retries(
     attempt: int,
-    backoff: float,
+    idle_for: float,
     exc: Exception,
     name: str,
     args: tuple[object, ...],
@@ -42,7 +42,7 @@ def count_retries(
 
 def log_retries(
     attempt: int,
-    backoff: float,
+    idle_for: float,
     exc: Exception,
     name: str,
     args: tuple[object, ...],
@@ -52,7 +52,7 @@ def log_retries(
         "stamina.retry_scheduled",
         callable=name,
         attempt=attempt,
-        backoff=backoff,
+        slept=idle_for,
         error=repr(exc),
         args=tuple(repr(a) for a in args),
         kwargs=dict(kwargs.items()),

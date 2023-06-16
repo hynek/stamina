@@ -44,7 +44,7 @@ class TestGuessName:
         """
         Names of callables are guessed.
         """
-        assert name == guess_name(obj)
+        assert f"tests.{name}" == guess_name(obj)
 
     def test_local(self):
         """
@@ -58,10 +58,10 @@ class TestGuessName:
             pass
 
         assert (
-            "test_instrumentation.TestGuessName.test_local.<locals>.f"
+            "tests.test_instrumentation.TestGuessName.test_local.<locals>.f"
             == guess_name(f)
         )
         assert (
-            "test_instrumentation.TestGuessName.test_local.<locals>.async_f"
+            "tests.test_instrumentation.TestGuessName.test_local.<locals>.async_f"
             == guess_name(async_f)
         )

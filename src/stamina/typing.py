@@ -16,7 +16,7 @@ class RetryHook(Protocol):
     def __call__(
         self,
         attempt: int,
-        backoff: float,
+        idle_for: float,
         exc: Exception,
         name: str,
         args: tuple[object, ...],
