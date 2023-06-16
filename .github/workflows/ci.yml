@@ -37,7 +37,9 @@ jobs:
       - name: Prepare & run nox
         run: |
           python -Im pip install nox
-          python -Im nox -e cog -- --check
+          python -Im nox \
+            --session cog \
+            -- --check
 
   tests:
     name: Tests on ${{ matrix.python-version }}
