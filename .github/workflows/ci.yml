@@ -201,6 +201,7 @@ jobs:
     needs:
       - coverage
       - install-dev
+      - cog-check
 
     runs-on: ubuntu-latest
 
