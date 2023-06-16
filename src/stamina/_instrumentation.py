@@ -4,8 +4,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 
 try:
     import structlog
@@ -31,8 +29,8 @@ def count_retries(
     backoff: float,
     exc: Exception,
     name: str,
-    args: Any,
-    kwargs: Any,
+    args: tuple[object, ...],
+    kwargs: dict[str, object],
 ) -> None:
     """
     Count and log retries for callable *name*.
@@ -47,8 +45,8 @@ def log_retries(
     backoff: float,
     exc: Exception,
     name: str,
-    args: Any,
-    kwargs: Any,
+    args: tuple[object, ...],
+    kwargs: dict[str, object],
 ) -> None:
     logger.warning(
         "stamina.retry_scheduled",

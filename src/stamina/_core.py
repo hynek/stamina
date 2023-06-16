@@ -146,7 +146,10 @@ class _RetryContextIterator:
 
 
 def _make_before_sleep(
-    name: str, on_retry: Iterable[RetryHook], args: object, kw: object
+    name: str,
+    on_retry: Iterable[RetryHook],
+    args: tuple[object, ...],
+    kw: dict[str, object],
 ) -> Callable[[_t.RetryCallState], None]:
     """
     Create a `before_sleep` callback function that runs our `RetryHook`s with

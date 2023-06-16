@@ -19,7 +19,7 @@ class RetryHook(Protocol):
         backoff: float,
         exc: Exception,
         name: str,
-        args: object,
-        kwargs: object,
+        args: tuple[object, ...],
+        kwargs: dict[str, object],
     ) -> None:
         ...
