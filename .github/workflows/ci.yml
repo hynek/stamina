@@ -64,7 +64,8 @@ jobs:
       - name: Download pre-built packages
         uses: actions/download-artifact@v3
         with:
-          name: dist
+          name: Packages
+          path: dist
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -93,7 +94,8 @@ jobs:
       - name: Download pre-built packages
         uses: actions/download-artifact@v3
         with:
-          name: dist
+          name: Packages
+          path: dist
       - uses: actions/setup-python@v4
         with:
           cache: pip
