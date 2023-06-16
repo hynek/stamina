@@ -65,7 +65,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: Packages
-      - run: tar xf Packages/*.tar.gz --strip-components=1  # needed for config files
+          path: dist
+      - run: tar xf dist/*.tar.gz --strip-components=1  # needed for config files
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -79,7 +80,7 @@ jobs:
           nox \
             --python ${{ matrix.python-version }}
             -e tests \
-            -- --use-wheel Packages/*.whl
+            -- --use-wheel dist/*.whl
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v3
@@ -150,7 +151,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: Packages
-      - run: tar xf Packages/*.tar.gz --strip-components=1  # needed for config files
+          path: dist
+      - run: tar xf dist/*.tar.gz --strip-components=1  # needed for config files
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
