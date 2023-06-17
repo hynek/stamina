@@ -10,15 +10,7 @@ import stamina
 
 
 @pytest.mark.parametrize("attempts", [None, 1])
-@pytest.mark.parametrize(
-    "timeout",
-    [
-        None,
-        1,
-        dt.timedelta(days=1),
-        dt.datetime.now(tz=dt.timezone.utc) + dt.timedelta(days=1),
-    ],
-)
+@pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
 @pytest.mark.parametrize("duration", [1, dt.timedelta(days=1)])
 async def test_ok(attempts, timeout, duration):
     """
@@ -52,16 +44,7 @@ async def test_ok(attempts, timeout, duration):
     assert 42 == await C().f()
 
 
-@pytest.mark.parametrize(
-    "timeout",
-    [
-        None,
-        1,
-        dt.timedelta(days=1),
-        dt.datetime.now(tz=dt.timezone.utc) + dt.timedelta(days=1),
-        dt.datetime.now().astimezone() + dt.timedelta(days=1),  # noqa: DTZ005
-    ],
-)
+@pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
 @pytest.mark.parametrize("duration", [0, dt.timedelta(days=0)])
 async def test_retries(duration, timeout):
     """

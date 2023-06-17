@@ -9,7 +9,7 @@
 
 Transient failures are common in distributed systems.
 To make your systems resilient, you need to [**retry** failed operations](https://blog.pragmaticengineer.com/resiliency-in-distributed-systems/#retry).
-[Tenacity](https://tenacity.readthedocs.io/) is a *robust* and beautifully *composable* toolkit for handling retries.
+[Tenacity](https://tenacity.readthedocs.io/) is a *production-ready* and beautifully *composable* toolkit for handling retries.
 In practice, only a few knobs are needed (repeatedly!), though.
 
 *stamina* is an **opinionated** thin layer around Tenacity based on best practices to avoid constant copy-pasting and shrink the user error surface:
@@ -17,7 +17,6 @@ In practice, only a few knobs are needed (repeatedly!), though.
 - Retry only on certain exceptions.
 - [Exponential backoff with _jitter_](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) between retries.
 - Limit the number of retries **and** total time.
-- Or set an absolute **deadline**!
 - Automatic **async** support.
 - Preserve **type hints** of the decorated callable.
 - Count ([Prometheus](https://github.com/prometheus/client_python)) and log ([*structlog*](https://www.structlog.org/)) retries with basic metadata (if they're installed).
@@ -47,11 +46,7 @@ def do_it(code: int) -> httpx.Response:
 # reveal_type(do_it)
 # note: Revealed type is "def (code: builtins.int) -> httpx._models.Response"
 
-for attempt in stamina.retry_context(
-    on=httpx.HTTPError,
-    # Absolute deadlines are also supported:
-    timeout=dt.datetime.now().astimezone() + dt.timedelta(seconds=10),
-):
+for attempt in stamina.retry_context(on=httpx.HTTPError):
     with attempt:
         resp = httpx.get(f"https://httpbin.org/status/404")
         resp.raise_for_status()
@@ -92,11 +87,6 @@ There is no default – you _must_ pass this explicitly.
 **attempts**: Maximum number of attempts (default: `10`).
 
 **timeout**: Maximum time for all retries.
-
-Can also be a [`datetime.datetime()`](https://docs.python.org/3/library/datetime.html#datetime.datetime) that is used as a deadline.
-If the next sleep could possibly exceed the timeout (longest-possible _jitter_ is assumed), no retry is scheduled.
-This means that the retries almost always stop **before** the deadline.
-
 Can be combined with *attempts* (default: `45`).
 
 **wait_initial**: Minimum first backoff before first retry (default: `0.1`).

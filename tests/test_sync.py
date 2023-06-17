@@ -4,21 +4,16 @@
 
 import datetime as dt
 
-from unittest.mock import Mock
-
 import pytest
 import tenacity
 
 import stamina
 
-from stamina._core import _make_stop, _StopBefore
+from stamina._core import _make_stop
 
 
 @pytest.mark.parametrize("attempts", [None, 1])
-@pytest.mark.parametrize(
-    "timeout",
-    [None, 1, dt.timedelta(days=1), dt.datetime.now(tz=dt.timezone.utc)],
-)
+@pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
 @pytest.mark.parametrize("duration", [1, dt.timedelta(days=1)])
 def test_ok(attempts, timeout, duration):
     """
@@ -41,12 +36,7 @@ def test_ok(attempts, timeout, duration):
 
 @pytest.mark.parametrize(
     "timeout",
-    [
-        None,
-        1,
-        dt.timedelta(days=1),
-        dt.datetime.now(tz=dt.timezone.utc) + dt.timedelta(days=1),
-    ],
+    [None, 1, dt.timedelta(days=1)],
 )
 @pytest.mark.parametrize("duration", [0, dt.timedelta(days=0)])
 def test_retries(duration, timeout):
@@ -128,27 +118,3 @@ class TestMakeStop:
         If all conditions are None, return stop_never.
         """
         assert tenacity.stop_never is _make_stop(attempts=None, timeout=None)
-
-
-class TestStopBefore:
-    @pytest.mark.parametrize(
-        "deadline, wait_initial, wait_exp_base, wait_jitter",
-        [
-            (dt.datetime.now(tz=dt.timezone.utc), 1, 1, 1),
-            (dt.datetime.now().astimezone(), 1, 1, 1),  # noqa: DTZ005
-        ],
-    )
-    def test_deadline_expired(
-        self, deadline, wait_initial, wait_exp_base, wait_jitter
-    ):
-        """
-        If deadline could possibly be overstepped, return True to stop.
-        """
-        sb = _StopBefore(
-            deadline,
-            wait_initial=wait_initial,
-            wait_exp_base=wait_exp_base,
-            wait_jitter=wait_jitter,
-        )
-
-        assert sb(Mock(attempt_number=1))

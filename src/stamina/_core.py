@@ -37,7 +37,7 @@ P = ParamSpec("P")
 def retry_context(
     on: type[Exception] | tuple[type[Exception], ...],
     attempts: int | None = 10,
-    timeout: float | dt.timedelta | dt.datetime | None = 45.0,
+    timeout: float | dt.timedelta | None = 45.0,
     wait_initial: float | dt.timedelta = 0.1,
     wait_max: float | dt.timedelta = 5.0,
     wait_jitter: float | dt.timedelta = 1.0,
@@ -79,7 +79,7 @@ class _RetryContextIterator:
         cls,
         on: type[Exception] | tuple[type[Exception], ...],
         attempts: int | None,
-        timeout: float | dt.timedelta | dt.datetime | None,
+        timeout: float | dt.timedelta | None,
         wait_initial: float | dt.timedelta,
         wait_max: float | dt.timedelta,
         wait_jitter: float | dt.timedelta,
@@ -88,28 +88,6 @@ class _RetryContextIterator:
         args: tuple[object, ...],
         kw: dict[str, object],
     ) -> _RetryContextIterator:
-        wait_initial = (
-            wait_initial.total_seconds()
-            if isinstance(wait_initial, dt.timedelta)
-            else wait_initial
-        )
-        wait_max = (
-            wait_max.total_seconds()
-            if isinstance(wait_max, dt.timedelta)
-            else wait_max
-        )
-        wait_jitter = (
-            wait_jitter.total_seconds()
-            if isinstance(wait_jitter, dt.timedelta)
-            else wait_jitter
-        )
-        if isinstance(timeout, dt.datetime):
-            timeout = _StopBefore(
-                timeout, wait_initial, wait_exp_base, wait_jitter
-            )
-        elif isinstance(timeout, dt.timedelta):
-            timeout = timeout.total_seconds()
-
         return cls(
             _name=name,
             _args=args,
@@ -117,14 +95,22 @@ class _RetryContextIterator:
             _tenacity_kw={
                 "retry": _t.retry_if_exception_type(on),
                 "wait": _t.wait_exponential_jitter(
-                    initial=wait_initial,
-                    max=wait_max,
+                    initial=wait_initial.total_seconds()
+                    if isinstance(wait_initial, dt.timedelta)
+                    else wait_initial,
+                    max=wait_max.total_seconds()
+                    if isinstance(wait_max, dt.timedelta)
+                    else wait_max,
                     exp_base=wait_exp_base,
-                    jitter=wait_jitter,
+                    jitter=wait_jitter.total_seconds()
+                    if isinstance(wait_jitter, dt.timedelta)
+                    else wait_jitter,
                 ),
                 "stop": _make_stop(
                     attempts=attempts,
-                    timeout=timeout,
+                    timeout=timeout.total_seconds()
+                    if isinstance(timeout, dt.timedelta)
+                    else timeout,
                 ),
                 "reraise": True,
             },
@@ -200,9 +186,7 @@ def _make_before_sleep(
     return before_sleep
 
 
-def _make_stop(
-    *, attempts: int | None, timeout: float | _StopBefore | None
-) -> _t.stop_base:
+def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
     """
     Combine *attempts* and *timeout* into one stop condition.
     """
@@ -212,10 +196,7 @@ def _make_stop(
         stops.append(_t.stop_after_attempt(attempts))
 
     if timeout:
-        if isinstance(timeout, _StopBefore):
-            stops.append(timeout)
-        else:
-            stops.append(_t.stop_after_delay(timeout))
+        stops.append(_t.stop_after_delay(timeout))
 
     if len(stops) > 1:
         return _t.stop_any(*stops)
@@ -226,38 +207,11 @@ def _make_stop(
     return stops[0]
 
 
-@dataclass
-class _StopBefore(_t.stop.stop_base):  # type: ignore[misc]
-    """
-    Stop before a given timestamp.
-    """
-
-    __slots__ = ("deadline", "wait_initial", "wait_exp_base", "wait_jitter")
-
-    deadline: dt.datetime
-    wait_initial: float
-    wait_exp_base: float
-    wait_jitter: float
-
-    def __call__(self, retry_state: _t.RetryCallState) -> bool:
-        return (
-            dt.datetime.now(tz=self.deadline.tzinfo)
-            + dt.timedelta(
-                # We don't have access to the next sleep, so we have to compute
-                # the worst case.
-                seconds=self.wait_initial
-                * self.wait_exp_base**retry_state.attempt_number
-                + self.wait_jitter
-            )
-            >= self.deadline
-        )
-
-
 def retry(
     *,
     on: type[Exception] | tuple[type[Exception], ...],
     attempts: int | None = 10,
-    timeout: float | dt.timedelta | dt.datetime | None = 45.0,
+    timeout: float | dt.timedelta | None = 45.0,
     wait_initial: float | dt.timedelta = 0.1,
     wait_max: float | dt.timedelta = 5.0,
     wait_jitter: float | dt.timedelta = 1.0,
