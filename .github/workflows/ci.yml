@@ -167,13 +167,6 @@ jobs:
             --python ${{ matrix.python-version }} \
             --sessions mypy
 
-      - name: Upload coverage data
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-data
-          path: .coverage.*
-          if-no-files-found: ignore
-
   install-dev:
     name: Verify dev env
     runs-on: ${{ matrix.os }}
