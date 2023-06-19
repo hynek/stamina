@@ -33,7 +33,13 @@ docs = [
   "structlog",
   "prometheus-client",
 ]
-dev = ["stamina[tests,typing]", "nox", "structlog", "prometheus-client"]
+dev = [
+  "stamina[tests,typing]",
+  "nox",
+  "tomli; python_version<'3.11'",
+  "structlog",
+  "prometheus-client",
+]
 
 [project.urls]
 Documentation = "https://py-stamina.readthedocs.io/"
