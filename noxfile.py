@@ -5,41 +5,30 @@
 from __future__ import annotations
 
 import os
+import pathlib
+import shutil
+import sys
 
 import nox
 
 
-nox.options.sessions = ["cog", "pre_commit", "tests", "mypy"]
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
+
+nox.options.sessions = ["pre_commit", "tests", "mypy"]
 nox.options.reuse_existing_virtualenvs = True
 nox.options.error_on_external_run = True
 
 
+pyp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
 ALL_SUPPORTED = [
-    # [[[cog
-    # import tomllib, pathlib
-    # sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
-    # for v in sup["all"]:
-    #     cog.outl(f'"{v}",')
-    # ]]]
-    "3.8",
-    "3.9",
-    "3.10",
-    "3.11",
-    "3.12",
-    # [[[end]]]
+    pv.rsplit(" ")[-1]
+    for pv in pyp["project"]["classifiers"]
+    if pv.startswith("Programming Language :: Python :: ")
 ]
-
-
-@nox.session
-def cog(session: nox.Session) -> None:
-    session.install("cogapp")
-
-    session.run(
-        # fmt: off
-        "cog", *session.posargs, "-r",
-        "pyproject.toml", "noxfile.py", ".github/workflows/ci.yml",
-        # fmt: on
-    )
 
 
 @nox.session
@@ -91,3 +80,39 @@ def coverage_report(session: nox.Session) -> None:
 
     session.run("coverage", "combine")
     session.run("coverage", "report")
+
+
+@nox.session
+def docs(session: nox.Session) -> None:
+    if session.posargs and session.posargs[0] == "serve":
+        session.install("-e", ".[docs]", "watchfiles")
+        session.run(
+            "watchfiles",
+            "--ignore-paths",
+            "docs/_build",
+            "python -Im sphinx "
+            "-T -E "
+            "-W --keep-going "
+            "-b html "
+            "-d docs/_build/doctrees "
+            "-D language=en "
+            "docs "
+            "docs/_build/html",
+        )
+        return
+
+    session.install(".[docs]")
+    shutil.rmtree("docs/_build", ignore_errors=True)
+    for cmd in ["html", "doctest"]:
+        session.run(
+            # fmt: off
+            "python", "-Im", "sphinx",
+            "-T", "-E",
+            "-W", "--keep-going",
+            "-b", cmd,
+            "-d", "docs/_build/doctrees",
+            "-D", "language=en",
+            "docs",
+            "docs/_build/html",
+            # fmt: on
+        )

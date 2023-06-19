@@ -47,7 +47,7 @@ def retry_context(
     Iterator that yields context managers that can be used to retry code
     blocks.
 
-    Arguments have the same meaning as for :func:`retry`.
+    Arguments have the same meaning as for :func:`stamina.retry`.
 
     .. versionadded:: 23.1.0
     """
@@ -222,20 +222,23 @@ def retry(
 
     The backoff delays between retries grow exponentially plus a random jitter.
 
-    Example:
+    Parameters:
+        on: The exception type or types to retry on.
 
-        To retry three times HTTP errors keeping the rest at default::
+        attempts: The maximum number of attempts to make.
 
-            import httpx
+        wait_initial: The initial delay between attempts.
 
-            from stamina import retry
+        wait_max: The maximum delay between attempts.
 
-            @retry(on=httpx.HTTPError, attempts=3)
-            def do_it(code: int) -> httpx.Response:
-                resp = httpx.get(f"https://httpbin.org/status/{code}")
-                resp.raise_for_status()
+        wait_jitter: The maximum random jitter to add to the delay.
 
-                return resp
+        wait_exp_base: The base of the exponential backoff.
+
+    .. versionchanged:: 23.1.0
+
+       All time-related parameters can now be specified as a
+       :class:`datetime.timedelta`.
     """
     retry_ctx = _RetryContextIterator.from_params(
         on=on,

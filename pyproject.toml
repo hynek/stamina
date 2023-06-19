@@ -3,51 +3,21 @@ requires = ["hatchling", "hatch-vcs", "hatch-fancy-pypi-readme>=22.8.0"]
 build-backend = "hatchling.build"
 
 
-[tool.supported-pythons]
-# This is the canonical truth that is then used by Cog to generate metadata & CI
-# config.
-min = "3.8"
-max = "3.12"
-# [[[cog
-# import tomllib, pathlib
-# sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
-# minv = int(sup["min"].split('.')[1])
-# maxv = int(sup["max"].split('.')[1])
-# cog.outl(f'all = {list(f"3.{v}" for v in range(minv, maxv+1))}')
-# ]]]
-all = ['3.8', '3.9', '3.10', '3.11', '3.12']
-# [[[end]]]
-
-
 [project]
 dynamic = ["version", "readme"]
 name = "stamina"
 description = "Production-grade retries made easy."
-# [[[cog
-# import tomllib, pathlib
-# sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
-# cog.outl(f'requires-python = ">={sup["min"]}"')
-# ]]]
 requires-python = ">=3.8"
-# [[[end]]]
 license = "MIT"
 keywords = ["retry", "retries", "reliability", "tenacity"]
 authors = [{ name = "Hynek Schlawack", email = "hs@ox.cx" }]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
-  # [[[cog
-  # import tomllib, pathlib
-  # sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
-  # for v in sup["all"]:
-  #     cog.outl(f'"Programming Language :: Python :: {v}",')
-  # ]]]
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
-  # [[[end]]]
-  "License :: OSI Approved :: MIT License",
   "Typing :: Typed",
 ]
 dependencies = ["tenacity", "typing-extensions; python_version<'3.10'"]
@@ -55,10 +25,24 @@ dependencies = ["tenacity", "typing-extensions; python_version<'3.10'"]
 [project.optional-dependencies]
 tests = ["pytest", "pytest-asyncio"]
 typing = ["mypy"]
-dev = ["stamina[tests,typing]", "nox", "structlog", "prometheus-client"]
+docs = [
+  "sphinx",
+  "furo",
+  "myst-parser",
+  "sphinx-notfound-page",
+  "structlog",
+  "prometheus-client",
+]
+dev = [
+  "stamina[tests,typing]",
+  "nox",
+  "tomli; python_version<'3.11'",
+  "structlog",
+  "prometheus-client",
+]
 
 [project.urls]
-Documentation = "https://github.com/hynek/stamina#readme"
+Documentation = "https://py-stamina.readthedocs.io/"
 Source = "https://github.com/hynek/stamina"
 Changelog = "https://github.com/hynek/stamina/blob/main/CHANGELOG.md"
 Funding = "https://github.com/sponsors/hynek"
@@ -78,15 +62,7 @@ text = "# *stamina*: Production-grade Retries Made Easy"
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 path = "README.md"
 start-after = "## Production-grade Retries Made Easy"
-end-before = "## Usage"
 
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-text = "For example:\n"
-
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-path = "README.md"
-start-after = "<!-- example-start -->"
-end-before = "<!-- example-end -->"
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 text = """
@@ -103,7 +79,6 @@ pattern = "\n(###.+?\n)## "
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 path = "README.md"
 start-at = "## License"
-
 
 
 [tool.pytest.ini_options]
@@ -123,7 +98,7 @@ source = ["stamina"]
 source = ["src", ".nox/tests*/**/site-packages"]
 
 [tool.coverage.report]
-show_missing = true
+how_missing = true
 skip_covered = true
 exclude_lines = [
   "no cov",
