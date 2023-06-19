@@ -30,8 +30,9 @@ It starts with 100ms and increases it exponentially by 2 until it reaches 45 sec
 At every step a *jitter* between 0 and 1 second is added.
 
 That means the first backoff is no longer than 1.1 seconds and the last one is no longer than 46 seconds.
-
 You can [tune all these parameters](stamina.retry) to your liking, but the defaults are a good starting point.
+
+The [*Exponential Backoff And Jitter*](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) article on the *AWS Architecture Blog* is a good explanation with pretty graphs.
 
 
 ## Decorators
@@ -59,6 +60,8 @@ def do_it(code: int) -> httpx.Response:
 
 This will retry the function up to 3 times if it raises an {class}`httpx.HTTPError` (or any subclass thereof).
 Since retrying on {class}`Exception` is an attractive nuisance, *stamina* doesn't do it by default and forces you to be explicit.
+
+To give you observability of your application's retrying, *stamina* will count the retries using [*prometheus-client*](https://github.com/prometheus/client_python)) in the `stamina_retries_total` counter and log them out using [*structlog*](https://www.structlog.org/) (if either is installed).
 
 
 ## Arbitrary Code Blocks
