@@ -234,8 +234,8 @@ def retry(
 
     Parameters:
         on: An Exception or a tuple of Exceptions on which the decorated
-        callable will be retried. There is no default -- you *must* pass this
-        explicitly.
+            callable will be retried. There is no default -- you *must* pass
+            this explicitly.
 
         attempts: Maximum time for all retries. Can be combined with *attempts*
 
@@ -244,8 +244,8 @@ def retry(
         wait_max: Maximum backoff time between retries at any time.
 
         wait_jitter: Maximum *jitter* that is added to retry back-off delays
-        (the actual jitter added is a random number between 0 and
-        *wait_jitter*)
+            (the actual jitter added is a random number between 0 and
+            *wait_jitter*)
 
         wait_exp_base: The exponential base used to compute the retry backoff.
 
