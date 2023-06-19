@@ -5,41 +5,28 @@
 from __future__ import annotations
 
 import os
+import pathlib
 
 import nox
 
 
-nox.options.sessions = ["cog", "pre_commit", "tests", "mypy"]
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
+
+
+nox.options.sessions = ["pre_commit", "tests", "mypy"]
 nox.options.reuse_existing_virtualenvs = True
 nox.options.error_on_external_run = True
 
 
+pyp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
 ALL_SUPPORTED = [
-    # [[[cog
-    # import tomllib, pathlib
-    # sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
-    # for v in sup["all"]:
-    #     cog.outl(f'"{v}",')
-    # ]]]
-    "3.8",
-    "3.9",
-    "3.10",
-    "3.11",
-    "3.12",
-    # [[[end]]]
+    pv.rsplit(" ")[-1]
+    for pv in pyp["project"]["classifiers"]
+    if pv.startswith("Programming Language :: Python :: ")
 ]
-
-
-@nox.session
-def cog(session: nox.Session) -> None:
-    session.install("cogapp")
-
-    session.run(
-        # fmt: off
-        "cog", *session.posargs, "-r",
-        "pyproject.toml", "noxfile.py", ".github/workflows/ci.yml",
-        # fmt: on
-    )
 
 
 @nox.session

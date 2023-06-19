@@ -3,51 +3,21 @@ requires = ["hatchling", "hatch-vcs", "hatch-fancy-pypi-readme>=22.8.0"]
 build-backend = "hatchling.build"
 
 
-[tool.supported-pythons]
-# This is the canonical truth that is then used by Cog to generate metadata & CI
-# config.
-min = "3.8"
-max = "3.12"
-# [[[cog
-# import tomllib, pathlib
-# sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
-# minv = int(sup["min"].split('.')[1])
-# maxv = int(sup["max"].split('.')[1])
-# cog.outl(f'all = {list(f"3.{v}" for v in range(minv, maxv+1))}')
-# ]]]
-all = ['3.8', '3.9', '3.10', '3.11', '3.12']
-# [[[end]]]
-
-
 [project]
 dynamic = ["version", "readme"]
 name = "stamina"
 description = "Production-grade retries made easy."
-# [[[cog
-# import tomllib, pathlib
-# sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
-# cog.outl(f'requires-python = ">={sup["min"]}"')
-# ]]]
 requires-python = ">=3.8"
-# [[[end]]]
 license = "MIT"
 keywords = ["retry", "retries", "reliability", "tenacity"]
 authors = [{ name = "Hynek Schlawack", email = "hs@ox.cx" }]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
-  # [[[cog
-  # import tomllib, pathlib
-  # sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
-  # for v in sup["all"]:
-  #     cog.outl(f'"Programming Language :: Python :: {v}",')
-  # ]]]
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
-  # [[[end]]]
-  "License :: OSI Approved :: MIT License",
   "Typing :: Typed",
 ]
 dependencies = ["tenacity", "typing-extensions; python_version<'3.10'"]

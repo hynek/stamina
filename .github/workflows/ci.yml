@@ -25,22 +25,6 @@ jobs:
 
       - uses: hynek/build-and-inspect-python-package@v1
 
-  cog-check:
-    name: Ensure cogified files are up-to-date
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          cache: pip
-
-      - name: Prepare & run nox
-        run: |
-          python -Im pip install nox
-          python -Im nox \
-            --session cog \
-            -- --check
-
   tests:
     name: Tests on ${{ matrix.python-version }}
     runs-on: ubuntu-latest
@@ -49,18 +33,11 @@ jobs:
       fail-fast: false
       matrix:
         python-version:
-          # [[[cog
-          # import tomllib, pathlib
-          # sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
-          # for v in sup["all"]:
-          #     cog.outl(f'- "{v}"')
-          # ]]]
           - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
-          # [[[end]]]
 
     steps:
       - name: Download pre-built packages
@@ -134,18 +111,11 @@ jobs:
       fail-fast: false
       matrix:
         python-version:
-          # [[[cog
-          # import tomllib, pathlib
-          # sup = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["tool"]["supported-pythons"]
-          # for v in sup["all"]:
-          #     cog.outl(f'- "{v}"')
-          # ]]]
           - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
-          # [[[end]]]
 
     steps:
       - name: Download pre-built packages
