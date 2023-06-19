@@ -4,7 +4,7 @@ Release **{sub-ref}`release`**  ([What's new?](changelog))
 
 ```{include} ../README.md
 :start-after: "## Production-grade Retries Made Easy"
-:end-before: "## Project Information"
+:end-before: "For example:"
 ```
 
 ## User's Guide
@@ -12,7 +12,7 @@ Release **{sub-ref}`release`**  ([What's new?](changelog))
 ```{toctree}
 :maxdepth: 2
 
-usage
+tutorial
 api
 security
 ```

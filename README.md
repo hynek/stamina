@@ -1,5 +1,6 @@
 # stamina
 
+[![Documentation at ReadTheDocs](https://img.shields.io/badge/Docs-Read%20The%20Docs-black)](https://py-stamina.readthedocs.io/)
 [![PyPI - Version](https://img.shields.io/pypi/v/stamina.svg)](https://pypi.org/project/stamina)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/stamina.svg)](https://pypi.org/project/stamina)
 [![License: MIT](https://img.shields.io/badge/license-MIT-C06524)](https://github.com/hynek/stamina/blob/main/LICENSE)
@@ -21,6 +22,25 @@ In practice, only a few knobs are needed (repeatedly!), though.
 - Preserve **type hints** of the decorated callable.
 - Count ([Prometheus](https://github.com/prometheus/client_python)) and log ([*structlog*](https://www.structlog.org/)) retries with basic metadata (if they're installed).
 - Easy _global_ deactivation for testing.
+
+For example:
+
+```python
+import httpx
+
+import stamina
+
+
+@stamina.retry(on=httpx.HTTPError, attempts=3)
+def do_it(code: int) -> httpx.Response:
+    resp = httpx.get(f"https://httpbin.org/status/{code}")
+    resp.raise_for_status()
+
+    return resp
+```
+
+**Async** callables work use the same API and it's possible to retry **arbitrary blocks**, too.
+Please refer to our [tutorial](https://py-stamina.readthedocs.io/en/latest/tutorial.html) for more examples.
 
 
 ## Project Information
