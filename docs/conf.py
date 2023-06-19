@@ -71,7 +71,10 @@ autodoc_typehints_description_target = "documented"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = "furo"
-html_theme_options = {}
+html_theme_options = {
+    "source_branch": "main",
+    "source_directory": "docs/",
+}
 html_static_path = []
 
 htmlhelp_basename = "staminadoc"
