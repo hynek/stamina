@@ -2,7 +2,7 @@
 
 ## Retries?
 
-Retries are essential for making distributed systems resilient.
+Retries [are essential](https://blog.pragmaticengineer.com/resiliency-in-distributed-systems/#retry) for making distributed systems resilient.
 Transient errors are unavoidable and can happen for the wildest reasons -- sometimes one never finds out.
 
 However, retries are also very dangerous if done naïvely.
