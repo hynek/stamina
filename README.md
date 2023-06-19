@@ -1,6 +1,6 @@
 # stamina
 
-[![Documentation at ReadTheDocs](https://img.shields.io/badge/Docs-Read%20The%20Docs-black)](https://py-stamina.readthedocs.io/)
+[![Documentation at ReadTheDocs](https://img.shields.io/badge/Docs-Read%20The%20Docs-black)](https://stamina.hynek.me)
 [![PyPI - Version](https://img.shields.io/pypi/v/stamina.svg)](https://pypi.org/project/stamina)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/stamina.svg)](https://pypi.org/project/stamina)
 [![License: MIT](https://img.shields.io/badge/license-MIT-C06524)](https://github.com/hynek/stamina/blob/main/LICENSE)
@@ -40,14 +40,14 @@ def do_it(code: int) -> httpx.Response:
 ```
 
 **Async** callables work use the same API and it's possible to retry **arbitrary blocks**, too.
-Please refer to our [tutorial](https://py-stamina.readthedocs.io/en/latest/tutorial.html) for more examples.
+Please refer to our [tutorial](https://stamina.hynek.me/en/latest/tutorial.html) for more examples.
 
 
 ## Project Information
 
 - [**PyPI**](https://pypi.org/project/stamina/)
 - [**Source Code**](https://github.com/hynek/stamina)
-- [**Documentation**](https://py-stamina.readthedocs.io/)
+- [**Documentation**](https://stamina.hynek.me)
 - [**Changelog**](https://github.com/hynek/stamina/blob/main/CHANGELOG.md)
 
 
