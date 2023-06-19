@@ -156,7 +156,7 @@ jobs:
 
       - name: Prepare & run Nox
         run: |
-          python -Im pip install nox "tomli; python_version<'3.11'"
+          python -Im pip install nox
           python -Im nox \
             --session docs
 
