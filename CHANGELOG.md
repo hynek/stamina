@@ -21,6 +21,8 @@ The **third number** is for emergencies when we need to start branches for older
   [#10](https://github.com/hynek/stamina/pull/10)
 - Retries of arbitrary blocks using (async) `for` loops and context managers.
   [#12](https://github.com/hynek/stamina/pull/12)
+- Proper documentation.
+  [#16](https://github.com/hynek/stamina/pull/16)
 
 
 ### Changed
