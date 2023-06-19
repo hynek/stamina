@@ -6,13 +6,15 @@ from __future__ import annotations
 
 import os
 import pathlib
+import shutil
+import sys
 
 import nox
 
 
-try:
+if sys.version_info >= (3, 11):
     import tomllib
-except ImportError:
+else:
     import tomli as tomllib
 
 
@@ -78,3 +80,39 @@ def coverage_report(session: nox.Session) -> None:
 
     session.run("coverage", "combine")
     session.run("coverage", "report")
+
+
+@nox.session
+def docs(session: nox.Session) -> None:
+    if session.posargs and session.posargs[0] == "serve":
+        session.install("-e", ".[docs]", "watchfiles")
+        session.run(
+            "watchfiles",
+            "--ignore-paths",
+            "docs/_build",
+            "python -Im sphinx "
+            "-T -E "
+            "-W --keep-going "
+            "-b html "
+            "-d docs/_build/doctrees "
+            "-D language=en "
+            "docs "
+            "docs/_build/html",
+        )
+        return
+
+    session.install(".[docs]")
+    shutil.rmtree("docs/_build", ignore_errors=True)
+    for cmd in ["html", "doctest"]:
+        session.run(
+            # fmt: off
+            "python", "-Im", "sphinx",
+            "-T", "-E",
+            "-W", "--keep-going",
+            "-b", cmd,
+            "-d", "docs/_build/doctrees",
+            "-D", "language=en",
+            "docs",
+            "docs/_build/html",
+            # fmt: on
+        )

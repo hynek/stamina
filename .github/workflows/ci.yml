@@ -137,6 +137,29 @@ jobs:
             --python ${{ matrix.python-version }} \
             --sessions mypy
 
+  docs:
+    name: Build docs & run doctests
+    runs-on: ubuntu-latest
+    needs: build-package
+    steps:
+      - name: Download pre-built packages
+        uses: actions/download-artifact@v3
+        with:
+          name: Packages
+          path: dist
+      - run: tar xf dist/*.tar.gz --strip-components=1
+      - uses: actions/setup-python@v4
+        with:
+          # Keep in sync with .readthedocs.yaml
+          python-version: "3.11"
+          cache: pip
+
+      - name: Prepare & run Nox
+        run: |
+          python -Im pip install nox
+          python -Im nox \
+            --session docs
+
   install-dev:
     name: Verify dev env
     runs-on: ${{ matrix.os }}
@@ -162,7 +185,7 @@ jobs:
     needs:
       - coverage
       - install-dev
-      - cog-check
+      - docs
       - build-package
 
     runs-on: ubuntu-latest

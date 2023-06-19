@@ -1,0 +1,16 @@
+---
+version: 2
+formats: all
+
+build:
+  os: ubuntu-22.04
+  tools:
+    # Keep version in sync with ci.yml/docs.
+    python: "3.11"
+
+python:
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs

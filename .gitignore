@@ -8,3 +8,4 @@ __pycache__
 dist
 t.py
 Justfile
+docs/_build

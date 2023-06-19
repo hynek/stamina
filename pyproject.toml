@@ -25,10 +25,18 @@ dependencies = ["tenacity", "typing-extensions; python_version<'3.10'"]
 [project.optional-dependencies]
 tests = ["pytest", "pytest-asyncio"]
 typing = ["mypy"]
+docs = [
+  "sphinx",
+  "furo",
+  "myst-parser",
+  "sphinx-notfound-page",
+  "structlog",
+  "prometheus-client",
+]
 dev = ["stamina[tests,typing]", "nox", "structlog", "prometheus-client"]
 
 [project.urls]
-Documentation = "https://github.com/hynek/stamina#readme"
+Documentation = "https://py-stamina.readthedocs.io/"
 Source = "https://github.com/hynek/stamina"
 Changelog = "https://github.com/hynek/stamina/blob/main/CHANGELOG.md"
 Funding = "https://github.com/sponsors/hynek"
@@ -48,15 +56,7 @@ text = "# *stamina*: Production-grade Retries Made Easy"
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 path = "README.md"
 start-after = "## Production-grade Retries Made Easy"
-end-before = "## Usage"
 
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-text = "For example:\n"
-
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-path = "README.md"
-start-after = "<!-- example-start -->"
-end-before = "<!-- example-end -->"
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 text = """
@@ -73,7 +73,6 @@ pattern = "\n(###.+?\n)## "
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 path = "README.md"
 start-at = "## License"
-
 
 
 [tool.pytest.ini_options]
@@ -93,7 +92,7 @@ source = ["stamina"]
 source = ["src", ".nox/tests*/**/site-packages"]
 
 [tool.coverage.report]
-show_missing = true
+how_missing = true
 skip_covered = true
 exclude_lines = [
   "no cov",
