@@ -19,7 +19,7 @@ But bad retries can make things *much worse*.
 - Limit the number of retries **and** total time.
 - Automatic **async** support.
 - Preserve **type hints** of the decorated callable.
-- Count ([Prometheus](https://github.com/prometheus/client_python)) and log ([*structlog*](https://www.structlog.org/)) retries with basic metadata (if they're installed).
+- Count ([Prometheus](https://github.com/prometheus/client_python)) and log ([*structlog*](https://www.structlog.org/)) retries with basic metadata, if they're installed.
 - Easy _global_ deactivation for testing.
 
 For example:
