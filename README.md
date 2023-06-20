@@ -9,13 +9,13 @@
 ## Production-grade Retries Made Easy
 
 Transient failures are common in distributed systems.
-To make your systems resilient, you need to [**retry** failed operations](https://blog.pragmaticengineer.com/resiliency-in-distributed-systems/#retry).
+To make your systems resilient, you need to **retry** failed operations.
 But bad retries can make things *much worse*.
 
 [Tenacity](https://tenacity.readthedocs.io/) is a *production-ready* and beautifully *composable* toolkit for handling retries, and *stamina* is an opinionated thin layer around it with *good defaults* based on best practices to avoid constant copy-pasting and shrink the user error surface:
 
 - Retry only on certain exceptions.
-- [Exponential backoff with _jitter_](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) between retries.
+- Exponential backoff with _jitter_ between retries.
 - Limit the number of retries **and** total time.
 - Automatic **async** support.
 - Preserve **type hints** of the decorated callable.
