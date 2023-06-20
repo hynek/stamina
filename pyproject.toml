@@ -13,6 +13,7 @@ keywords = ["retry", "retries", "reliability", "tenacity"]
 authors = [{ name = "Hynek Schlawack", email = "hs@ox.cx" }]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
+  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
@@ -98,7 +99,7 @@ source = ["stamina"]
 source = ["src", ".nox/tests*/**/site-packages"]
 
 [tool.coverage.report]
-how_missing = true
+show_missing = true
 skip_covered = true
 exclude_lines = [
   "no cov",
