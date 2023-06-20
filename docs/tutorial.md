@@ -3,19 +3,20 @@
 ## Retries?
 
 Retries [are essential](https://blog.pragmaticengineer.com/resiliency-in-distributed-systems/#retry) for making distributed systems resilient.
-Transient errors are unavoidable and can happen for the wildest reasons -- sometimes one never finds out.
+Transient errors are unavoidable and can happen for the wildest reasons -- sometimes, one never finds out.
 
 However, retries are also very dangerous if done naïvely.
 Simply repeating an operation until it succeeds can lead to [*cascading failures*](https://en.wikipedia.org/wiki/Cascading_failure) and [*thundering herds*](https://en.wikipedia.org/wiki/Thundering_herd_problem) and ultimately take down your whole system, just because a database had a brief hiccup.
 
 So:
 
-1. You must wait between your retries: this is called to *backoff*.
-2. You can't retry at the same time with all your clients, so you have to introduce randomness into your *backoff*: a *jitter*.
-3. You must not retry forever, sometimes a service is down and you have to deal with it.
+1. You must wait between your retries: this is called a *backoff*.
+2. You can't retry simultaneously with all your clients, so you must introduce randomness into your *backoff*: a *jitter*.
+3. You must not retry forever.
+   Sometimes a remote service is down indefinitely, and you must deal with it.
 
-But how long should you backoff?
-The failure could be a network hiccup, so maybe 100ms?
+But how long should you back off?
+The failure could be a network hiccup, so 100ms?
 Maybe an application was just being deployed, so let's do 1 second?
 But what if it's a database that's overloaded?
 Then maybe 10 seconds?
@@ -23,13 +24,13 @@ And so forth.
 
 The answer is:
 You do all of those.
-You start with a small backoff and increase it exponentially, while adding a random *jitter* to it.
+You start with a small backoff and increase it exponentially, adding a random *jitter*
 
 That's what *stamina* does by default:
-It starts with 100ms and increases it exponentially by 2 until it reaches 45 seconds or 10 attempts.
-At every step a *jitter* between 0 and 1 second is added.
+It starts with 100ms and increases exponentially by 2 until it reaches 45 seconds or 10 attempts.
+A *jitter* between 0 and 1 second is added at every step.
 
-That means the first backoff is no longer than 1.1 seconds and the last one is no longer than 46 seconds.
+That means the first backoff is no longer than 1.1 seconds, and the last is no longer than 46 seconds.
 You can [tune all these parameters](stamina.retry) to your liking, but the defaults are a good starting point.
 
 The [*Exponential Backoff And Jitter*](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) article on the *AWS Architecture Blog* is a good explanation with pretty graphs.
@@ -81,7 +82,7 @@ for attempt in stamina.retry_context(on=httpx.HTTPError):
 
 ## Async
 
-Async works with the exact same functions and arguments -- you just have to use async functions and `async for`:
+Async works with the same functions and arguments -- you just have to use async functions and `async for`:
 
 ```python
 @stamina.retry(
@@ -108,13 +109,12 @@ async def with_block(code: int) -> httpx.Response:
 ```
 
 
-## Globally Disabling Retries
+## Deactivating Retries Globally
 
-Occasionally you might want to disable retries globally -- for instance in tests.
+Occasionally it's handy to turn off retries globally -- for instance, in tests.
 *stamina* has two helpers for controlling and inspecting whether retrying is active:
 {func}`stamina.is_active()` and {func}`stamina.set_active()` (it's idempotent: you can call `set_active(True)` as many times as you want in a row).
-This is useful in tests.
-For example, here's a *pytest* fixture that automatically disables retries at the beginning of a test run:
+For example, here's a *pytest* fixture that automatically turns off retries at the beginning of a test run:
 
 ```python
 @pytest.fixture(autouse=True, scope="session")
