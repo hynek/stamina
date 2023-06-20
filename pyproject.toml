@@ -161,7 +161,6 @@ ignore = [
 ]
 
 [tool.ruff.per-file-ignores]
-"*/*twisted.py" = ["N"] # lol Twisted & PEP 8 names
 "tests/*" = [
   "ARG005", # we need stub lambdas
   "S101",   # assert
