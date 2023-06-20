@@ -140,39 +140,38 @@ line-length = 79
 
 
 [tool.ruff]
-src = ["src", "tests", "noxfile.py"]
-select = [
-  "E",   # pycodestyle
-  "W",   # pycodestyle
-  "F",   # Pyflakes
-  "UP",  # pyupgrade
-  "N",   # pep8-naming
-  "YTT", # flake8-2020
-  "S",   # flake8-bandit
-  "B",   # flake8-bugbear
-  "C4",  # flake8-comprehensions
-  "T10", # flake8-debugger
-  "ISC", # flake8-implicit-str-concat
-  "RET", # flake8-return
-  "SIM", # flake8-simplify
-  "DTZ", # flake8-datetimez
-  "I",   # isort
-  "PGH", # pygrep-hooks
-  "PLC", # Pylint
-  "PIE", # flake8-pie
-  "RUF", # ruff
-]
+src = ["src", "tests", "noxfile.py", "docs/conf.py"]
+select = ["ALL"]
 ignore = [
-  "RUF001", # leave my smart characters alone
-  "E501",   # enforce line lengths using Black
+  "A001",    # shadowing is fine
+  "ANN",     # Mypy is better at this
+  "COM",     # Black takes care of our commas
+  "D",       # We prefer our own docstring style.
+  "E501",    # leave line-length enforcement to Black
+  "FIX",     # Yes, we want XXX as a marker.
+  "INP001",  # sometimes we want Python files outside of packages
+  "PLR2004", # numbers are sometimes fine
+  "RUF001",  # leave my smart characters alone
+  "SLF001",  # private members are accessed by friendly functions
+  "TD",      # we don't follow other people's todo style
+  "TCH",     # TYPE_CHECKING blocks break autodocs
+  "PLR0913", # yes, many arguments, but most have defaults
+  "ARG001",  # unused arguments are normal when implementing interfaces
+  "FBT",     # we have one function that takes one bool; c'mon!
 ]
 
 [tool.ruff.per-file-ignores]
+"*/*twisted.py" = ["N"] # lol Twisted & PEP 8 names
 "tests/*" = [
-  "S101",    # assert
-  "SIM300",  # Yoda rocks in tests
-  "PLC1901", # empty strings are falsey, but are less specific in tests
+  "ARG005", # we need stub lambdas
+  "S101",   # assert
+  "SIM300", # Yoda rocks in asserts
+  "PT005",  # we always add underscores and explicit name
+  "PT011",  # broad is fine
+  "TRY002", # stock exceptions are fine in tests
+  "EM101",  # no need for exception msg hygiene in tests
 ]
+
 
 [tool.ruff.isort]
 lines-between-types = 1

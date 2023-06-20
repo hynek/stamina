@@ -30,7 +30,7 @@ foo = Foo()
 
 class TestGuessName:
     @pytest.mark.parametrize(
-        "obj,name",
+        ("obj", "name"),
         [
             (function, "test_instrumentation.function"),
             (async_function, "test_instrumentation.async_function"),

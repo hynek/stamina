@@ -146,7 +146,7 @@ async def test_retry_blocks_can_be_disabled():
     stamina.set_active(False)
     num_called = 0
 
-    with pytest.raises(Exception, match="passed"):
+    with pytest.raises(Exception, match="passed"):  # noqa: PT012
         async for attempt in stamina.retry_context(on=Exception, attempts=2):
             with attempt:
                 num_called += 1
