@@ -288,7 +288,7 @@ def retry(
                 name, args, kw
             ):
                 with attempt:
-                    return await wrapped(*args, **kw)  # type: ignore[misc,no-any-return]
+                    return await wrapped(*args, **kw)  # type: ignore[no-any-return]
 
         return async_inner  # type: ignore[return-value]
 
