@@ -25,7 +25,7 @@ dependencies = ["tenacity", "typing-extensions; python_version<'3.10'"]
 
 [project.optional-dependencies]
 tests = ["pytest", "pytest-asyncio"]
-typing = ["mypy>1.4"]
+typing = ["mypy>=1.4"]
 docs = [
   "sphinx",
   "furo",
