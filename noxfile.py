@@ -84,6 +84,8 @@ def coverage_report(session: nox.Session) -> None:
 
 @nox.session
 def docs(session: nox.Session) -> None:
+    shutil.rmtree("docs/_build", ignore_errors=True)
+
     if session.posargs and session.posargs[0] == "serve":
         session.install("-e", ".[docs]", "watchfiles")
         session.run(
@@ -102,8 +104,9 @@ def docs(session: nox.Session) -> None:
         return
 
     session.install(".[docs]")
-    shutil.rmtree("docs/_build", ignore_errors=True)
-    for cmd in ["html", "doctest"]:
+    cmds = session.posargs or ["html", "doctest"]
+
+    for cmd in cmds:
         session.run(
             # fmt: off
             "python", "-Im", "sphinx",
