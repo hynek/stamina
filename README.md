@@ -12,7 +12,7 @@ Transient failures are common in distributed systems.
 To make your systems resilient, you need to **retry** failed operations.
 But bad retries can make things *much worse*.
 
-*stamina* is an opinionated wrapper around the *great* [Tenacity](https://tenacity.readthedocs.io/) package.
+*stamina* is an opinionated wrapper around the *great-but-unopinionated* [Tenacity](https://tenacity.readthedocs.io/) package.
 Its goal is to make it easy to do the right thing with *good defaults* based on best practices and shrinking the user error surface.
 It is the result of years of copy-pasting the same configuration over and over again:
 
