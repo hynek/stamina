@@ -35,10 +35,10 @@ You can [tune all these parameters](stamina.retry) to your liking, but the defau
 
 ---
 
-If you want learn more:
+If you want to learn more:
 
 - The [*Exponential Backoff And Jitter*](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) article on the *AWS Architecture Blog* is a good explanation of the basics with pretty graphs.
-- [*Resiliency in Distributed Systems*](https://blog.pragmaticengineer.com/resiliency-in-distributed-systems/) takes a wider view and explains how to build resilient systems in general.
+- [*Resiliency in Distributed Systems*](https://blog.pragmaticengineer.com/resiliency-in-distributed-systems/) takes a broader view and explains how to build resilient systems in general.
 - And finally, I've given a talk at PyCon US 2017 called [*Solid Snakes or: How to Take 5 Weeks of Vacation*](https://www.youtube.com/watch?v=YVuqeXyvOUc) that addresses the various aspects to take care of to... take five weeks of (uninterrupted!) vacation.
   This one has a stronger focus on Python and working at a smaller scale.
 
