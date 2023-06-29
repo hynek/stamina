@@ -14,3 +14,13 @@ __all__ = [
     "set_active",
     "RETRY_COUNTER",
 ]
+
+
+def __getattr__(name: str) -> str:
+    if name != "__version__":
+        msg = f"module {__name__} has no attribute {name}"
+        raise AttributeError(msg)
+
+    from importlib.metadata import metadata
+
+    return metadata("stamina")["version"]
