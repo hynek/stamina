@@ -78,6 +78,7 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           cache: pip
+          python-version-file: .python-version-default
 
       - uses: actions/download-artifact@v3
         with:
@@ -152,12 +153,12 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           cache: pip
+          python-version-file: .python-version-default
 
       - name: Prepare & run Nox
         run: |
           python -Im pip install nox "tomli; python_version<'3.11'"
           python -Im nox \
-            --python ${{ matrix.python-version }} \
             --sessions mypy_pkg
 
   docs:
@@ -195,6 +196,7 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           cache: pip
+          python-version-file: .python-version-default
 
       - name: Install in dev mode & import
         run: |
