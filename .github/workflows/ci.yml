@@ -199,7 +199,7 @@ jobs:
       - name: Install in dev mode & import
         run: |
           python -Im pip install -e .[dev]
-          python -c 'import stamina'
+          python -Ic 'import stamina; print(stamina.__version__)'
 
   required-checks-pass:
     name: Ensure everything required is passing for branch protection.
