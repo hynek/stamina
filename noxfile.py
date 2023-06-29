@@ -47,12 +47,12 @@ def mypy(session: nox.Session) -> None:
 
 def _get_pkg(posargs) -> tuple[str, list]:
     """
-    Allow `--use-wheel path/to/wheel.whl` to be passed.
+    Allow `--installpkg path/to/wheel.whl` to be passed.
     """
     posargs = list(posargs)
 
     try:
-        i = posargs.index("--use-wheel")
+        i = posargs.index("--installpkg")
         pkg = posargs[i + 1]
         del posargs[i : i + 2]
     except ValueError:

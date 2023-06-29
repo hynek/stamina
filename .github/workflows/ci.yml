@@ -58,7 +58,7 @@ jobs:
           python -Im nox \
             --python ${{ matrix.python-version }} \
             --sessions tests \
-            -- --use-wheel dist/*.whl
+            -- --installpkg dist/*.whl
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v3
