@@ -135,7 +135,30 @@ jobs:
           python -Im pip install nox "tomli; python_version<'3.11'"
           python -Im nox \
             --python ${{ matrix.python-version }} \
-            --sessions mypy
+            --sessions mypy_api
+
+  mypy-pkg:
+    name: Type-check package
+    runs-on: ubuntu-latest
+    needs: build-package
+
+    steps:
+      - name: Download pre-built packages
+        uses: actions/download-artifact@v3
+        with:
+          name: Packages
+          path: dist
+      - run: tar xf dist/*.tar.gz --strip-components=1  # needed for config files
+      - uses: actions/setup-python@v4
+        with:
+          cache: pip
+
+      - name: Prepare & run Nox
+        run: |
+          python -Im pip install nox "tomli; python_version<'3.11'"
+          python -Im nox \
+            --python ${{ matrix.python-version }} \
+            --sessions mypy_pkg
 
   docs:
     name: Build docs & run doctests
@@ -186,7 +209,8 @@ jobs:
       - coverage
       - install-dev
       - docs
-      - build-package
+      - mypy-api
+      - mypy-pkg
 
     runs-on: ubuntu-latest
 
