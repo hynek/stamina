@@ -93,7 +93,7 @@ def coverage_report(session: nox.Session) -> None:
 def docs(session: nox.Session) -> None:
     shutil.rmtree("docs/_build", ignore_errors=True)
 
-    if session.posargs and session.posargs[0] == "serve":
+    if session.posargs and session.posargs[0] == "watch":
         session.install("-e", ".[docs]", "watchfiles")
         session.run(
             "watchfiles",
