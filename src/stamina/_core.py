@@ -27,9 +27,6 @@ else:
     from typing_extensions import ParamSpec
 
 
-__all__ = ["retry"]
-
-
 T = TypeVar("T")
 P = ParamSpec("P")
 
