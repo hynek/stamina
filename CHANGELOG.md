@@ -25,6 +25,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   [#12](https://github.com/hynek/stamina/pull/12)
 - Proper documentation.
   [#16](https://github.com/hynek/stamina/pull/16)
+- A backwards-compatibility policy.
 
 
 ### Changed
