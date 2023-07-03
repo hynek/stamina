@@ -11,7 +11,12 @@ from collections.abc import Callable
 from dataclasses import dataclass, replace
 from functools import wraps
 from inspect import iscoroutinefunction
-from typing import Iterable, TypeVar
+from typing import (
+    AsyncIterator,
+    Iterable,
+    Iterator,
+    TypeVar,
+)
 
 import tenacity as _t
 
@@ -115,28 +120,26 @@ class _RetryContextIterator:
 
     _STOP_NO_RETRY = _t.stop_after_attempt(1)
 
-    def __iter__(self) -> _t.Retrying:
+    def __iter__(self) -> Iterator[_t.AttemptManager]:
         if not _CONFIG.is_active:
-            return _t.Retrying(
-                reraise=True, stop=self._STOP_NO_RETRY
-            ).__iter__()
+            yield from _t.Retrying(reraise=True, stop=self._STOP_NO_RETRY)
 
-        return _t.Retrying(
+        yield from _t.Retrying(
             before_sleep=_make_before_sleep(
                 self._name, _CONFIG.on_retry, self._args, self._kw
             )
             if _CONFIG.on_retry
             else None,
             **self._tenacity_kw,
-        ).__iter__()
+        )
 
-    def __aiter__(self) -> _t.AsyncRetrying:
+    def __aiter__(self) -> AsyncIterator[_t.AttemptManager]:
         if not _CONFIG.is_active:
-            return _t.AsyncRetrying(
+            return _t.AsyncRetrying(  # type: ignore[no-any-return]
                 reraise=True, stop=self._STOP_NO_RETRY
             ).__aiter__()
 
-        return _t.AsyncRetrying(
+        return _t.AsyncRetrying(  # type: ignore[no-any-return]
             before_sleep=_make_before_sleep(
                 self._name, _CONFIG.on_retry, self._args, self._kw
             )
