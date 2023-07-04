@@ -63,6 +63,7 @@ text = "# *stamina*: Production-grade Retries Made Easy"
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 path = "README.md"
 start-after = "## Production-grade Retries Made Easy"
+end-before = "## Project Information"
 
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
@@ -78,8 +79,13 @@ start-after = "<!-- changelog follows -->"
 pattern = "\n(###.+?\n)## "
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-path = "README.md"
-start-at = "## License"
+text = """
+---
+
+[→ Full Changelog](https://github.com/hynek/stamina/blob/main/CHANGELOG.md)
+
+
+"""
 
 
 [tool.pytest.ini_options]
