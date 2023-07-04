@@ -217,18 +217,20 @@ def retry(
     wait_jitter: float | dt.timedelta = 1.0,
     wait_exp_base: float = 2.0,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
-    """
+    r"""
     Retry if one of configured exceptions are raised.
 
     The backoff delays between retries grow exponentially plus a random jitter.
 
-    The backoff for retry attempt number *attempt* is computed as::
+    The backoff for retry attempt number *attempt* is computed as:
 
-        wait_initial * wait_exp_base ** (attempt - 1) + random(0, wait_jitter)
+    .. math::
 
-    Since ``x**0`` is always 1, the first backoff is within the interval
-    ``[wait_initial,wait_initial+wait_jitter]``. Thus, with default values
-    between 0.1 and 1.1 seconds.
+        wait\_initial * wait\_exp\_base^{attempt - 1} + random(0, wait\_jitter)
+
+    Since :math:`x^0` is always 1, the first backoff is within the interval
+    :math:`[wait\_initial,wait\_initial+wait\_jitter]`. Thus, with default
+    values between 0.1 and 1.1 seconds.
 
     If all retries fail, the *last* exception is let through.
 
