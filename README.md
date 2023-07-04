@@ -52,6 +52,10 @@ Please refer to our [tutorial](https://stamina.hynek.me/en/latest/tutorial.html)
 - [**Changelog**](https://github.com/hynek/stamina/blob/main/CHANGELOG.md)
 
 
-## License
+## Credits
 
 *stamina* is written by [Hynek Schlawack](https://hynek.me/) and distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+
+The development is kindly supported by my employer [Variomedia AG](https://www.variomedia.de/) and all my amazing [GitHub Sponsors](https://github.com/sponsors/hynek).
+
+This project would not be possible without the years of incredible work that went into [Tenacity](https://tenacity.readthedocs.io/).

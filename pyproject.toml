@@ -87,6 +87,10 @@ text = """
 
 """
 
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+start-at = "## Credits"
+
 
 [tool.pytest.ini_options]
 addopts = ["-ra", "--strict-markers", "--strict-config"]
