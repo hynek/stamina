@@ -222,22 +222,28 @@ def retry(
 
     The backoff delays between retries grow exponentially plus a random jitter.
 
-    The backoff for retry attempt number _attempt_ is computed as::
+    The backoff for retry attempt number *attempt* is computed as::
 
         wait_initial * wait_exp_base ** (attempt - 1) + random(0, wait_jitter)
 
-    Since `x**0` is always 1, the first backoff is within the interval
-    `[wait_initial,wait_initial+wait_jitter]`. Thus, with default values
+    Since ``x**0`` is always 1, the first backoff is within the interval
+    ``[wait_initial,wait_initial+wait_jitter]``. Thus, with default values
     between 0.1 and 1.1 seconds.
 
     If all retries fail, the *last* exception is let through.
+
+    All float-based time parameters are in seconds.
 
     Parameters:
         on: An Exception or a tuple of Exceptions on which the decorated
             callable will be retried. There is no default -- you *must* pass
             this explicitly.
 
-        attempts: Maximum time for all retries. Can be combined with *attempts*
+        attempts: Maximum total number of attempts. Can be combined with
+            *timeout*.
+
+        timeout: Maximum total time for all retries. Can be combined with
+            *attempts*.
 
         wait_initial: Minimum backoff before the *first* retry.
 
