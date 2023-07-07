@@ -1,9 +1,10 @@
 # stamina
 
 [![Documentation at ReadTheDocs](https://img.shields.io/badge/Docs-Read%20The%20Docs-black)](https://stamina.hynek.me)
+[![License: MIT](https://img.shields.io/badge/license-MIT-C06524)](https://github.com/hynek/stamina/blob/main/LICENSE)
+[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7550/badge)](https://bestpractices.coreinfrastructure.org/projects/7550)
 [![PyPI - Version](https://img.shields.io/pypi/v/stamina.svg)](https://pypi.org/project/stamina)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/stamina.svg)](https://pypi.org/project/stamina)
-[![License: MIT](https://img.shields.io/badge/license-MIT-C06524)](https://github.com/hynek/stamina/blob/main/LICENSE)
 
 
 ## Production-grade Retries Made Easy
