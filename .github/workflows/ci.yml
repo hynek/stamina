@@ -45,7 +45,10 @@ jobs:
         with:
           name: Packages
           path: dist
-      - run: tar xf dist/*.tar.gz --strip-components=1  # needed for config files
+      - name: Get tests & config from sdist
+        run: |
+          tar xf dist/*.tar.gz --strip-components=1
+          rm -rf src
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
