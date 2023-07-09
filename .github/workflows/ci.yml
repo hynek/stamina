@@ -13,6 +13,8 @@ env:
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
   PIP_NO_PYTHON_VERSION_WARNING: "1"
 
+permissions: {}
+
 jobs:
   build-package:
     name: Build & verify package
