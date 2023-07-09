@@ -211,6 +211,7 @@ jobs:
 
     steps:
       - uses: GitHubSecurityLab/actions-permissions/monitor@v1
+        if: runner.os != "Windows"
         with:
           config: ${{ vars.PERMISSIONS_CONFIG }}
       - uses: actions/checkout@v3
