@@ -17,7 +17,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ### Changed
 
-- Tenacity's internal attempt object is no longer exposed to the user.
+- Tenacity's internal `AttemptManager` object is no longer exposed to the user.
   This was an oversight and never documented.
   `stamina.retry_context()` now yields instances of `stamina.Attempt`.
   [#22](https://github.com/hynek/stamina/pull/22)
