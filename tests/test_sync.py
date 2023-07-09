@@ -124,6 +124,9 @@ def test_retry_block():
     for attempt in stamina.retry_context(on=ValueError, wait_max=0):
         with attempt:
             i += 1
+
+            assert i == attempt.num
+
             if i < 2:
                 raise ValueError
 

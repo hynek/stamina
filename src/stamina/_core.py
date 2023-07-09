@@ -81,6 +81,13 @@ class Attempt:
 
     _t_attempt: _t.AttemptManager
 
+    @property
+    def num(self) -> int:
+        """
+        The number of the current attempt.
+        """
+        return self._t_attempt.retry_state.attempt_number  # type: ignore[no-any-return]
+
     def __enter__(self) -> None:
         return self._t_attempt.__enter__()  # type: ignore[no-any-return]
 

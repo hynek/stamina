@@ -151,6 +151,9 @@ async def test_retry_block():
     async for attempt in stamina.retry_context(on=ValueError, wait_max=0):
         with attempt:
             num_called += 1
+
+            assert num_called == attempt.num
+
             if num_called < 2:
                 raise ValueError
 
