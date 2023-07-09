@@ -103,7 +103,7 @@ class _LazyNoAsyncRetry:
     Allows us a free null object pattern using non-retries and avoid None.
     """
 
-    def __aiter__(self) -> _t.StopBase:
+    def __aiter__(self) -> _t.AsyncRetrying:
         return _t.AsyncRetrying(reraise=True, stop=_STOP_NO_RETRY).__aiter__()
 
 
