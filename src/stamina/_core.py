@@ -204,8 +204,8 @@ class _RetryContextIterator:
 
     async def __anext__(self) -> Attempt:
         # XXX: This is a reimplementation of `tenacity.AsyncRetrying.__anext__`
-        # as of 433324956abb028f6d993195d31e4dd8308115c3 because I can't come
-        # up with a good way to wrap it.`
+        # XXX: as of 433324956abb028f6d993195d31e4dd8308115c3. I'm open to
+        # XXX: suggestions on how to wrap it instead.
         while True:
             rs = self._t_a_retrying._retry_state
             if (do := self._t_a_retrying.iter(retry_state=rs)) is None:
