@@ -71,8 +71,7 @@ autodoc_typehints_description_target = "documented"
 # a list of builtin themes.
 html_theme = "furo"
 html_theme_options = {
-    "source_branch": "main",
-    "source_directory": "docs/",
+    "source_edit_link": "https://github.com/hynek/stamina/edit/main/{filename}",
 }
 html_static_path = []
 
