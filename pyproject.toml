@@ -141,8 +141,8 @@ module = "tenacity.*"
 follow_imports = "skip"
 
 [[tool.mypy.overrides]]
-module = "nox.*"
-follow_imports = "skip"
+module = "noxfile.*"
+disallow_untyped_decorators = false
 
 
 [tool.black]

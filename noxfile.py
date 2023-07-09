@@ -49,10 +49,10 @@ def mypy_api(session: nox.Session) -> None:
 def mypy_pkg(session: nox.Session) -> None:
     session.install(".[typing]", "structlog", "prometheus-client")
 
-    session.run("mypy", "src", "tests/typing")
+    session.run("mypy", "src", "tests/typing", "noxfile.py")
 
 
-def _get_pkg(posargs) -> tuple[str, list]:
+def _get_pkg(posargs: list[str]) -> tuple[str, list[str]]:
     """
     Allow `--installpkg path/to/wheel.whl` to be passed.
     """
