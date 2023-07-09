@@ -98,6 +98,18 @@ class Attempt:
 _STOP_NO_RETRY = _t.stop_after_attempt(1)
 
 
+class _LazyNoAsyncRetry:
+    """
+    Allows us a free null object pattern using non-retries and avoid None.
+    """
+
+    def __aiter__(self) -> _t.StopBase:
+        return _t.AsyncRetrying(reraise=True, stop=_STOP_NO_RETRY).__aiter__()
+
+
+_LAZY_NO_ASYNC_RETRY = _LazyNoAsyncRetry()
+
+
 @dataclass
 class _RetryContextIterator:
     __slots__ = (
@@ -153,7 +165,7 @@ class _RetryContextIterator:
                 ),
                 "reraise": True,
             },
-            _t_a_retrying=_t.AsyncRetrying(reraise=True, stop=_STOP_NO_RETRY),
+            _t_a_retrying=_LAZY_NO_ASYNC_RETRY,
         )
 
     def with_name(
