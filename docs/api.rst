@@ -5,6 +5,7 @@ API Reference
 
 .. autofunction:: retry
 .. autofunction:: retry_context
+.. autoclass:: Attempt
 
 
 Configuration

@@ -97,6 +97,24 @@ def test_retry_inactive():
     assert 1 == num_called
 
 
+def test_retry_inactive_ok():
+    """
+    If inactive, the happy path still works.
+    """
+    num_called = 0
+
+    @stamina.retry(on=Exception)
+    def f():
+        nonlocal num_called
+        num_called += 1
+
+    stamina.set_active(False)
+
+    f()
+
+    assert 1 == num_called
+
+
 def test_retry_block():
     """
     Sync retry_context blocks are retried.
