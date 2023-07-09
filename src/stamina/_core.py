@@ -112,13 +112,7 @@ _LAZY_NO_ASYNC_RETRY = _LazyNoAsyncRetry()
 
 @dataclass
 class _RetryContextIterator:
-    __slots__ = (
-        "_t_kw",
-        "_t_a_retrying",
-        "_name",
-        "_args",
-        "_kw",
-    )
+    __slots__ = ("_t_kw", "_t_a_retrying", "_name", "_args", "_kw")
     _t_kw: dict[str, object]
     _t_a_retrying: _t.AsyncRetrying
     _name: str
