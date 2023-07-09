@@ -210,21 +210,16 @@ class _RetryContextIterator:
 
     async def __anext__(self) -> Attempt:
         while True:
-            do = self._t_a_retrying.iter(
-                retry_state=self._t_a_retrying._retry_state
-            )
-            if do is None:
+            rs = self._t_a_retrying._retry_state
+            if (do := self._t_a_retrying.iter(retry_state=rs)) is None:
                 raise StopAsyncIteration
 
             if isinstance(do, _t.DoAttempt):
-                return Attempt(
-                    _t.AttemptManager(
-                        retry_state=self._t_a_retrying._retry_state
-                    )
-                )
+                return Attempt(_t.AttemptManager(retry_state=rs))
 
             if isinstance(do, _t.DoSleep):
-                self._t_a_retrying._retry_state.prepare_for_next_attempt()
+                rs.prepare_for_next_attempt()
+
                 await self._t_a_retrying.sleep(do)
             else:
                 raise StopAsyncIteration  # pragma: no cover -- no clue how to trigger
