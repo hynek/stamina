@@ -98,7 +98,7 @@ def hook(
 
 for attempt in retry_context(on=ValueError, timeout=13):
     with attempt:
-        ...
+        x: int = attempt.num
 
 for attempt in retry_context(
     on=ValueError, timeout=dt.timedelta(seconds=13.0)
@@ -116,4 +116,4 @@ async def f() -> None:
         wait_jitter=one_sec,
     ):
         with attempt:
-            ...
+            pass

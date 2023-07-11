@@ -11,12 +11,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, replace
 from functools import wraps
 from inspect import iscoroutinefunction
-from typing import (
-    AsyncIterator,
-    Iterable,
-    Iterator,
-    TypeVar,
-)
+from types import TracebackType
+from typing import AsyncIterator, Iterable, Iterator, TypeVar
 
 import tenacity as _t
 
@@ -69,9 +65,58 @@ def retry_context(
 
 
 @dataclass
+class Attempt:
+    """
+    A context manager that can be used to retry code blocks.
+
+    Instances are yielded by the :func:`stamina.retry_context` iterator.
+
+    .. versionadded:: 23.2.0
+    """
+
+    _t_attempt: _t.AttemptManager
+
+    @property
+    def num(self) -> int:
+        """
+        The number of the current attempt.
+        """
+        return self._t_attempt.retry_state.attempt_number  # type: ignore[no-any-return]
+
+    def __enter__(self) -> None:
+        return self._t_attempt.__enter__()  # type: ignore[no-any-return]
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> bool | None:
+        return self._t_attempt.__exit__(  # type: ignore[no-any-return]
+            exc_type, exc_value, traceback
+        )
+
+
+_STOP_NO_RETRY = _t.stop_after_attempt(1)
+
+
+class _LazyNoAsyncRetry:
+    """
+    Allows us a free null object pattern using non-retries and avoid None.
+    """
+
+    def __aiter__(self) -> _t.AsyncRetrying:
+        return _t.AsyncRetrying(reraise=True, stop=_STOP_NO_RETRY).__aiter__()
+
+
+_LAZY_NO_ASYNC_RETRY = _LazyNoAsyncRetry()
+
+
+@dataclass
 class _RetryContextIterator:
-    __slots__ = ("_tenacity_kw", "_name", "_args", "_kw")
-    _tenacity_kw: dict[str, object]
+    __slots__ = ("_t_kw", "_t_a_retrying", "_name", "_args", "_kw")
+    _t_kw: dict[str, object]
+    _t_a_retrying: _t.AsyncRetrying
     _name: str
     _args: tuple[object, ...]
     _kw: dict[str, object]
@@ -94,7 +139,7 @@ class _RetryContextIterator:
             _name=name,
             _args=args,
             _kw=kw,
-            _tenacity_kw={
+            _t_kw={
                 "retry": _t.retry_if_exception_type(on),
                 "wait": _t.wait_exponential_jitter(
                     initial=wait_initial.total_seconds()
@@ -116,37 +161,8 @@ class _RetryContextIterator:
                 ),
                 "reraise": True,
             },
+            _t_a_retrying=_LAZY_NO_ASYNC_RETRY,
         )
-
-    _STOP_NO_RETRY = _t.stop_after_attempt(1)
-
-    def __iter__(self) -> Iterator[_t.AttemptManager]:
-        if not _CONFIG.is_active:
-            yield from _t.Retrying(reraise=True, stop=self._STOP_NO_RETRY)
-
-        yield from _t.Retrying(
-            before_sleep=_make_before_sleep(
-                self._name, _CONFIG.on_retry, self._args, self._kw
-            )
-            if _CONFIG.on_retry
-            else None,
-            **self._tenacity_kw,
-        )
-
-    def __aiter__(self) -> AsyncIterator[_t.AttemptManager]:
-        if not _CONFIG.is_active:
-            return _t.AsyncRetrying(  # type: ignore[no-any-return]
-                reraise=True, stop=self._STOP_NO_RETRY
-            ).__aiter__()
-
-        return _t.AsyncRetrying(  # type: ignore[no-any-return]
-            before_sleep=_make_before_sleep(
-                self._name, _CONFIG.on_retry, self._args, self._kw
-            )
-            if _CONFIG.on_retry
-            else None,
-            **self._tenacity_kw,
-        ).__aiter__()
 
     def with_name(
         self, name: str, args: tuple[object, ...], kw: dict[str, object]
@@ -155,6 +171,41 @@ class _RetryContextIterator:
         Recreate ourselves with a new name and arguments.
         """
         return replace(self, _name=name, _args=args, _kw=kw)
+
+    def __iter__(self) -> Iterator[Attempt]:
+        if not _CONFIG.is_active:
+            for r in _t.Retrying(
+                reraise=True, stop=_STOP_NO_RETRY
+            ):  # pragma: no cover -- it's always once + GeneratorExit
+                yield Attempt(r)
+
+        for r in _t.Retrying(
+            before_sleep=_make_before_sleep(
+                self._name, _CONFIG.on_retry, self._args, self._kw
+            )
+            if _CONFIG.on_retry
+            else None,
+            **self._t_kw,
+        ):
+            yield Attempt(r)
+
+    def __aiter__(self) -> AsyncIterator[Attempt]:
+        if _CONFIG.is_active:
+            self._t_a_retrying = _t.AsyncRetrying(
+                before_sleep=_make_before_sleep(
+                    self._name, _CONFIG.on_retry, self._args, self._kw
+                )
+                if _CONFIG.on_retry
+                else None,
+                **self._t_kw,
+            )
+
+        self._t_a_retrying = self._t_a_retrying.__aiter__()
+
+        return self
+
+    async def __anext__(self) -> Attempt:
+        return Attempt(await self._t_a_retrying.__anext__())
 
 
 def _make_before_sleep(

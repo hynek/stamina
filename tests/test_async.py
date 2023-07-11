@@ -124,6 +124,24 @@ async def test_retry_inactive():
     assert 1 == num_called
 
 
+async def test_retry_inactive_ok():
+    """
+    If inactive, the happy path still works.
+    """
+    num_called = 0
+
+    @stamina.retry(on=Exception)
+    async def f():
+        nonlocal num_called
+        num_called += 1
+
+    stamina.set_active(False)
+
+    await f()
+
+    assert 1 == num_called
+
+
 async def test_retry_block():
     """
     Async retry_context blocks are retried.
@@ -133,6 +151,9 @@ async def test_retry_block():
     async for attempt in stamina.retry_context(on=ValueError, wait_max=0):
         with attempt:
             num_called += 1
+
+            assert num_called == attempt.num
+
             if num_called < 2:
                 raise ValueError
 

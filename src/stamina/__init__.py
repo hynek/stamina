@@ -3,11 +3,12 @@
 # SPDX-License-Identifier: MIT
 
 from ._config import is_active, set_active
-from ._core import retry, retry_context
+from ._core import Attempt, retry, retry_context
 from ._instrumentation import RETRY_COUNTER
 
 
 __all__ = [
+    "Attempt",
     "retry",
     "retry_context",
     "is_active",
