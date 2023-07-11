@@ -12,12 +12,7 @@ from dataclasses import dataclass, replace
 from functools import wraps
 from inspect import iscoroutinefunction
 from types import TracebackType
-from typing import (
-    AsyncIterator,
-    Iterable,
-    Iterator,
-    TypeVar,
-)
+from typing import AsyncIterator, Iterable, Iterator, TypeVar
 
 import tenacity as _t
 
@@ -210,23 +205,7 @@ class _RetryContextIterator:
         return self
 
     async def __anext__(self) -> Attempt:
-        # XXX: This is a reimplementation of `tenacity.AsyncRetrying.__anext__`
-        # XXX: as of 433324956abb028f6d993195d31e4dd8308115c3. I'm open to
-        # XXX: suggestions on how to wrap it instead.
-        while True:
-            rs = self._t_a_retrying._retry_state
-            if (do := self._t_a_retrying.iter(retry_state=rs)) is None:
-                raise StopAsyncIteration
-
-            if isinstance(do, _t.DoAttempt):
-                return Attempt(_t.AttemptManager(retry_state=rs))
-
-            if isinstance(do, _t.DoSleep):
-                rs.prepare_for_next_attempt()
-
-                await self._t_a_retrying.sleep(do)
-            else:
-                raise StopAsyncIteration  # pragma: no cover -- no clue how to trigger
+        return Attempt(await self._t_a_retrying.__anext__())
 
 
 def _make_before_sleep(
