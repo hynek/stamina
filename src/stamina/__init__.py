@@ -22,6 +22,6 @@ def __getattr__(name: str) -> str:
         msg = f"module {__name__} has no attribute {name}"
         raise AttributeError(msg)
 
-    from importlib.metadata import metadata
+    from importlib.metadata import version
 
-    return metadata("stamina")["version"]
+    return version("stamina")
