@@ -1,0 +1,9 @@
+---
+blank_issues_enabled: false
+contact_links:
+  - name: Feature requests
+    url: https://github.com/hynek/stamina/discussions/categories/ideas
+    about: Feature suggestions go here please!
+  - name: Questions
+    url: https://github.com/hynek/stamina/discussions/categories/q-a
+    about: Please ask questions here!
