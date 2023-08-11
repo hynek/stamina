@@ -3,7 +3,6 @@ name: Build & maybe upload PyPI package
 
 on:
   push:
-    branches: [main]
     tags: ["*"]
   release:
     types:
@@ -26,7 +25,6 @@ jobs:
 
       - uses: hynek/build-and-inspect-python-package@v1
 
-  # Upload to Test PyPI on every commit on main.
   release-test-pypi:
     name: Publish in-dev package to test.pypi.org
     environment: release-test-pypi
