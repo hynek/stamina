@@ -2,9 +2,7 @@
 
 ## Supported Versions
 
-We only support the latest version.
-
-We are following [*CalVer*](https://calver.org) with generous backwards-compatibility guarantees.
+We're following [*CalVer*](https://calver.org) with generous backwards-compatibility guarantees.
 Therefore we only support the latest version.
 
 That said, you shouldn't be afraid to upgrade if you're only using our documented public APIs and pay attention to `DeprecationWarning`s.
