@@ -167,7 +167,7 @@ Please report any harm to [Hynek Schlawack] in any way you find appropriate.
 [Napoleon]: https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html
 [reStructuredText]: https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
 [good test docstrings]: https://jml.io/test-docstrings/
-[code of conduct]: https://github.com/hynek/pem/blob/main/.github/CODE_OF_CONDUCT.md
+[code of conduct]: https://github.com/hynek/stamina/blob/main/.github/CODE_OF_CONDUCT.md
 [Hynek Schlawack]: https://hynek.me/about/
 [pep 257]: https://peps.python.org/pep-0257/
 [pep 8]: https://peps.python.org/pep-0008/
