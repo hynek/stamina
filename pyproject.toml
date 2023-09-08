@@ -121,6 +121,7 @@ exclude_lines = [
 
 
 [tool.interrogate]
+omit-covered-files = true
 verbose = 2
 fail-under = 100
 whitelist-regex = ["test_.*"]
