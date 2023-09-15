@@ -69,7 +69,7 @@ You will find the built documentation in `docs/_build/html`.
 ## Code
 
 - Obey [PEP 8] and [PEP 257].
-  We use the `"""`-on-separate-lines style for docstrings with [Napoleon]-style API documentation:
+  We use the `"""`-on-separate-lines style for docstrings with [Napoleon](https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html)-style API documentation:
 
   ```python
   def func(x: str) -> str:
@@ -164,7 +164,6 @@ Please report any harm to [Hynek Schlawack] in any way you find appropriate.
 [Ruff]: https://github.com/astral-sh/ruff
 [*pre-commit*]: https://pre-commit.com/
 [Black]: https://github.com/psf/black
-[Napoleon]: https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html
 [reStructuredText]: https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
 [good test docstrings]: https://jml.io/test-docstrings/
 [code of conduct]: https://github.com/hynek/stamina/blob/main/.github/CODE_OF_CONDUCT.md
