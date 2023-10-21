@@ -1,6 +1,6 @@
 # *stamina*: Production-grade Retries Made Easy
 
-Release **{sub-ref}`release`**  ([What's new?](changelog))
+Release **{sub-ref}`release`**  ([What's new?](https://github.com/hynek/stamina/blob/main/CHANGELOG.md))
 
 ```{include} ../README.md
 :start-after: "## Production-grade Retries Made Easy"
@@ -12,21 +12,25 @@ Release **{sub-ref}`release`**  ([What's new?](changelog))
 ```{toctree}
 :maxdepth: 2
 
+motivation
 tutorial
 api
-security
 ```
-
-
-## Project Information
-
-```{include} ../README.md
-:start-after: "## Project Information"
-```
-
 
 ```{toctree}
 :hidden: true
 
-changelog
+credits
+```
+
+```{toctree}
+:hidden:
+:caption: Meta
+
+PyPI <https://pypi.org/project/stamina/>
+GitHub <https://github.com/hynek/stamina/>
+Changelog <https://github.com/hynek/stamina/blob/main/CHANGELOG.md>
+Contributing <https://github.com/hynek/stamina/blob/main/.github/CONTRIBUTING.md>
+Security Policy <https://github.com/hynek/stamina/blob/main/.github/SECURITY.md>
+Funding <https://hynek.me/say-thanks/>
 ```

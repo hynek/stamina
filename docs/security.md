@@ -1,2 +1,0 @@
-```{include} ../.github/SECURITY.md
-```
