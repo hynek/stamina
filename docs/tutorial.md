@@ -10,8 +10,6 @@ If you're not sure why you should use retries in general or _stamina_ in particu
 The easiest way to add smart retries to your code is to decorate a callable with {func}`stamina.retry()`:
 
 ```python
-import datetime as dt
-
 import httpx
 
 import stamina
@@ -54,6 +52,9 @@ for attempt in stamina.retry_context(on=httpx.HTTPError):
 Async works with the same functions and arguments -- you just have to use async functions and `async for`:
 
 ```python
+import datetime as dt
+
+
 @stamina.retry(
     on=httpx.HTTPError, attempts=3, timeout=dt.timedelta(seconds=10)
 )
@@ -77,15 +78,19 @@ async def with_block(code: int) -> httpx.Response:
     return resp
 ```
 
+Note how you can also pass {class}`datetime.timedelta` objects to *timeout*, *wait_initial*, *wait_max*, and *wait_jitter*.
+
 
 ## Deactivating Retries Globally
 
-Occasionally it's handy to turn off retries globally -- for instance, in tests.
+Occasionally, turning off retries globally is handy -- for instance, in tests.
 *stamina* has two helpers for controlling and inspecting whether retrying is active:
 {func}`stamina.is_active()` and {func}`stamina.set_active()` (it's idempotent: you can call `set_active(True)` as many times as you want in a row).
 For example, here's a *pytest* fixture that automatically turns off retries at the beginning of a test run:
 
 ```python
+import pytest
+
 @pytest.fixture(autouse=True, scope="session")
 def deactivate_retries():
     stamina.set_active(False)
