@@ -9,7 +9,7 @@ Release **{sub-ref}`release`**  ([What's new?](https://github.com/hynek/stamina/
 
 ---
 
-Check out {doc}`motivation` if you need more convincing or jump straight into our {doc}`tutorial` if you want to get started right away!
+Check out {doc}`motivation` if you need more convincing, or jump into our {doc}`tutorial` to get started right away!
 
 
 ```{toctree}
