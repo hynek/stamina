@@ -1,6 +1,6 @@
 # Tutorial
 
-:::{note}
+:::{tip}
 If you're not sure why you should use retries in general or _stamina_ in particular, head over to {doc}`motivation` first.
 :::
 

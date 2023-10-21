@@ -3,6 +3,9 @@
 Retries are essential for making distributed systems resilient.
 Transient errors are unavoidable and can happen for the wildest reasons -- sometimes, one never finds out.
 
+
+## Dangers of Retries
+
 However, retries are also very dangerous if done naïvely.
 Simply repeating an operation until it succeeds can lead to [*cascading failures*](https://en.wikipedia.org/wiki/Cascading_failure) and [*thundering herds*](https://en.wikipedia.org/wiki/Thundering_herd_problem) and ultimately take down your whole system, just because a database had a brief hiccup.
 
@@ -24,6 +27,9 @@ The answer is:
 You do all of those.
 You start with a small backoff and increase it exponentially, adding a random jitter.
 
+
+## *stamina*
+
 That's what *stamina* does by default:
 It starts with 100ms and increases exponentially by 2 until it reaches 45 seconds or 10 attempts.
 A jitter between 0 and 1 second is added at every step.
@@ -37,9 +43,10 @@ wait\_initial * wait\_exp\_base^{attempt - 1} + random(0, wait\_jitter)
 That means that, by default, the first backoff is no longer than 1.1 seconds, and the last is no longer than 46 seconds.
 You can [tune all these parameters](stamina.retry) to your liking, but the defaults are a good starting point.
 
----
+I hope you're now all motivated and ready to jump into our {doc}`tutorial`!
 
-If you want to learn more:
+
+## Supplemental Literature
 
 - The [*Exponential Backoff And Jitter*](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) article on the *AWS Architecture Blog* is a good explanation of the basics with pretty graphs.
 - [*Resiliency in Distributed Systems*](https://blog.pragmaticengineer.com/resiliency-in-distributed-systems/) takes a broader view and explains how to build resilient systems in general.
