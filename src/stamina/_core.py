@@ -275,6 +275,7 @@ def retry(
 
     The backoff for retry attempt number *attempt* is computed as:
 
+    .. keep in-sync with docs/motivation.md
     .. math::
 
        wait\_initial * wait\_exp\_base^{attempt - 1} + random(0, wait\_jitter)

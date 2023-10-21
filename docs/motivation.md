@@ -27,8 +27,14 @@ You start with a small backoff and increase it exponentially, adding a random ji
 That's what *stamina* does by default:
 It starts with 100ms and increases exponentially by 2 until it reaches 45 seconds or 10 attempts.
 A jitter between 0 and 1 second is added at every step.
+Or, more formally:
 
-That means the first backoff is no longer than 1.1 seconds, and the last is no longer than 46 seconds.
+% keep in-sync with stamina.retry's docstring
+```{math}
+wait\_initial * wait\_exp\_base^{attempt - 1} + random(0, wait\_jitter)
+```
+
+That means that, by default, the first backoff is no longer than 1.1 seconds, and the last is no longer than 46 seconds.
 You can [tune all these parameters](stamina.retry) to your liking, but the defaults are a good starting point.
 
 ---
