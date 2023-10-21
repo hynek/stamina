@@ -6,7 +6,18 @@ from __future__ import annotations
 
 import pytest
 
-from stamina._instrumentation import guess_name
+from stamina._instrumentation import get_default_hooks, guess_name
+
+
+try:
+    import structlog
+except ImportError:
+    structlog = None
+
+try:
+    import prometheus_client
+except ImportError:
+    prometheus_client = None
 
 
 def function():
@@ -65,3 +76,12 @@ class TestGuessName:
             "tests.test_instrumentation.TestGuessName.test_local.<locals>.async_f"
             == guess_name(async_f)
         )
+
+
+def test_get_default_hooks():
+    """
+    Both default instrumentations are detected.
+    """
+    assert len([m for m in (structlog, prometheus_client) if m]) == len(
+        get_default_hooks()
+    )

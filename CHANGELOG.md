@@ -22,6 +22,10 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   `stamina.retry_context()` now yields instances of `stamina.Attempt`.
   [#22](https://github.com/hynek/stamina/pull/22)
 
+- Initialization of instrumentation is now delayed.
+  This means that if there's no retries, there's no startup overhead from importing *structlog* and *prometheus_client*.
+  [#34](https://github.com/hynek/stamina/pull/34)
+
 
 ## [23.1.0](https://github.com/hynek/stamina/compare/22.2.0...23.1.0) - 2023-07-04
 

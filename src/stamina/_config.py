@@ -8,17 +8,17 @@ from dataclasses import dataclass
 from threading import Lock
 from typing import Iterable
 
-from ._instrumentation import INSTRUMENTS
 from .typing import RetryHook
 
 
 @dataclass
 class Config:
     is_active: bool
-    on_retry: Iterable[RetryHook]
+    on_retry: Iterable[RetryHook] | None
 
 
-_CONFIG = Config(is_active=True, on_retry=INSTRUMENTS)
+# on_retry is lazily initialized to avoid startup overhead.
+_CONFIG = Config(is_active=True, on_retry=None)
 _LOCK = Lock()
 
 
