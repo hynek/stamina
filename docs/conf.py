@@ -70,9 +70,17 @@ autodoc_typehints_description_target = "documented"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = "furo"
-# None of the options work, so we disable the button completely.
-html_theme_options = {"top_of_page_button": None}
-html_static_path = []
+html_theme_options = {
+    "light_css_variables": {
+        "font-stack--monospace": "BerkeleyMono, MonoLisa, ui-monospace, "
+        "SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace",
+    },
+    # None of the options work, so we disable the button completely.
+    "top_of_page_button": None,
+}
+
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 
 htmlhelp_basename = "staminadoc"
 
