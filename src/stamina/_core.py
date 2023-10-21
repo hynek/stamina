@@ -18,8 +18,8 @@ import tenacity as _t
 
 from stamina.typing import RetryDetails, RetryHook
 
-from ._config import _CONFIG
-from ._instrumentation import guess_name
+from ._config import _CONFIG, Config
+from ._instrumentation import get_default_hooks, guess_name
 
 
 if sys.version_info >= (3, 10):
@@ -181,10 +181,8 @@ class _RetryContextIterator:
 
         for r in _t.Retrying(
             before_sleep=_make_before_sleep(
-                self._name, _CONFIG.on_retry, self._args, self._kw
-            )
-            if _CONFIG.on_retry
-            else None,
+                self._name, _CONFIG, self._args, self._kw
+            ),
             **self._t_kw,
         ):
             yield Attempt(r)
@@ -193,10 +191,8 @@ class _RetryContextIterator:
         if _CONFIG.is_active:
             self._t_a_retrying = _t.AsyncRetrying(
                 before_sleep=_make_before_sleep(
-                    self._name, _CONFIG.on_retry, self._args, self._kw
-                )
-                if _CONFIG.on_retry
-                else None,
+                    self._name, _CONFIG, self._args, self._kw
+                ),
                 **self._t_kw,
             )
 
@@ -208,9 +204,19 @@ class _RetryContextIterator:
         return Attempt(await self._t_a_retrying.__anext__())
 
 
+def _get_before_retry_hooks(config: Config) -> Iterable[RetryHook]:
+    """
+    Return on_retry hooks if they've been initialized, otherwise initialize.
+    """
+    if config.on_retry is None:
+        config.on_retry = get_default_hooks()
+
+    return config.on_retry
+
+
 def _make_before_sleep(
     name: str,
-    on_retry: Iterable[RetryHook],
+    config: Config,
     args: tuple[object, ...],
     kw: dict[str, object],
 ) -> Callable[[_t.RetryCallState], None]:
@@ -220,6 +226,9 @@ def _make_before_sleep(
     """
 
     def before_sleep(rcs: _t.RetryCallState) -> None:
+        if not (on_retry := _get_before_retry_hooks(config)):
+            return
+
         details = RetryDetails(
             name=name,
             attempt=rcs.attempt_number,
