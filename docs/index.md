@@ -7,19 +7,17 @@ Release **{sub-ref}`release`**  ([What's new?](https://github.com/hynek/stamina/
 :end-before: "For example:"
 ```
 
-## User's Guide
+---
 
-```{toctree}
-:maxdepth: 2
+Check out {doc}`motivation` if you need more convincing or jump straight into our {doc}`tutorial` if you want to get started right now!
 
-motivation
-tutorial
-api
-```
 
 ```{toctree}
 :hidden: true
 
+motivation
+tutorial
+api
 credits
 ```
 
