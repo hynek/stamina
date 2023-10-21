@@ -16,7 +16,7 @@ from typing import AsyncIterator, Iterable, Iterator, TypeVar
 
 import tenacity as _t
 
-from stamina.typing import RetryHook
+from stamina.typing import RetryDetails, RetryHook
 
 from ._config import _CONFIG
 from ._instrumentation import guess_name
@@ -220,19 +220,17 @@ def _make_before_sleep(
     """
 
     def before_sleep(rcs: _t.RetryCallState) -> None:
-        attempt = rcs.attempt_number
-        exc = rcs.outcome.exception()
-        idle_for = rcs.idle_for
+        details = RetryDetails(
+            name=name,
+            attempt=rcs.attempt_number,
+            idle_for=rcs.idle_for,
+            exception=rcs.outcome.exception(),
+            args=args,
+            kwargs=kw,
+        )
 
         for hook in on_retry:
-            hook(
-                attempt=attempt,
-                idle_for=idle_for,
-                exc=exc,
-                name=name,
-                args=args,
-                kwargs=kw,
-            )
+            hook(details)
 
     return before_sleep
 

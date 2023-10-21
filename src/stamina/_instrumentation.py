@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+from .typing import RetryDetails
+
 
 try:
     import structlog
@@ -24,38 +26,26 @@ except ImportError:
     RETRY_COUNTER = None  # type: ignore[assignment]
 
 
-def count_retries(
-    attempt: int,
-    idle_for: float,
-    exc: Exception,
-    name: str,
-    args: tuple[object, ...],
-    kwargs: dict[str, object],
-) -> None:
+def count_retries(details: RetryDetails) -> None:
     """
     Count and log retries for callable *name*.
     """
     RETRY_COUNTER.labels(
-        callable=name, attempt=attempt, error_type=guess_name(exc.__class__)
+        callable=details.name,
+        attempt=details.attempt,
+        error_type=guess_name(details.exception.__class__),
     ).inc()
 
 
-def log_retries(
-    attempt: int,
-    idle_for: float,
-    exc: Exception,
-    name: str,
-    args: tuple[object, ...],
-    kwargs: dict[str, object],
-) -> None:
+def log_retries(details: RetryDetails) -> None:
     logger.warning(
         "stamina.retry_scheduled",
-        callable=name,
-        attempt=attempt,
-        slept=idle_for,
-        error=repr(exc),
-        args=tuple(repr(a) for a in args),
-        kwargs=dict(kwargs.items()),
+        callable=details.name,
+        attempt=details.attempt,
+        slept=details.idle_for,
+        error=repr(details.exception),
+        args=tuple(repr(a) for a in details.args),
+        kwargs=dict(details.kwargs.items()),
     )
 
 
