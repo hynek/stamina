@@ -12,14 +12,14 @@ from dataclasses import dataclass, replace
 from functools import wraps
 from inspect import iscoroutinefunction
 from types import TracebackType
-from typing import AsyncIterator, Iterable, Iterator, TypeVar
+from typing import AsyncIterator, Iterator, TypeVar
 
 import tenacity as _t
 
-from stamina.typing import RetryDetails, RetryHook
+from stamina.typing import RetryDetails
 
-from ._config import _CONFIG, Config
-from ._instrumentation import get_default_hooks, guess_name
+from ._config import _CONFIG, _Config
+from ._instrumentation import guess_name
 
 
 if sys.version_info >= (3, 10):
@@ -204,19 +204,9 @@ class _RetryContextIterator:
         return Attempt(await self._t_a_retrying.__anext__())
 
 
-def _get_before_retry_hooks(config: Config) -> Iterable[RetryHook]:
-    """
-    Return on_retry hooks if they've been initialized, otherwise initialize.
-    """
-    if config.on_retry is None:
-        config.on_retry = get_default_hooks()
-
-    return config.on_retry
-
-
 def _make_before_sleep(
     name: str,
-    config: Config,
+    config: _Config,
     args: tuple[object, ...],
     kw: dict[str, object],
 ) -> Callable[[_t.RetryCallState], None]:
@@ -226,7 +216,7 @@ def _make_before_sleep(
     """
 
     def before_sleep(rcs: _t.RetryCallState) -> None:
-        if not (on_retry := _get_before_retry_hooks(config)):
+        if not (on_retry := config.on_retry):
             return
 
         details = RetryDetails(

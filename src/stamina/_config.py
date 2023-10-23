@@ -4,22 +4,51 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from threading import Lock
 from typing import Iterable
 
+from ._instrumentation import get_default_hooks
 from .typing import RetryHook
 
 
-@dataclass
-class Config:
+class _Config:
+    """
+    Global stamina configuration.
+
+    Strictly private.
+    """
+
+    lock: Lock
     is_active: bool
-    on_retry: Iterable[RetryHook] | None
+    _on_retry: Iterable[RetryHook]
+
+    def __init__(self, lock: Lock) -> None:
+        self.lock = lock
+        self.is_active = True
+
+        # Prepare delayed initialization.
+        self._on_retry = ()
+        self._get_on_retry = self._init_on_retry
+
+    @property
+    def on_retry(self) -> Iterable[RetryHook]:
+        return self._get_on_retry()
+
+    def _init_on_retry(self) -> Iterable[RetryHook]:
+        """
+        Perform delayed initialization of on_retry hooks.
+        """
+        with self.lock:
+            # Ensure hooks didn't init while waiting for the lock.
+            if self._get_on_retry == self._init_on_retry:
+                self._on_retry = get_default_hooks()
+                self._get_on_retry = lambda: self._on_retry
+
+        return self._on_retry
 
 
-# on_retry is lazily initialized to avoid startup overhead.
-_CONFIG = Config(is_active=True, on_retry=None)
 _LOCK = Lock()
+_CONFIG = _Config(_LOCK)
 
 
 def is_active() -> bool:
