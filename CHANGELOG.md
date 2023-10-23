@@ -15,6 +15,11 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/23.1.0...HEAD)
 
+### Added
+
+- If *structlog* is not installed, the scheduled retry is logged using the standard library `logging` module.
+
+
 ### Changed
 
 - Tenacity's internal `AttemptManager` object is no longer exposed to the user.
@@ -23,7 +28,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   [#22](https://github.com/hynek/stamina/pull/22)
 
 - Initialization of instrumentation is now delayed.
-  This means that if there's no retries, there's no startup overhead from importing *structlog* and *prometheus_client*.
+  This means that if there's no retries, there's no startup overhead from importing *structlog* and *prometheus-client*.
   [#34](https://github.com/hynek/stamina/pull/34)
 
 

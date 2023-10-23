@@ -16,10 +16,8 @@ from typing import AsyncIterator, Iterator, TypeVar
 
 import tenacity as _t
 
-from stamina.typing import RetryDetails
-
 from ._config import _CONFIG, _Config
-from ._instrumentation import guess_name
+from ._instrumentation import RetryDetails, guess_name
 
 
 if sys.version_info >= (3, 10):
@@ -216,9 +214,6 @@ def _make_before_sleep(
     """
 
     def before_sleep(rcs: _t.RetryCallState) -> None:
-        if not (on_retry := config.on_retry):
-            return
-
         details = RetryDetails(
             name=name,
             attempt=rcs.attempt_number,
@@ -228,7 +223,7 @@ def _make_before_sleep(
             kwargs=kw,
         )
 
-        for hook in on_retry:
+        for hook in config.on_retry:
             hook(details)
 
     return before_sleep
