@@ -222,11 +222,18 @@ def _make_before_sleep(
     the necessary arguments.
     """
 
+    last_idle_for = 0.0
+
     def before_sleep(rcs: _t.RetryCallState) -> None:
+        nonlocal last_idle_for
+
+        wait_for = rcs.idle_for - last_idle_for
+
         details = RetryDetails(
             name=name,
             retry_num=rcs.attempt_number,
-            idle_for=rcs.idle_for,
+            wait_for=wait_for,
+            waited_so_far=rcs.idle_for - wait_for,
             caused_by=rcs.outcome.exception(),
             args=args,
             kwargs=kw,
@@ -234,6 +241,8 @@ def _make_before_sleep(
 
         for hook in config.on_retry:
             hook(details)
+
+        last_idle_for = rcs.idle_for
 
     return before_sleep
 

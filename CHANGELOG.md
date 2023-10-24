@@ -32,7 +32,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   This means that if there's no retries, there's no startup overhead from importing *structlog* and *prometheus-client*.
   [#34](https://github.com/hynek/stamina/pull/34)
 
-- Some key names in *structlog* log messages have been renamed to better reflect their meaning (`slept` → `idle_for`, `attempt` → `retry_num`, and `error` → `caused_by`).
+- Some key names in *structlog* log messages have been renamed to better reflect their meaning (`slept` → `waited_so_far`, `attempt` → `retry_num`, and `error` → `caused_by`).
   You can rename them back using *structlog*'s [`structlog.processors.EventRenamer`](https://www.structlog.org/en/stable/api.html#structlog.processors.EventRenamer).
   [#35](https://github.com/hynek/stamina/pull/35)
 

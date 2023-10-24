@@ -36,7 +36,8 @@ def test_decorator_sync(log_output):
         {
             "args": (),
             "retry_num": 1,
-            "idle_for": 0.0,
+            "wait_for": 0.0,
+            "waited_so_far": 0.0,
             "callable": "tests.test_structlog.test_decorator_sync.<locals>.f",
             "caused_by": "ValueError()",
             "event": "stamina.retry_scheduled",
@@ -62,7 +63,8 @@ async def test_decorator_async(log_output):
         {
             "args": (),
             "retry_num": 1,
-            "idle_for": 0.0,
+            "wait_for": 0.0,
+            "waited_so_far": 0.0,
             "callable": "tests.test_structlog.test_decorator_async.<locals>.f",
             "caused_by": "ValueError()",
             "event": "stamina.retry_scheduled",
@@ -84,7 +86,8 @@ def test_context_sync(log_output):
         {
             "callable": "<context block>",
             "retry_num": 1,
-            "idle_for": 0.0,
+            "wait_for": 0.0,
+            "waited_so_far": 0.0,
             "caused_by": "ValueError()",
             "args": (),
             "kwargs": {},
@@ -106,7 +109,8 @@ async def test_context_async(log_output):
         {
             "callable": "<context block>",
             "retry_num": 1,
-            "idle_for": 0.0,
+            "wait_for": 0.0,
+            "waited_so_far": 0.0,
             "caused_by": "ValueError()",
             "args": (),
             "kwargs": {},

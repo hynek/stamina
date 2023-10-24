@@ -21,7 +21,8 @@ class RetryDetails:
         "args",
         "kwargs",
         "retry_num",
-        "idle_for",
+        "wait_for",
+        "waited_so_far",
         "caused_by",
     )
 
@@ -29,7 +30,8 @@ class RetryDetails:
     args: tuple[object, ...]
     kwargs: dict[str, object]
     retry_num: int
-    idle_for: float
+    wait_for: float
+    waited_so_far: float
     caused_by: Exception
 
 
@@ -121,7 +123,8 @@ def init_structlog() -> RetryHook | None:
             kwargs=dict(details.kwargs.items()),
             retry_num=details.retry_num,
             caused_by=repr(details.caused_by),
-            idle_for=details.idle_for,
+            wait_for=round(details.wait_for, 2),
+            waited_so_far=round(details.waited_so_far, 2),
         )
 
     return log_retries
@@ -149,7 +152,8 @@ def init_logging(log_level: int) -> RetryHook:
                 "stamina.kwargs": dict(details.kwargs.items()),
                 "stamina.retry_num": details.retry_num,
                 "stamina.caused_by": repr(details.caused_by),
-                "stamina.idle_for": details.idle_for,
+                "stamina.wait_for": round(details.wait_for, 2),
+                "stamina.waited_so_far": round(details.waited_so_far, 2),
             },
         )
 
