@@ -36,5 +36,5 @@ def test_config_init_concurrently():
     cfg._get_on_retry = fake_on_retry
     cfg._on_retry = (1, 2)
 
-    assert (1, 2) == cfg._init_on_retry()
+    assert (1, 2) == cfg._init_on_first_retry()
     assert fake_on_retry is cfg._get_on_retry

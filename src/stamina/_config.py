@@ -30,19 +30,19 @@ class _Config:
 
         # Prepare delayed initialization.
         self._on_retry = ()
-        self._get_on_retry = self._init_on_retry
+        self._get_on_retry = self._init_on_first_retry
 
     @property
     def on_retry(self) -> Iterable[RetryHook]:
         return self._get_on_retry()
 
-    def _init_on_retry(self) -> Iterable[RetryHook]:
+    def _init_on_first_retry(self) -> Iterable[RetryHook]:
         """
         Perform delayed initialization of on_retry hooks.
         """
         with self.lock:
             # Ensure hooks didn't init while waiting for the lock.
-            if self._get_on_retry == self._init_on_retry:
+            if self._get_on_retry == self._init_on_first_retry:
                 self._on_retry = get_default_hooks()
                 self._get_on_retry = lambda: self._on_retry
 
