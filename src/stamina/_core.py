@@ -216,9 +216,9 @@ def _make_before_sleep(
     def before_sleep(rcs: _t.RetryCallState) -> None:
         details = RetryDetails(
             name=name,
-            attempt=rcs.attempt_number,
+            retry_num=rcs.attempt_number,
             idle_for=rcs.idle_for,
-            exception=rcs.outcome.exception(),
+            caused_by=rcs.outcome.exception(),
             args=args,
             kwargs=kw,
         )

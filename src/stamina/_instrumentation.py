@@ -19,9 +19,9 @@ class RetryDetails:
     name: str
     args: tuple[object, ...]
     kwargs: dict[str, object]
-    attempt: int
+    retry_num: int
     idle_for: float
-    exception: Exception
+    caused_by: Exception
 
 
 class RetryHook(Protocol):
@@ -73,7 +73,7 @@ def init_prometheus() -> RetryHook | None:
         RETRY_COUNTER = Counter(
             "stamina_retries_total",
             "Total number of retries.",
-            ("callable", "attempt", "error_type"),
+            ("callable", "retry_num", "error_type"),
         )
 
     def count_retries(details: RetryDetails) -> None:
@@ -82,8 +82,8 @@ def init_prometheus() -> RetryHook | None:
         """
         RETRY_COUNTER.labels(
             callable=details.name,
-            attempt=details.attempt,
-            error_type=guess_name(details.exception.__class__),
+            retry_num=details.retry_num,
+            error_type=guess_name(details.caused_by.__class__),
         ).inc()
 
     return count_retries
@@ -108,11 +108,11 @@ def init_structlog() -> RetryHook | None:
         logger.warning(
             "stamina.retry_scheduled",
             callable=details.name,
-            attempt=details.attempt,
-            idle_for=details.idle_for,
-            error=repr(details.exception),
             args=tuple(repr(a) for a in details.args),
             kwargs=dict(details.kwargs.items()),
+            retry_num=details.retry_num,
+            caused_by=repr(details.caused_by),
+            idle_for=details.idle_for,
         )
 
     return log_retries
@@ -138,9 +138,9 @@ def init_logging(log_level: int) -> RetryHook:
                 "stamina.callable": details.name,
                 "stamina.args": tuple(repr(a) for a in details.args),
                 "stamina.kwargs": dict(details.kwargs.items()),
-                "stamina.attempt": details.attempt,
+                "stamina.retry_num": details.retry_num,
+                "stamina.caused_by": repr(details.caused_by),
                 "stamina.idle_for": details.idle_for,
-                "stamina.error": repr(details.exception),
             },
         )
 
