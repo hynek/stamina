@@ -1,6 +1,6 @@
 # Instrumentation
 
-*stamina* tries to do the right thing without configuration.
+*stamina* tries to do give you the best-possible observability of your application's retrying without any configuration.
 
 
 ## Metrics
