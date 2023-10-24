@@ -27,8 +27,8 @@ If [*structlog*] is installed, scheduled retries are logged using a *structlog* 
 - `retry_num`: The number of the current *retry*.
   So, if your callable failed once, this is set to 1.
 - `wait_for`: The time stamina will wait before the current scheduled attempt.
-- `waited_so_far`: The time stamina has spent waiting before the current retry.
-  In other words, if the current retry succeeds, *stamina* would've spent `wait_for` + `waited_so_far` waiting.
+- `waited_so_far`: The time *stamina* has spent waiting before the current retry.
+  In other words, if the current retry succeeds, *stamina* will have spent `wait_for` + `waited_so_far` waiting.
 - `caused_by`: The {func}`repr` of the exception that caused the retry.
 
 
@@ -44,8 +44,8 @@ Logging happens at warning level and includes the following *extra fields*:
 - `stamina.retry_num`: The number of the current *retry*.
   So, if your callable failed once, this is set to 1.
 - `stamina.wait_for`: The time stamina will wait before the current scheduled attempt.
-- `stamina.waited_so_far`: The time stamina has spent waiting before the current retry.
-  In other words, if the current retry succeeds, *stamina* would've spent `stamina.wait_for` + `stamina.waited_so_far` waiting.
+- `stamina.waited_so_far`: The time *stamina* has spent waiting before the current retry.
+  In other words, if the current retry succeeds, *stamina* will have spent `stamina.wait_for` + `stamina.waited_so_far` waiting.
 - `stamina.caused_by`: The {func}`repr` of the exception that caused the retry.
 
 Please note that extra fields don't appear in log messages by default and require configuration.
