@@ -35,10 +35,10 @@ def test_decorator_sync(log_output):
     assert [
         {
             "args": (),
-            "attempt": 1,
-            "slept": 0.0,
+            "retry_num": 1,
+            "idle_for": 0.0,
             "callable": "tests.test_structlog.test_decorator_sync.<locals>.f",
-            "error": "ValueError()",
+            "caused_by": "ValueError()",
             "event": "stamina.retry_scheduled",
             "kwargs": {},
             "log_level": "warning",
@@ -61,10 +61,10 @@ async def test_decorator_async(log_output):
     assert [
         {
             "args": (),
-            "attempt": 1,
-            "slept": 0.0,
+            "retry_num": 1,
+            "idle_for": 0.0,
             "callable": "tests.test_structlog.test_decorator_async.<locals>.f",
-            "error": "ValueError()",
+            "caused_by": "ValueError()",
             "event": "stamina.retry_scheduled",
             "kwargs": {},
             "log_level": "warning",
@@ -83,9 +83,9 @@ def test_context_sync(log_output):
     assert [
         {
             "callable": "<context block>",
-            "attempt": 1,
-            "slept": 0.0,
-            "error": "ValueError()",
+            "retry_num": 1,
+            "idle_for": 0.0,
+            "caused_by": "ValueError()",
             "args": (),
             "kwargs": {},
             "event": "stamina.retry_scheduled",
@@ -105,9 +105,9 @@ async def test_context_async(log_output):
     assert [
         {
             "callable": "<context block>",
-            "attempt": 1,
-            "slept": 0.0,
-            "error": "ValueError()",
+            "retry_num": 1,
+            "idle_for": 0.0,
+            "caused_by": "ValueError()",
             "args": (),
             "kwargs": {},
             "event": "stamina.retry_scheduled",

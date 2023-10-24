@@ -17,6 +17,7 @@ Check out {doc}`motivation` if you need more convincing, or jump into our {doc}`
 
 motivation
 tutorial
+instrumentation
 api
 credits
 ```

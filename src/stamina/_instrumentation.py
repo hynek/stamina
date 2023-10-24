@@ -4,7 +4,36 @@
 
 from __future__ import annotations
 
-from .typing import RetryDetails, RetryHook
+from dataclasses import dataclass
+from typing import Protocol
+
+
+@dataclass(frozen=True)
+class RetryDetails:
+    """
+    Details about a retry attempt that are passed into :class:`RetryHook`s.
+
+    .. versionadded:: 23.2.0
+    """
+
+    name: str
+    args: tuple[object, ...]
+    kwargs: dict[str, object]
+    retry_num: int
+    idle_for: float
+    caused_by: Exception
+
+
+class RetryHook(Protocol):
+    """
+    A callable that gets called after an attempt has failed and a retry has
+    been scheduled.
+
+    .. versionadded:: 23.2.0
+    """
+
+    def __call__(self, details: RetryDetails) -> None:
+        ...
 
 
 def get_default_hooks() -> tuple[RetryHook, ...]:
@@ -16,8 +45,7 @@ def get_default_hooks() -> tuple[RetryHook, ...]:
     if prom := init_prometheus():
         hooks.append(prom)
 
-    if sl := init_structlog():
-        hooks.append(sl)
+    hooks.append(init_structlog() or init_logging(30))
 
     return tuple(hooks)
 
@@ -30,6 +58,8 @@ def init_prometheus() -> RetryHook | None:
     Try to initialize Prometheus instrumentation.
 
     Return None if it's not available.
+
+    .. versionadded:: 23.2.0
     """
     try:
         from prometheus_client import Counter
@@ -43,7 +73,7 @@ def init_prometheus() -> RetryHook | None:
         RETRY_COUNTER = Counter(
             "stamina_retries_total",
             "Total number of retries.",
-            ("callable", "attempt", "error_type"),
+            ("callable", "retry_num", "error_type"),
         )
 
     def count_retries(details: RetryDetails) -> None:
@@ -52,8 +82,8 @@ def init_prometheus() -> RetryHook | None:
         """
         RETRY_COUNTER.labels(
             callable=details.name,
-            attempt=details.attempt,
-            error_type=guess_name(details.exception.__class__),
+            retry_num=details.retry_num,
+            error_type=guess_name(details.caused_by.__class__),
         ).inc()
 
     return count_retries
@@ -64,6 +94,8 @@ def init_structlog() -> RetryHook | None:
     Try to initialize structlog instrumentation.
 
     Return None if it's not available.
+
+    .. versionadded:: 23.2.0
     """
     try:
         import structlog
@@ -76,11 +108,40 @@ def init_structlog() -> RetryHook | None:
         logger.warning(
             "stamina.retry_scheduled",
             callable=details.name,
-            attempt=details.attempt,
-            slept=details.idle_for,
-            error=repr(details.exception),
             args=tuple(repr(a) for a in details.args),
             kwargs=dict(details.kwargs.items()),
+            retry_num=details.retry_num,
+            caused_by=repr(details.caused_by),
+            idle_for=details.idle_for,
+        )
+
+    return log_retries
+
+
+def init_logging(log_level: int) -> RetryHook:
+    """
+    Initialize logging using the standard library.
+
+    Returned hook logs scheduled retries at *log_level*.
+
+    .. versionadded:: 23.2.0
+    """
+    import logging
+
+    logger = logging.getLogger("stamina")
+
+    def log_retries(details: RetryDetails) -> None:
+        logger.log(
+            log_level,
+            "stamina.retry_scheduled",
+            extra={
+                "stamina.callable": details.name,
+                "stamina.args": tuple(repr(a) for a in details.args),
+                "stamina.kwargs": dict(details.kwargs.items()),
+                "stamina.retry_num": details.retry_num,
+                "stamina.caused_by": repr(details.caused_by),
+                "stamina.idle_for": details.idle_for,
+            },
         )
 
     return log_retries

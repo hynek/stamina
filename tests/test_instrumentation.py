@@ -6,7 +6,13 @@ from __future__ import annotations
 
 import pytest
 
-from stamina._instrumentation import get_default_hooks, guess_name
+import stamina
+
+from stamina._instrumentation import (
+    get_default_hooks,
+    guess_name,
+    init_structlog,
+)
 
 
 try:
@@ -82,6 +88,50 @@ def test_get_default_hooks():
     """
     Both default instrumentations are detected.
     """
-    assert len([m for m in (structlog, prometheus_client) if m]) == len(
-        get_default_hooks()
-    )
+    if prometheus_client:
+        assert 2 == len(get_default_hooks())
+    else:
+        assert 1 == len(get_default_hooks())
+
+
+@pytest.mark.skipif(not structlog, reason="needs structlog")
+def test_structlog_detected():
+    """
+    If structlog is importable, init_structlog returns a callable.
+    """
+    assert init_structlog()
+
+
+@pytest.mark.skipif(structlog, reason="needs missing structlog")
+class TestLogging:
+    def test_sync(self, caplog):
+        """
+        Sync retries are logged.
+        """
+
+        @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+        def f():
+            raise ValueError
+
+        with pytest.raises(ValueError):
+            f()
+
+        assert [
+            ("stamina", 30, "stamina.retry_scheduled")
+        ] == caplog.record_tuples
+
+    async def test_async(self, caplog):
+        """
+        Async retries are logged.
+        """
+
+        @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+        async def f():
+            raise ValueError
+
+        with pytest.raises(ValueError):
+            await f()
+
+        assert [
+            ("stamina", 30, "stamina.retry_scheduled")
+        ] == caplog.record_tuples
