@@ -126,6 +126,7 @@ def test_retry_block():
             i += 1
 
             assert i == attempt.num
+            assert f"<Attempt num={i}>" == repr(attempt)
 
             if i < 2:
                 raise ValueError

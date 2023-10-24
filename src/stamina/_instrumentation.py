@@ -16,6 +16,15 @@ class RetryDetails:
     .. versionadded:: 23.2.0
     """
 
+    __slots__ = (
+        "name",
+        "args",
+        "kwargs",
+        "retry_num",
+        "idle_for",
+        "caused_by",
+    )
+
     name: str
     args: tuple[object, ...]
     kwargs: dict[str, object]

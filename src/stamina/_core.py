@@ -62,7 +62,6 @@ def retry_context(
     )
 
 
-@dataclass
 class Attempt:
     """
     A context manager that can be used to retry code blocks.
@@ -72,7 +71,15 @@ class Attempt:
     .. versionadded:: 23.2.0
     """
 
+    __slots__ = ("_t_attempt",)
+
     _t_attempt: _t.AttemptManager
+
+    def __init__(self, attempt: _t.AttemptManager):
+        self._t_attempt = attempt
+
+    def __repr__(self) -> str:
+        return f"<Attempt num={self.num}>"
 
     @property
     def num(self) -> int:
@@ -102,6 +109,8 @@ class _LazyNoAsyncRetry:
     """
     Allows us a free null object pattern using non-retries and avoid None.
     """
+
+    __slots__ = ()
 
     def __aiter__(self) -> _t.AsyncRetrying:
         return _t.AsyncRetrying(reraise=True, stop=_STOP_NO_RETRY).__aiter__()

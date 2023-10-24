@@ -18,6 +18,8 @@ class _Config:
     Strictly private.
     """
 
+    __slots__ = ("lock", "is_active", "_on_retry", "_get_on_retry")
+
     lock: Lock
     is_active: bool
     _on_retry: Iterable[RetryHook]
