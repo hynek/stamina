@@ -18,19 +18,28 @@ class _Config:
     Strictly private.
     """
 
-    __slots__ = ("lock", "is_active", "_on_retry", "_get_on_retry")
+    __slots__ = ("lock", "_is_active", "_on_retry", "_get_on_retry")
 
     lock: Lock
-    is_active: bool
+    _is_active: bool
     _on_retry: Iterable[RetryHook]
 
     def __init__(self, lock: Lock) -> None:
         self.lock = lock
-        self.is_active = True
+        self._is_active = True
 
         # Prepare delayed initialization.
         self._on_retry = ()
         self._get_on_retry = self._init_on_first_retry
+
+    @property
+    def is_active(self) -> bool:
+        return self._is_active
+
+    @is_active.setter
+    def is_active(self, value: bool) -> None:
+        with self.lock:
+            self._is_active = value
 
     @property
     def on_retry(self) -> Iterable[RetryHook]:
@@ -49,8 +58,7 @@ class _Config:
         return self._on_retry
 
 
-_LOCK = Lock()
-_CONFIG = _Config(_LOCK)
+_CONFIG = _Config(Lock())
 
 
 def is_active() -> bool:
@@ -60,7 +68,7 @@ def is_active() -> bool:
     Returns:
         Whether retrying is active.
     """
-    return _CONFIG.is_active
+    return _CONFIG._is_active
 
 
 def set_active(active: bool) -> None:
@@ -69,5 +77,4 @@ def set_active(active: bool) -> None:
 
     Is idempotent and can be called repeatedly with the same value.
     """
-    with _LOCK:
-        _CONFIG.is_active = bool(active)
+    _CONFIG.is_active = bool(active)
