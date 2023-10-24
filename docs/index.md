@@ -4,7 +4,7 @@ Release **{sub-ref}`release`**  ([What's new?](https://github.com/hynek/stamina/
 
 ```{include} ../README.md
 :start-after: "## Production-grade Retries Made Easy"
-:end-before: "For example:"
+:end-before: "<!-- end docs index -->"
 ```
 
 ---

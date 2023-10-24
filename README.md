@@ -41,6 +41,8 @@ def do_it(code: int) -> httpx.Response:
     return resp
 ```
 
+<!-- end docs index -->
+
 **Async** callables work use the same API and it's possible to retry **arbitrary blocks**, too.
 Please refer to our [tutorial](https://stamina.hynek.me/en/latest/tutorial.html) for more examples.
 
