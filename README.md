@@ -18,11 +18,11 @@ Its goal is to be as ergonomic as possible while doing the right thing by defaul
 It is the result of years of copy-pasting the same configuration over and over again:
 
 - Retry only on certain exceptions.
-- Exponential backoff with _jitter_ between retries.
+- Exponential **backoff** with **jitter** between retries.
 - Limit the number of retries **and** total time.
 - Automatic **async** support.
 - Preserve **type hints** of the decorated callable.
-- Count ([Prometheus](https://github.com/prometheus/client_python)) and log ([*structlog*](https://www.structlog.org/)) retries with basic metadata, if they're installed.
+- Count ([Prometheus](https://github.com/prometheus/client_python)) and log ([*structlog*](https://www.structlog.org/) with fallback to `logging`) retries with basic metadata, if they're installed.
 - Easy _global_ deactivation for testing.
 
 For example:
