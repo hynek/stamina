@@ -14,3 +14,9 @@ Configuration
 
 .. autofunction:: set_active
 .. autofunction:: is_active
+
+
+Instrumentation
+---------------
+
+.. autodata:: stamina.instrumentation.prometheus.RETRIES_TOTAL

@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from ._instrumentation import RetryDetails, RetryHook
+from .instrumentation import RetryDetails, RetryHook
 
 
 __all__ = ["RetryHook", "RetryDetails"]

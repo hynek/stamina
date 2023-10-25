@@ -7,7 +7,7 @@ from __future__ import annotations
 from threading import Lock
 from typing import Iterable
 
-from ._instrumentation import get_default_hooks
+from .instrumentation._hooks import get_default_hooks
 from .typing import RetryHook
 
 

@@ -8,11 +8,9 @@ import pytest
 
 import stamina
 
-from stamina._instrumentation import (
-    get_default_hooks,
-    guess_name,
-    init_structlog,
-)
+from stamina.instrumentation._data import guess_name
+from stamina.instrumentation._hooks import get_default_hooks
+from stamina.instrumentation._structlog import init_structlog
 
 
 try:

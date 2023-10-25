@@ -17,7 +17,7 @@ from typing import AsyncIterator, Iterator, TypeVar
 import tenacity as _t
 
 from ._config import _CONFIG, _Config
-from ._instrumentation import RetryDetails, guess_name
+from .instrumentation._data import RetryDetails, guess_name
 
 
 if sys.version_info >= (3, 10):

@@ -2,9 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
+from . import instrumentation
 from ._config import is_active, set_active
 from ._core import Attempt, retry, retry_context
-from ._instrumentation import RETRY_COUNTER
 
 
 __all__ = [
@@ -13,7 +13,7 @@ __all__ = [
     "retry_context",
     "is_active",
     "set_active",
-    "RETRY_COUNTER",
+    "instrumentation",
 ]
 
 

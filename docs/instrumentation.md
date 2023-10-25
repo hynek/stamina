@@ -16,6 +16,9 @@ If [*prometheus-client*](https://github.com/prometheus/client_python) is install
 - `error_type`: The name of the exception **class** that caused the retry.
   For example, `httpx.ConnectError`.
 
+You can access the counter at {data}`stamina.instrumentation.prometheus.RETRIES_TOTAL`.
+Note, that it's `None` until the first retry is scheduled.
+
 
 ## *structlog*
 
