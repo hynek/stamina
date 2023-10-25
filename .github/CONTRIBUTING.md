@@ -113,7 +113,7 @@ You will find the built documentation in `docs/_build/html`.
 
 ## Documentation
 
-- Use [semantic newlines] in Markdown and reStructuredText files (files ending in `.md` and `.rst`):
+- Use [semantic newlines] in Markdown files (files ending in `.md`):
 
   ```markdown
   This is a sentence.
