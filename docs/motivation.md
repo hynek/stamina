@@ -12,7 +12,7 @@ Simply repeating an operation until it succeeds can lead to [*cascading failures
 So:
 
 1. You must wait between your retries: this is called a *backoff*.
-2. You can't retry simultaneously with all your clients, so you must introduce randomness into your *backoff*: a *jitter*.
+2. You can't retry simultaneously with all your clients, so you must introduce randomness into your backoff: a *jitter*.
 3. You must not retry forever.
    Sometimes, a remote service is down indefinitely, and you must deal with it.
 
@@ -40,7 +40,9 @@ Or, more formally:
 wait\_initial * wait\_exp\_base^{attempt - 1} + random(0, wait\_jitter)
 ```
 
-That means that, by default, the first backoff is no longer than 1.1 seconds, and the last is no longer than 46 seconds.
+That means that, by default, the first backoff is no longer than 1.1 seconds, and the last is no longer than 5 seconds.
+Note that no jitter is added once the maximum timeout is reached; there should be enough variance in the backoff due to the jitter added underway.
+
 You can [tune all these parameters](stamina.retry) to your liking, but the defaults are a good starting point.
 
 I hope you're now all motivated and ready to jump into our {doc}`tutorial`!

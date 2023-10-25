@@ -27,7 +27,7 @@ def do_it(code: int) -> httpx.Response:
 ```
 
 This will retry the function up to 3 times if it raises an {class}`httpx.HTTPError` (or any subclass thereof).
-Since retrying on {class}`Exception` is an [*attractive nuisance*](https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html), *stamina* doesn't do it by default and forces you to be explicit.
+Since retrying on {class}`Exception` is an [attractive nuisance](https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html), *stamina* doesn't do it by default and forces you to be explicit.
 
 To give you observability of your application's retrying, *stamina* will count the retries using [*prometheus-client*](https://github.com/prometheus/client_python) in the `stamina_retries_total` counter (if installed) and log them out using [*structlog*](https://www.structlog.org/) with a fallback to {mod}`logging`.
 
@@ -36,7 +36,7 @@ To give you observability of your application's retrying, *stamina* will count t
 
 Sometimes you only want to retry a part of a function.
 
-Since iterators can't catch exceptions and context managers can't execute the same block multiple times, we need both to achieve that.
+Since iterators can't catch exceptions and context managers can't execute the same block multiple times, we need to combine them to achieve that.
 *stamina* gives you the {func}`stamina.retry_context()` iterator which yields the necessary context managers:
 
 ```python
