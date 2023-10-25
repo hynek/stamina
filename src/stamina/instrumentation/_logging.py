@@ -4,10 +4,10 @@
 
 from __future__ import annotations
 
-from ._data import RetryDetails, RetryHook
+from ._data import RetryDetails, RetryHook, RetryHookFactory
 
 
-def init_logging(log_level: int) -> RetryHook:
+def init_logging(log_level: int = 30) -> RetryHook:
     """
     Initialize logging using the standard library.
 
@@ -35,3 +35,6 @@ def init_logging(log_level: int) -> RetryHook:
         )
 
     return log_retries
+
+
+LoggingOnRetryHook = RetryHookFactory(init_logging)

@@ -2,8 +2,23 @@
 #
 # SPDX-License-Identifier: MIT
 
-from . import prometheus
-from ._data import RetryDetails, RetryHook
+from __future__ import annotations
+
+from ._data import RetryDetails, RetryHook, RetryHookFactory
+from ._hooks import get_on_retry_hooks, set_on_retry_hooks
+from ._logging import LoggingOnRetryHook
+from ._prometheus import PrometheusOnRetryHook, get_prometheus_counter
+from ._structlog import StructlogOnRetryHook
 
 
-__all__ = ["RetryDetails", "RetryHook", "prometheus"]
+__all__ = [
+    "get_on_retry_hooks",
+    "set_on_retry_hooks",
+    "get_prometheus_counter",
+    "LoggingOnRetryHook",
+    "PrometheusOnRetryHook",
+    "RetryDetails",
+    "RetryHook",
+    "RetryHookFactory",
+    "StructlogOnRetryHook",
+]

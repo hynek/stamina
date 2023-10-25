@@ -11,9 +11,19 @@ from __future__ import annotations
 
 import datetime as dt
 
-from tenacity import RetryCallState
-
-from stamina import is_active, retry, retry_context, set_active
+from stamina import (
+    is_active,
+    retry,
+    retry_context,
+    set_active,
+)
+from stamina.instrumentation import (
+    RetryDetails,
+    RetryHook,
+    RetryHookFactory,
+    get_on_retry_hooks,
+    set_on_retry_hooks,
+)
 
 
 @retry(on=ValueError)
@@ -90,10 +100,17 @@ if is_active() is True:
 set_active(False)
 
 
-def hook(
-    retry_state: RetryCallState, name: str, args: object, kwargs: object
-) -> None:
+def hook(details: RetryDetails) -> None:
     return None
+
+
+def init() -> RetryHook:
+    return hook
+
+
+set_on_retry_hooks([hook, RetryHookFactory(init)])
+
+hooks: tuple[RetryHook, ...] = get_on_retry_hooks()
 
 
 for attempt in retry_context(on=ValueError, timeout=13):

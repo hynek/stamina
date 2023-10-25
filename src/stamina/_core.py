@@ -16,7 +16,7 @@ from typing import AsyncIterator, Iterator, TypeVar
 
 import tenacity as _t
 
-from ._config import _CONFIG, _Config
+from ._config import CONFIG, _Config
 from .instrumentation._data import RetryDetails, guess_name
 
 
@@ -180,7 +180,7 @@ class _RetryContextIterator:
         return replace(self, _name=name, _args=args, _kw=kw)
 
     def __iter__(self) -> Iterator[Attempt]:
-        if not _CONFIG.is_active:
+        if not CONFIG.is_active:
             for r in _t.Retrying(
                 reraise=True, stop=_STOP_NO_RETRY
             ):  # pragma: no cover -- it's always once + GeneratorExit
@@ -188,17 +188,17 @@ class _RetryContextIterator:
 
         for r in _t.Retrying(
             before_sleep=_make_before_sleep(
-                self._name, _CONFIG, self._args, self._kw
+                self._name, CONFIG, self._args, self._kw
             ),
             **self._t_kw,
         ):
             yield Attempt(r)
 
     def __aiter__(self) -> AsyncIterator[Attempt]:
-        if _CONFIG.is_active:
+        if CONFIG.is_active:
             self._t_a_retrying = _t.AsyncRetrying(
                 before_sleep=_make_before_sleep(
-                    self._name, _CONFIG, self._args, self._kw
+                    self._name, CONFIG, self._args, self._kw
                 ),
                 **self._t_kw,
             )

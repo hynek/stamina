@@ -4,12 +4,13 @@
 
 import pytest
 
-from stamina import set_active
+import stamina._config
 
 
 @pytest.fixture(autouse=True)
-def _activate():
+def _reset_config():
     """
-    Ensure we're active before each test.
+    Ensure we're active and have default on retry hooks before each test.
     """
-    set_active(True)
+    stamina.set_active(True)
+    stamina.instrumentation.set_on_retry_hooks(None)

@@ -8,6 +8,11 @@ import pytest
 
 import stamina
 
+from stamina.instrumentation import (
+    RetryHookFactory,
+    get_on_retry_hooks,
+    set_on_retry_hooks,
+)
 from stamina.instrumentation._data import guess_name
 from stamina.instrumentation._hooks import get_default_hooks
 from stamina.instrumentation._structlog import init_structlog
@@ -92,6 +97,18 @@ def test_get_default_hooks():
         assert 1 == len(get_default_hooks())
 
 
+def test_get_prometheus_counter():
+    """
+    Returns finalized counter if active.
+    """
+    counter = stamina.instrumentation.get_prometheus_counter()
+
+    if prometheus_client:
+        assert counter is not None
+    else:
+        assert counter is None
+
+
 @pytest.mark.skipif(not structlog, reason="needs structlog")
 def test_structlog_detected():
     """
@@ -133,3 +150,43 @@ class TestLogging:
         assert [
             ("stamina", 30, "stamina.retry_scheduled")
         ] == caplog.record_tuples
+
+
+class TestSetOnRetryHooks:
+    def test_none_is_default(self):
+        """
+        None is replaced with default hooks.
+        """
+        assert get_on_retry_hooks() is not None
+        assert () != get_on_retry_hooks()
+
+        set_on_retry_hooks(())
+
+        assert () == get_on_retry_hooks()
+
+        set_on_retry_hooks(None)
+
+        assert () != get_on_retry_hooks()
+        assert get_on_retry_hooks() is not None
+
+    def test_init_hooks(self):
+        """
+        If a hook is wrapped in RetryHookFactory, init_hooks transforms it into
+        a RetryHook. Otherwise it's left alone.
+        """
+
+        def hook(details):
+            pass
+
+        def delayed_hook(details):
+            pass
+
+        def init():
+            return delayed_hook
+
+        set_on_retry_hooks([hook, RetryHookFactory(init)])
+
+        assert (
+            hook,
+            delayed_hook,
+        ) == get_on_retry_hooks()

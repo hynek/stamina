@@ -10,16 +10,9 @@
 ```
 
 
-## Configuration
+## Activation and Deactivation
 
 ```{eval-rst}
 .. autofunction:: set_active
 .. autofunction:: is_active
-```
-
-
-## Instrumentation
-
-```{eval-rst}
-.. autodata:: stamina.instrumentation.prometheus.RETRIES_TOTAL
 ```
