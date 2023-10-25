@@ -47,12 +47,13 @@ def do_it(code: int) -> httpx.Response:
 Please refer to our [tutorial](https://stamina.hynek.me/en/latest/tutorial.html) for more examples.
 
 
-## Project Information
+## Project Links
 
 - [**PyPI**](https://pypi.org/project/stamina/)
-- [**Source Code**](https://github.com/hynek/stamina)
+- [**GitHub**](https://github.com/hynek/stamina)
 - [**Documentation**](https://stamina.hynek.me)
 - [**Changelog**](https://github.com/hynek/stamina/blob/main/CHANGELOG.md)
+- [**Funding**](https://hynek.me/say-thanks/)
 
 
 ## Credits

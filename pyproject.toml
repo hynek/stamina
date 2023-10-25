@@ -63,7 +63,7 @@ text = "# *stamina*: Production-grade Retries Made Easy"
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 path = "README.md"
 start-after = "## Production-grade Retries Made Easy"
-end-before = "## Project Information"
+end-before = "## Project Links"
 
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
