@@ -105,6 +105,7 @@ def docs(session: nox.Session) -> None:
             "-b html "
             "-d docs/_build/doctrees "
             "-D language=en "
+            "-n "
             "docs "
             "docs/_build/html",
         )
@@ -122,6 +123,7 @@ def docs(session: nox.Session) -> None:
             "-b", cmd,
             "-d", "docs/_build/doctrees",
             "-D", "language=en",
+            "-n",
             "docs",
             "docs/_build/html",
             # fmt: on

@@ -54,7 +54,7 @@ if "dev" in release:
 
 exclude_patterns = ["_build"]
 
-nitpick_ignore = []
+nitpick_ignore = [("py:class", "httpx.HTTPError")]
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True

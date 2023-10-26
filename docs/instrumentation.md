@@ -3,12 +3,12 @@
 *stamina* calls instrumentation hooks whenever a retry is scheduled, but **before** it waits for the backoff.
 That way, you learn immediately that something went wrong and when *stamina* will try again.
 
-You can set the hooks using {func}`stamina.set_on_retry_hooks` and retrieve them using {func}`stamina.get_on_retry_hooks`.
+You can set the hooks using {func}`stamina.instrumentation.set_on_retry_hooks` and retrieve them using {func}`stamina.instrumentation.get_on_retry_hooks`.
 A hook is a callable, like a function, that takes a single argument: a {class}`stamina.instrumentation.RetryDetails` object.
 Its return value is ignored.
 
 Sometimes (for example, in CLI tools) you may want to delay the initialization of the instrumentation until the first retry is scheduled.
-In that case, write a callable that creates and returns a retry hook, and pass it to {func}`stamina.set_on_retry_hooks` wrapped in a {class}`stamina.instrumentation.RetryHookFactory`.
+In that case, write a callable that creates and returns a retry hook, and pass it to {func}`stamina.instrumentation.set_on_retry_hooks` wrapped in a {class}`stamina.instrumentation.RetryHookFactory`.
 
 
 ## Defaults
@@ -18,16 +18,18 @@ In that case, write a callable that creates and returns a retry hook, and pass i
 That means that if it detects [*prometheus-client*](https://github.com/prometheus/client_python) or [*structlog*] installed, it will automatically use them.
 If *structlog* is missing, it falls back to the standard library's {mod}`logging` module.
 
-If you want to disable instrumentation, you can do so by setting {func}`stamina.set_on_retry_hooks` to an empty iterable:
+If you want to disable instrumentation, you can do so by setting {func}`stamina.instrumentation.set_on_retry_hooks` to an empty iterable:
 
 ```python
-stamina.set_on_retry_hooks([])
+stamina.instrumentation.set_on_retry_hooks([])
 ```
 
+(prometheus)=
 
-## *prometheus-client*
+## Prometheus
 
-When Prometheus integration is active, retries are counted using the [counter](https://prometheus.io/docs/concepts/metric_types/#counter) `stamina_retries_total` with the following labels:
+*stamina* offers Prometheus integration using the official [Python client](https://github.com/prometheus/client_python).
+When it's active, retries are counted using the [counter](https://prometheus.io/docs/concepts/metric_types/#counter) `stamina_retries_total` with the following labels:
 
 - `callable`: The name of the decorated callable.
 - `retry_num`: The number of the current *retry*.
@@ -36,10 +38,11 @@ When Prometheus integration is active, retries are counted using the [counter](h
   For example, `httpx.ConnectError`.
 
 You can access the counter using {func}`stamina.instrumentation.get_prometheus_counter`.
-Note that it's `None` until the first retry is scheduled or you call {func}`stamina.get_on_retry_hooks`.
+Note that it's `None` until the first retry is scheduled or you call {func}`stamina.instrumentation.get_on_retry_hooks`.
 
-You can activate it manually by adding {data}`stamina.instrumentation.PrometheusOnRetryHook` to the list of hooks passed to {func}`stamina.set_on_retry_hooks`.
+You can activate it manually by adding {data}`stamina.instrumentation.PrometheusOnRetryHook` to the list of hooks passed to {func}`stamina.instrumentation.set_on_retry_hooks`.
 
+(structlog)=
 
 ## *structlog*
 
@@ -55,8 +58,9 @@ If *structlog* instrumentation is active, scheduled retries are logged using a *
   In other words, if the current retry succeeds, *stamina* will have spent `wait_for` + `waited_so_far` waiting.
 - `caused_by`: The {func}`repr` of the exception that caused the retry.
 
-You can activate it manually by adding {data}`stamina.instrumentation.structlog.StructlogOnRetryHook` to the list of hooks passed to {func}`stamina.set_on_retry_hooks`.
+You can activate it manually by adding {data}`stamina.instrumentation.StructlogOnRetryHook` to the list of hooks passed to {func}`stamina.instrumentation.set_on_retry_hooks`.
 
+(logging)=
 
 ## Standard Library's `logging`
 
@@ -75,8 +79,7 @@ If standard library's `logging` integration is active, logging happens at warnin
 Please note that extra fields don't appear in log messages by default and require configuration.
 We recommend the usage of [*structlog*] instead.
 
-You can activate it manually by adding {data}`stamina.instrumentation.logging.LoggingOnRetryHook` to the list of hooks passed to {func}`stamina.set_on_retry_hooks`.
-
+You can activate it manually by adding {data}`stamina.instrumentation.LoggingOnRetryHook` to the list of hooks passed to {func}`stamina.instrumentation.set_on_retry_hooks`.
 
 [*structlog*]: https://www.structlog.org/
 
@@ -89,20 +92,21 @@ You can activate it manually by adding {data}`stamina.instrumentation.logging.Lo
 .. autofunction:: set_on_retry_hooks
 .. autofunction:: get_on_retry_hooks
 
-.. autoclass:: RetryDetails
 .. autoclass:: RetryHook()
 .. autoclass:: RetryHookFactory
+.. autoclass:: RetryDetails
 ```
 
 ### Integrations
 
 ```{eval-rst}
-
 .. data:: StructlogOnRetryHook
 
   Pass this object to :func:`stamina.instrumentation.set_on_retry_hooks` to activate *structlog* integration.
 
   Is active by default if *structlog* can be imported.
+
+  .. seealso:: :ref:`structlog`
 
   .. versionadded:: 23.2.0
 
@@ -112,6 +116,8 @@ You can activate it manually by adding {data}`stamina.instrumentation.logging.Lo
 
    Is active by default if *structlog* can **not** be imported.
 
+   .. seealso:: :ref:`logging`
+
    .. versionadded:: 23.2.0
 
 .. data:: PrometheusOnRetryHook
@@ -119,6 +125,8 @@ You can activate it manually by adding {data}`stamina.instrumentation.logging.Lo
    Pass this object to :func:`stamina.instrumentation.set_on_retry_hooks` to activate Prometheus integration.
 
    Is active by default if *prometheus-client* can be imported.
+
+   .. seealso:: :ref:`prometheus`
 
    .. versionadded:: 23.2.0
 .. autofunction:: get_prometheus_counter
