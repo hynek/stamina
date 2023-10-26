@@ -71,13 +71,6 @@ class RetryHook(Protocol):
     This is a :class:`typing.Protocol` that can be implemented by any callable
     that takes one argument of type :class:`RetryDetails` and returns None.
 
-    For example::
-
-       def print_hook(details: stamina.instrumentation.RetryDetails) -> None:
-           print("a retry has been scheduled!", details)
-
-        stamina.set_on_retry_hooks([print_hook])
-
     .. versionadded:: 23.2.0
     """
 
@@ -91,25 +84,8 @@ class RetryHookFactory:
     Wraps a callable that returns a :class:`RetryHook`.
 
     They are called on the first scheduled retry and can be used to delay
-    initialization.
-
-    For example, if your instrumentation needs to import
-    ``something_expensive`` which takes a long time to import, you can delay it
-    until the first retry (or call to
-    :func:`stamina.instrumentation.get_on_retry_hooks`)::
-
-      from stamina.instrumentation import RetryHookFactory
-
-       def init_with_expensive_import():
-           import something_expensive
-
-           def do_something(details: stamina.instrumentation.RetryDetails) -> None:
-               something_expensive.do_something(details)
-
-           return do_something
-
-
-       stamina.set_on_retry_hooks([RetryHookFactory(init_with_expensive_import)])
+    initialization. If you need to pass arguments, you can do that using
+    :func:`functools.partial`.
 
     .. versionadded:: 23.2.0
     """

@@ -27,7 +27,31 @@
 .. autofunction:: get_on_retry_hooks
 
 .. autoclass:: RetryHook()
+
+   For example::
+
+      def print_hook(details: stamina.instrumentation.RetryDetails) -> None:
+          print("a retry has been scheduled!", details)
+
+      stamina.set_on_retry_hooks([print_hook])
+
 .. autoclass:: RetryHookFactory
+
+   For example, if your instrumentation needs to import a module ``something_expensive`` which takes a long time to import, you can delay it until the first retry (or call to :func:`stamina.instrumentation.get_on_retry_hooks`)::
+
+      from stamina.instrumentation import RetryHookFactory, RetryDetails
+
+       def init_with_expensive_import():
+           import something_expensive
+
+           def do_something(details: RetryDetails) -> None:
+               something_expensive.do_something(details)
+
+           return do_something
+
+
+       stamina.set_on_retry_hooks([RetryHookFactory(init_with_expensive_import)])
+
 .. autoclass:: RetryDetails
 ```
 
