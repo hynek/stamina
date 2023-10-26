@@ -1,13 +1,14 @@
 # stamina
 
+*Production-grade Retries Made Easy*
+
 [![Documentation at ReadTheDocs](https://img.shields.io/badge/Docs-Read%20The%20Docs-black)](https://stamina.hynek.me)
 [![License: MIT](https://img.shields.io/badge/license-MIT-C06524)](https://github.com/hynek/stamina/blob/main/LICENSE)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7550/badge)](https://bestpractices.coreinfrastructure.org/projects/7550)
 [![PyPI - Version](https://img.shields.io/pypi/v/stamina.svg)](https://pypi.org/project/stamina)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/stamina.svg)](https://pypi.org/project/stamina)
 
-
-## Production-grade Retries Made Easy
+---
 
 Transient failures are common in distributed systems.
 To make your systems resilient, you need to **retry** failed operations.
@@ -44,7 +45,7 @@ def do_it(code: int) -> httpx.Response:
 <!-- end docs index -->
 
 **Async** callables work use the same API and it's possible to retry **arbitrary blocks**, too.
-Please refer to our [tutorial](https://stamina.hynek.me/en/latest/tutorial.html) for more examples.
+Check out our [tutorial](https://stamina.hynek.me/en/latest/tutorial.html) for more examples!
 
 
 ## Project Links

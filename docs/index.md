@@ -3,7 +3,7 @@
 Release **{sub-ref}`release`**  ([What's new?](https://github.com/hynek/stamina/blob/main/CHANGELOG.md))
 
 ```{include} ../README.md
-:start-after: "## Production-grade Retries Made Easy"
+:start-after: "---"
 :end-before: "<!-- end docs index -->"
 ```
 
