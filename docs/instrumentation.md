@@ -15,7 +15,7 @@ In that case, write a callable that creates and returns a retry hook, and pass i
 
 *stamina* tries to do give you the best-possible observability of your application's retrying without any configuration.
 
-That means that if it detects [*prometheus-client*](https://github.com/prometheus/client_python) or [*structlog*] installed, it will automatically use them.
+That means that if it detects [*prometheus-client*] or [*structlog*] installed, it will automatically use them.
 If *structlog* is missing, it falls back to the standard library's {mod}`logging` module.
 
 If you want to disable instrumentation, you can do so by setting {func}`stamina.instrumentation.set_on_retry_hooks` to an empty iterable:
@@ -28,7 +28,7 @@ stamina.instrumentation.set_on_retry_hooks([])
 
 ## Prometheus
 
-*stamina* offers Prometheus integration using the official [Python client](https://github.com/prometheus/client_python).
+*stamina* offers Prometheus integration using the official [*prometheus-client*].
 When it's active, retries are counted using the [counter](https://prometheus.io/docs/concepts/metric_types/#counter) `stamina_retries_total` with the following labels:
 
 - `callable`: The name of the decorated callable.
@@ -82,52 +82,4 @@ We recommend the usage of [*structlog*] instead.
 You can activate it manually by adding {data}`stamina.instrumentation.LoggingOnRetryHook` to the list of hooks passed to {func}`stamina.instrumentation.set_on_retry_hooks`.
 
 [*structlog*]: https://www.structlog.org/
-
-
-## API Reference
-
-```{eval-rst}
-.. module:: stamina.instrumentation
-
-.. autofunction:: set_on_retry_hooks
-.. autofunction:: get_on_retry_hooks
-
-.. autoclass:: RetryHook()
-.. autoclass:: RetryHookFactory
-.. autoclass:: RetryDetails
-```
-
-### Integrations
-
-```{eval-rst}
-.. data:: StructlogOnRetryHook
-
-  Pass this object to :func:`stamina.instrumentation.set_on_retry_hooks` to activate *structlog* integration.
-
-  Is active by default if *structlog* can be imported.
-
-  .. seealso:: :ref:`structlog`
-
-  .. versionadded:: 23.2.0
-
-.. data:: LoggingOnRetryHook
-
-   Pass this object to :func:`stamina.instrumentation.set_on_retry_hooks` to activate :mod:`logging` integration.
-
-   Is active by default if *structlog* can **not** be imported.
-
-   .. seealso:: :ref:`logging`
-
-   .. versionadded:: 23.2.0
-
-.. data:: PrometheusOnRetryHook
-
-   Pass this object to :func:`stamina.instrumentation.set_on_retry_hooks` to activate Prometheus integration.
-
-   Is active by default if *prometheus-client* can be imported.
-
-   .. seealso:: :ref:`prometheus`
-
-   .. versionadded:: 23.2.0
-.. autofunction:: get_prometheus_counter
-```
+[*prometheus-client*]: https://github.com/prometheus/client_python
