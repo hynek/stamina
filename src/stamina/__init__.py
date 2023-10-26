@@ -3,10 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 from . import instrumentation
-from ._config import (
-    is_active,
-    set_active,
-)
+from ._config import is_active, set_active
 from ._core import Attempt, retry, retry_context
 
 
