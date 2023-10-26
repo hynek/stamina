@@ -23,7 +23,7 @@ It is the result of years of copy-pasting the same configuration over and over a
 - Limit the number of retries **and** total time.
 - Automatic **async** support.
 - Preserve **type hints** of the decorated callable.
-- Flexible **instrumentation** with [Prometheus](https://github.com/prometheus/client_python), [*structlog*](https://www.structlog.org/), and standard library's `logging` support built-in.
+- Flexible **instrumentation** with [Prometheus](https://github.com/prometheus/client_python), [*structlog*](https://www.structlog.org/), and standard library's `logging` support out-of-the-box.
 - Easy _global_ deactivation for testing.
 
 For example:
