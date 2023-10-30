@@ -9,7 +9,7 @@ name = "stamina"
 description = "Production-grade retries made easy."
 requires-python = ">=3.8"
 license = "MIT"
-keywords = ["retry", "retries", "reliability", "tenacity"]
+keywords = ["retry", "retries", "reliability"]
 authors = [{ name = "Hynek Schlawack", email = "hs@ox.cx" }]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
