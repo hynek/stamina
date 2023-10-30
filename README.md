@@ -1,6 +1,4 @@
-# stamina
-
-*Production-grade Retries Made Easy*
+# *stamina*: Production-grade Retries Made Easy
 
 [![Documentation at ReadTheDocs](https://img.shields.io/badge/Docs-Read%20The%20Docs-black)](https://stamina.hynek.me)
 [![License: MIT](https://img.shields.io/badge/license-MIT-C06524)](https://github.com/hynek/stamina/blob/main/LICENSE)
