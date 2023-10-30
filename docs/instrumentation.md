@@ -29,7 +29,7 @@ stamina.instrumentation.set_on_retry_hooks([])
 ## Prometheus
 
 *stamina* offers Prometheus integration using the official [*prometheus-client*].
-When it's active, retries are counted using the [counter](https://prometheus.io/docs/concepts/metric_types/#counter) `stamina_retries_total` with the following labels:
+When it's active, retries are counted using the [counter](https://prometheus.io/docs/concepts/metric_types/) `stamina_retries_total` with the following labels:
 
 - `callable`: The name of the decorated callable.
 - `retry_num`: The number of the current *retry*.

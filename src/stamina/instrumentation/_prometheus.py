@@ -51,8 +51,8 @@ def get_prometheus_counter() -> Counter | None:
 
     Returns:
         If active, the Prometheus `counter
-        <https://github.com/prometheus/client_python#counter>`_ for the number
-        of retries. None otherwise.
+        <https://github.com/prometheus/client_python>`_ for the number of
+        retries. None otherwise.
 
     .. versionadded:: 23.2.0
     """
