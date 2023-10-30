@@ -288,7 +288,7 @@ def retry(
     .. keep in-sync with docs/motivation.md
     .. math::
 
-       wait\_initial * wait\_exp\_base^{attempt - 1} + random(0, wait\_jitter)
+       min(wait\_max, wait\_initial * wait\_exp\_base^{attempt - 1} + random(0, wait\_jitter))
 
     Since :math:`x^0` is always 1, the first backoff is within the interval
     :math:`[wait\_initial,wait\_initial+wait\_jitter]`. Thus, with default
