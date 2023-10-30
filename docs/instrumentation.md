@@ -18,7 +18,7 @@ In that case, write a callable that creates and returns a retry hook, and pass i
 That means that if it detects [*prometheus-client*] or [*structlog*] installed, it will automatically use them.
 If *structlog* is missing, it falls back to the standard library's {mod}`logging` module.
 
-If you want to disable instrumentation, you can do so by setting {func}`stamina.instrumentation.set_on_retry_hooks` to an empty iterable:
+To disable instrumentation, set the on-retry hooks to an empty iterable using {func}`stamina.instrumentation.set_on_retry_hooks`:
 
 ```python
 stamina.instrumentation.set_on_retry_hooks([])
