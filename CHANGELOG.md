@@ -22,7 +22,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 - Instrumentation is now pluggable!
   You can define your own hooks that are run with retry details whenever a retry is scheduled.
-  The documentation now has a whole chapter on instrumentation.
+  The documentation now has a [whole chapter on instrumentation](https://stamina.hynek.me/en/stable/instrumentation.html).
   [#37](https://github.com/hynek/stamina/pull/37)
 
 - If *structlog* is not installed, the scheduled retry is now logged using the standard library `logging` module by default.
