@@ -5,9 +5,10 @@
 from __future__ import annotations
 
 from threading import Lock
-from typing import Iterable
+from typing import Callable
 
-from .instrumentation._hooks import get_default_hooks
+from .instrumentation import RetryHookFactory
+from .instrumentation._hooks import get_default_hooks, init_hooks
 from .typing import RetryHook
 
 
@@ -22,14 +23,17 @@ class _Config:
 
     lock: Lock
     _is_active: bool
-    _on_retry: Iterable[RetryHook]
+    _on_retry: tuple[RetryHook, ...] | tuple[
+        RetryHook | RetryHookFactory, ...
+    ] | None
+    _get_on_retry: Callable[[], tuple[RetryHook, ...]]
 
     def __init__(self, lock: Lock) -> None:
         self.lock = lock
         self._is_active = True
 
         # Prepare delayed initialization.
-        self._on_retry = ()
+        self._on_retry = None
         self._get_on_retry = self._init_on_first_retry
 
     @property
@@ -42,23 +46,35 @@ class _Config:
             self._is_active = value
 
     @property
-    def on_retry(self) -> Iterable[RetryHook]:
+    def on_retry(self) -> tuple[RetryHook, ...]:
         return self._get_on_retry()
 
-    def _init_on_first_retry(self) -> Iterable[RetryHook]:
+    @on_retry.setter
+    def on_retry(
+        self, value: tuple[RetryHook | RetryHookFactory, ...] | None
+    ) -> None:
+        with self.lock:
+            self._get_on_retry = self._init_on_first_retry
+            self._on_retry = value
+
+    def _init_on_first_retry(self) -> tuple[RetryHook, ...]:
         """
         Perform delayed initialization of on_retry hooks.
         """
         with self.lock:
             # Ensure hooks didn't init while waiting for the lock.
             if self._get_on_retry == self._init_on_first_retry:
-                self._on_retry = get_default_hooks()
-                self._get_on_retry = lambda: self._on_retry
+                if self._on_retry is None:
+                    self._on_retry = get_default_hooks()
 
-        return self._on_retry
+                self._on_retry = init_hooks(self._on_retry)
+
+                self._get_on_retry = lambda: self._on_retry  # type: ignore[assignment, return-value]
+
+        return self._on_retry  # type: ignore[return-value]
 
 
-_CONFIG = _Config(Lock())
+CONFIG = _Config(Lock())
 
 
 def is_active() -> bool:
@@ -68,7 +84,7 @@ def is_active() -> bool:
     Returns:
         Whether retrying is active.
     """
-    return _CONFIG._is_active
+    return CONFIG.is_active
 
 
 def set_active(active: bool) -> None:
@@ -77,4 +93,4 @@ def set_active(active: bool) -> None:
 
     Is idempotent and can be called repeatedly with the same value.
     """
-    _CONFIG.is_active = bool(active)
+    CONFIG.is_active = bool(active)

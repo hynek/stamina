@@ -14,6 +14,7 @@ suppress_warnings = ["image.nonlocal_uri"]
 extensions = [
     "myst_parser",
     "notfound.extension",
+    "sphinx_copybutton",
     "sphinx.ext.autodoc",
     "sphinx.ext.autodoc.typehints",
     "sphinx.ext.doctest",
@@ -53,7 +54,7 @@ if "dev" in release:
 
 exclude_patterns = ["_build"]
 
-nitpick_ignore = []
+nitpick_ignore = [("py:class", "httpx.HTTPError")]
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True

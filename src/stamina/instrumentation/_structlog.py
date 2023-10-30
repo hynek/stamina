@@ -4,23 +4,18 @@
 
 from __future__ import annotations
 
-from ._data import RetryDetails, RetryHook
+from ._data import RetryDetails, RetryHook, RetryHookFactory
 
 
-def init_structlog() -> RetryHook | None:
+def init_structlog() -> RetryHook:
     """
-    Try to initialize structlog instrumentation.
-
-    Return None if it's not available.
+    Initialize structlog instrumentation.
 
     .. versionadded:: 23.2.0
     """
-    try:
-        import structlog
-    except ImportError:
-        return None
+    import structlog
 
-    logger = structlog.get_logger()
+    logger = structlog.get_logger("stamina")
 
     def log_retries(details: RetryDetails) -> None:
         logger.warning(
@@ -35,3 +30,6 @@ def init_structlog() -> RetryHook | None:
         )
 
     return log_retries
+
+
+StructlogOnRetryHook = RetryHookFactory(init_structlog)
