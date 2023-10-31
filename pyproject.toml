@@ -48,6 +48,8 @@ Documentation = "https://stamina.hynek.me/"
 Source = "https://github.com/hynek/stamina"
 Changelog = "https://github.com/hynek/stamina/blob/main/CHANGELOG.md"
 Funding = "https://github.com/sponsors/hynek"
+Mastodon = "https://mastodon.social/@hynek"
+Twitter = "https://twitter.com/hynek"
 
 
 [tool.hatch.version]
