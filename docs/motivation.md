@@ -1,10 +1,21 @@
 # Motivation
 
+## The Need for Retries
+
 Retries are essential for making distributed systems resilient.
-Transient errors are unavoidable and can happen for the wildest reasons -- sometimes, one never finds out.
+Transient errors are unavoidable and can happen for the wildest reasons:
+
+- A network hiccup.
+- A remote service being *deployed*.
+- A remote service being *overloaded*.
+- A remote service *crashed* and is booting back up.
+- A cluster manager decided to reshuffle your containers.
+
+And sometimes, one never finds out because a [cosmic ray](https://en.wikipedia.org/wiki/Cosmic_ray) flipped a memory bit.
+The bigger the scale, the more likely it is that something will go wrong -- but the chance is never zero.
 
 
-## Dangers of Retries
+## The Dangers of Retries
 
 However, retries are also very dangerous if done naïvely.
 Simply repeating an operation until it succeeds can lead to [*cascading failures*](https://en.wikipedia.org/wiki/Cascading_failure) and [*thundering herds*](https://en.wikipedia.org/wiki/Thundering_herd_problem) and ultimately take down your whole system, just because a database had a brief hiccup.
