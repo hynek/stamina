@@ -47,6 +47,7 @@ def test_decorator_sync(log_output):
     ] == log_output
 
 
+@pytest.mark.anyio()
 async def test_decorator_async(log_output):
     """
     Retries decorators log correct name / arguments.
@@ -97,6 +98,7 @@ def test_context_sync(log_output):
     ] == log_output
 
 
+@pytest.mark.anyio()
 async def test_context_async(log_output):
     """
     Retries context blocks log correct name / arguments.

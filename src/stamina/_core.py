@@ -25,6 +25,29 @@ if sys.version_info >= (3, 10):
 else:
     from typing_extensions import ParamSpec
 
+try:
+    from sniffio import current_async_library
+except ImportError:  # pragma: no cover -- we always have sniffio in tests
+
+    def current_async_library() -> str:
+        return "asyncio"
+
+
+async def _smart_sleep(delay: float) -> None:
+    io = current_async_library()
+
+    if io == "asyncio":
+        import asyncio
+
+        await asyncio.sleep(delay)
+    elif io == "trio":
+        import trio
+
+        await trio.sleep(delay)
+    else:  # pragma: no cover
+        msg = f"Unknown async library: {io!r}"
+        raise RuntimeError(msg)
+
 
 T = TypeVar("T")
 P = ParamSpec("P")
@@ -113,7 +136,9 @@ class _LazyNoAsyncRetry:
     __slots__ = ()
 
     def __aiter__(self) -> _t.AsyncRetrying:
-        return _t.AsyncRetrying(reraise=True, stop=_STOP_NO_RETRY).__aiter__()
+        return _t.AsyncRetrying(
+            reraise=True, stop=_STOP_NO_RETRY, sleep=_smart_sleep
+        ).__aiter__()
 
 
 _LAZY_NO_ASYNC_RETRY = _LazyNoAsyncRetry()
@@ -197,6 +222,7 @@ class _RetryContextIterator:
     def __aiter__(self) -> AsyncIterator[Attempt]:
         if CONFIG.is_active:
             self._t_a_retrying = _t.AsyncRetrying(
+                sleep=_smart_sleep,
                 before_sleep=_make_before_sleep(
                     self._name, CONFIG, self._args, self._kw
                 ),

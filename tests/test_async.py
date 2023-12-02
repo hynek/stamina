@@ -9,6 +9,9 @@ import pytest
 import stamina
 
 
+pytestmark = pytest.mark.anyio
+
+
 @pytest.mark.parametrize("attempts", [None, 1])
 @pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
 @pytest.mark.parametrize("duration", [1, dt.timedelta(days=1)])
