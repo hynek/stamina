@@ -69,6 +69,7 @@ def retry_context(
     Arguments have the same meaning as for :func:`stamina.retry`.
 
     .. versionadded:: 23.1.0
+    .. versionadded:: 23.3.0 `Trio <https://trio.readthedocs.io/>`_ support.
     """
 
     return _RetryContextIterator.from_params(
@@ -349,6 +350,8 @@ def retry(
 
        All time-related parameters can now be specified as a
        :class:`datetime.timedelta`.
+
+    .. versionadded:: 23.3.0 `Trio <https://trio.readthedocs.io/>`_ support.
     """
     retry_ctx = _RetryContextIterator.from_params(
         on=on,
