@@ -49,7 +49,8 @@ for attempt in stamina.retry_context(on=httpx.HTTPError):
 
 ## Async
 
-Async works with the same functions and arguments -- you just have to use async functions and `async for`:
+Async works with the same functions and arguments for both [`asyncio`](https://docs.python.org/3/library/asyncio.html) and [Trio](https://trio.readthedocs.io/).
+Just use async functions and `async for`:
 
 ```python
 import datetime as dt
