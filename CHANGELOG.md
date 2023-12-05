@@ -15,6 +15,11 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/23.2.0...HEAD)
 
+### Added
+
+- [Trio](https://trio.readthedocs.io/) support!
+  [#43](https://github.com/hynek/stamina/pull/43)
+
 
 ## [23.2.0](https://github.com/hynek/stamina/compare/23.1.0...23.2.0) - 2023-10-30
 

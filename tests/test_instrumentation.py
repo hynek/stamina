@@ -135,6 +135,7 @@ class TestLogging:
             ("stamina", 30, "stamina.retry_scheduled")
         ] == caplog.record_tuples
 
+    @pytest.mark.anyio()
     async def test_async(self, caplog):
         """
         Async retries are logged.

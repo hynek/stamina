@@ -69,7 +69,9 @@ def _get_pkg(posargs: list[str]) -> tuple[str, list[str]]:
 
 
 @nox.session(python=ALL_SUPPORTED)
-@nox.parametrize("opt_deps", [[], ["structlog", "prometheus-client"]])
+@nox.parametrize(
+    "opt_deps", [[], ["structlog", "prometheus-client"], ["trio"]]
+)
 def tests(session: nox.Session, opt_deps: list[str]) -> None:
     pkg, posargs = _get_pkg(session.posargs)
 
