@@ -66,7 +66,7 @@ jobs:
             -- --installpkg dist/*.whl
 
       - name: Upload coverage data
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-data
           path: .coverage.*
@@ -103,7 +103,7 @@ jobs:
           python -Im coverage report --fail-under=100
 
       - name: Upload HTML report if check failed.
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: html-report
           path: htmlcov
