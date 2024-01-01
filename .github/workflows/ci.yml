@@ -51,7 +51,7 @@ jobs:
         run: |
           tar xf dist/*.tar.gz --strip-components=1
           rm -rf src
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
@@ -80,7 +80,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           cache: pip
           python-version-file: .python-version-default
@@ -130,7 +130,7 @@ jobs:
           name: Packages
           path: dist
       - run: tar xf dist/*.tar.gz --strip-components=1  # needed for config files
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
@@ -155,7 +155,7 @@ jobs:
           name: Packages
           path: dist
       - run: tar xf dist/*.tar.gz --strip-components=1  # needed for config files
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           cache: pip
           python-version-file: .python-version-default
@@ -177,7 +177,7 @@ jobs:
           name: Packages
           path: dist
       - run: tar xf dist/*.tar.gz --strip-components=1
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           # Keep in sync with .readthedocs.yaml
           python-version: "3.11"
@@ -198,7 +198,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           cache: pip
           python-version-file: .python-version-default
