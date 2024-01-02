@@ -5,7 +5,6 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
   workflow_dispatch:
 
 env:
@@ -25,7 +24,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: hynek/build-and-inspect-python-package@v1
+      - uses: hynek/build-and-inspect-python-package@v2
 
   tests:
     name: Tests on ${{ matrix.python-version }}
@@ -43,7 +42,7 @@ jobs:
 
     steps:
       - name: Download pre-built packages
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Packages
           path: dist
@@ -66,14 +65,14 @@ jobs:
             -- --installpkg dist/*.whl
 
       - name: Upload coverage data
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: coverage-data
+          name: coverage-data-${{ matrix.python-version }}
           path: .coverage.*
           if-no-files-found: ignore
 
   coverage:
-    name: Combine & check coverage.
+    name: Combine & check coverage
     runs-on: ubuntu-latest
     needs: tests
     if: always()
@@ -85,9 +84,10 @@ jobs:
           cache: pip
           python-version-file: .python-version-default
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: coverage-data
+          pattern: coverage-data-*
+          merge-multiple: true
 
       - name: Combine coverage & fail if it's <100%.
         run: |
@@ -97,13 +97,13 @@ jobs:
           python -Im coverage html --skip-covered --skip-empty
 
           # Report and write to summary.
-          python -Im coverage report | sed 's/^/    /' >> $GITHUB_STEP_SUMMARY
+          python -Im coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
 
           # Report again and fail if under 100%.
           python -Im coverage report --fail-under=100
 
       - name: Upload HTML report if check failed.
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: html-report
           path: htmlcov
@@ -125,7 +125,7 @@ jobs:
 
     steps:
       - name: Download pre-built packages
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Packages
           path: dist
@@ -150,7 +150,7 @@ jobs:
 
     steps:
       - name: Download pre-built packages
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Packages
           path: dist
@@ -162,7 +162,6 @@ jobs:
 
       - name: Prepare & run Nox
         run: |
-          python -Im pip install nox "tomli; python_version<'3.11'"
           python -Im nox \
             --sessions mypy_pkg
 
@@ -172,7 +171,7 @@ jobs:
     needs: build-package
     steps:
       - name: Download pre-built packages
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Packages
           path: dist
@@ -180,7 +179,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           # Keep in sync with .readthedocs.yaml
-          python-version: "3.11"
+          python-version: "3.12"
           cache: pip
 
       - name: Prepare & run Nox
@@ -209,7 +208,7 @@ jobs:
           python -Ic 'import stamina; print(stamina.__version__)'
 
   required-checks-pass:
-    name: Ensure everything required is passing for branch protection.
+    name: Ensure everything required is passing for branch protection
     if: always()
 
     needs:
