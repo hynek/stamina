@@ -207,10 +207,10 @@ class _RetryContextIterator:
 
     def __iter__(self) -> Iterator[Attempt]:
         if not CONFIG.is_active:
-            for r in _t.Retrying(
-                reraise=True, stop=_STOP_NO_RETRY
-            ):  # pragma: no cover -- it's always once + GeneratorExit
+            for r in _t.Retrying(reraise=True, stop=_STOP_NO_RETRY):
                 yield Attempt(r)
+
+            return
 
         for r in _t.Retrying(
             before_sleep=_make_before_sleep(
