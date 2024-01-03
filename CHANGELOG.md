@@ -15,6 +15,11 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/23.3.0...HEAD)
 
+### Fixed
+
+- Deactivating *stamina* made it retry sync blocks when they succeeded.
+  [#54](https://github.com/hynek/stamina/pull/54)
+
 
 ## [23.3.0](https://github.com/hynek/stamina/compare/23.2.0...23.3.0) - 2023-12-05
 

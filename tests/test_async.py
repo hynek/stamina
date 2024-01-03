@@ -127,6 +127,23 @@ async def test_retry_inactive():
     assert 1 == num_called
 
 
+async def test_retry_inactive_block():
+    """
+    If inactive, don't retry.
+    """
+    num_called = 0
+
+    stamina.set_active(False)
+
+    with pytest.raises(Exception, match="passed"):  # noqa: PT012
+        async for attempt in stamina.retry_context(on=ValueError):
+            with attempt:
+                num_called += 1
+                raise Exception("passed")
+
+    assert 1 == num_called
+
+
 async def test_retry_inactive_ok():
     """
     If inactive, the happy path still works.
@@ -141,6 +158,21 @@ async def test_retry_inactive_ok():
     stamina.set_active(False)
 
     await f()
+
+    assert 1 == num_called
+
+
+async def test_retry_inactive_block_ok():
+    """
+    If inactive, the happy path still works.
+    """
+    num_called = 0
+
+    stamina.set_active(False)
+
+    async for attempt in stamina.retry_context(on=ValueError):
+        with attempt:
+            num_called += 1
 
     assert 1 == num_called
 
