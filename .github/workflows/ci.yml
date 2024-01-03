@@ -46,7 +46,7 @@ jobs:
         with:
           name: Packages
           path: dist
-      - name: Get tests & config from sdist
+      - name: Get tests & config from sdist; delete src.
         run: |
           tar xf dist/*.tar.gz --strip-components=1
           rm -rf src
@@ -62,7 +62,8 @@ jobs:
           python -Im nox \
             --python ${{ matrix.python-version }} \
             --sessions tests \
-            -- --installpkg dist/*.whl
+            -- \
+            --installpkg dist/*.whl
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v4
@@ -129,7 +130,7 @@ jobs:
         with:
           name: Packages
           path: dist
-      - run: tar xf dist/*.tar.gz --strip-components=1  # needed for config files
+      - run: tar xf dist/*.tar.gz --strip-components=1
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
@@ -154,7 +155,7 @@ jobs:
         with:
           name: Packages
           path: dist
-      - run: tar xf dist/*.tar.gz --strip-components=1  # needed for config files
+      - run: tar xf dist/*.tar.gz --strip-components=1
       - uses: actions/setup-python@v5
         with:
           cache: pip
