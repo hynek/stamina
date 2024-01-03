@@ -17,7 +17,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ### Fixed
 
-- Deactivating *stamina* made it retry sync blocks when they succeeded.
+- *stamina* doesn't retry successful blocks when it's deactivated anymore (yes, you read it right).
   [#54](https://github.com/hynek/stamina/pull/54)
 
 
