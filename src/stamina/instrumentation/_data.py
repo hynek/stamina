@@ -30,14 +30,15 @@ class RetryDetails:
 
         kwargs: Keyword arguments that were passed to the callable.
 
-        retry_num: Number of the retry attempt. Starts at 1 after the first
-            failure.
+        retry_num:
+            Number of the retry attempt. Starts at 1 after the first failure.
 
-        wait_for: Time in seconds that *stamina* will wait before the next
-            attempt.
+        wait_for:
+            Time in seconds that *stamina* will wait before the next attempt.
 
-        waited_so_far: Time in seconds that *stamina* has waited so far for the
-            current callable.
+        waited_so_far:
+            Time in seconds that *stamina* has waited so far for the current
+            callable.
 
         caused_by: Exception that caused the retry attempt.
 

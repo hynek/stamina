@@ -76,11 +76,11 @@ You will find the built documentation in `docs/_build/html`.
       """
       Do something.
 
-      Parameters:
-        x: A very important parameter.
+      Args:
+          x: A very important parameter.
 
       Returns:
-        The result of doing something.
+          The result of doing something.
       """
   ```
 

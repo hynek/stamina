@@ -58,9 +58,9 @@ def set_on_retry_hooks(
     Set hooks that are called after a retry has been scheduled.
 
     Args:
-        hooks: Hooks to call after a retry has been scheduled. Passing
-            None resets to default. To deactivate instrumentation, pass an
-            empty iterable.
+        hooks:
+            Hooks to call after a retry has been scheduled. Passing None resets
+            to default. To deactivate instrumentation, pass an empty iterable.
 
     .. versionadded:: 23.2.0
     """

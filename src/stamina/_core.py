@@ -325,29 +325,30 @@ def retry(
 
     All float-based time parameters are in seconds.
 
-    Parameters:
-        on: An Exception or a tuple of Exceptions on which the decorated
+    Args:
+        on:
+            An Exception or a tuple of Exceptions on which the decorated
             callable will be retried. There is no default -- you *must* pass
             this explicitly.
 
-        attempts: Maximum total number of attempts. Can be combined with
-            *timeout*.
+        attempts:
+            Maximum total number of attempts. Can be combined with *timeout*.
 
-        timeout: Maximum total time for all retries. Can be combined with
+        timeout:
+            Maximum total time for all retries. Can be combined with
             *attempts*.
 
         wait_initial: Minimum backoff before the *first* retry.
 
         wait_max: Maximum backoff time between retries at any time.
 
-        wait_jitter: Maximum *jitter* that is added to retry back-off delays
-            (the actual jitter added is a random number between 0 and
-            *wait_jitter*)
+        wait_jitter:
+            Maximum *jitter* that is added to retry back-off delays (the actual
+            jitter added is a random number between 0 and *wait_jitter*)
 
         wait_exp_base: The exponential base used to compute the retry backoff.
 
     .. versionchanged:: 23.1.0
-
        All time-related parameters can now be specified as a
        :class:`datetime.timedelta`.
 
