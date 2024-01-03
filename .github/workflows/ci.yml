@@ -163,6 +163,7 @@ jobs:
 
       - name: Prepare & run Nox
         run: |
+          python -Im pip install nox
           python -Im nox \
             --sessions mypy_pkg
 
