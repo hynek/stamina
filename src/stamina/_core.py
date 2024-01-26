@@ -175,22 +175,30 @@ class _RetryContextIterator:
             _t_kw={
                 "retry": _t.retry_if_exception_type(on),
                 "wait": _t.wait_exponential_jitter(
-                    initial=wait_initial.total_seconds()
-                    if isinstance(wait_initial, dt.timedelta)
-                    else wait_initial,
-                    max=wait_max.total_seconds()
-                    if isinstance(wait_max, dt.timedelta)
-                    else wait_max,
+                    initial=(
+                        wait_initial.total_seconds()
+                        if isinstance(wait_initial, dt.timedelta)
+                        else wait_initial
+                    ),
+                    max=(
+                        wait_max.total_seconds()
+                        if isinstance(wait_max, dt.timedelta)
+                        else wait_max
+                    ),
                     exp_base=wait_exp_base,
-                    jitter=wait_jitter.total_seconds()
-                    if isinstance(wait_jitter, dt.timedelta)
-                    else wait_jitter,
+                    jitter=(
+                        wait_jitter.total_seconds()
+                        if isinstance(wait_jitter, dt.timedelta)
+                        else wait_jitter
+                    ),
                 ),
                 "stop": _make_stop(
                     attempts=attempts,
-                    timeout=timeout.total_seconds()
-                    if isinstance(timeout, dt.timedelta)
-                    else timeout,
+                    timeout=(
+                        timeout.total_seconds()
+                        if isinstance(timeout, dt.timedelta)
+                        else timeout
+                    ),
                 ),
                 "reraise": True,
             },

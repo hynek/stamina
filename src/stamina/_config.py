@@ -23,9 +23,9 @@ class _Config:
 
     lock: Lock
     _is_active: bool
-    _on_retry: tuple[RetryHook, ...] | tuple[
-        RetryHook | RetryHookFactory, ...
-    ] | None
+    _on_retry: (
+        tuple[RetryHook, ...] | tuple[RetryHook | RetryHookFactory, ...] | None
+    )
     _get_on_retry: Callable[[], tuple[RetryHook, ...]]
 
     def __init__(self, lock: Lock) -> None:

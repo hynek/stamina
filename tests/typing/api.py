@@ -27,33 +27,27 @@ from stamina.instrumentation import (
 
 
 @retry(on=ValueError)
-def just_exc() -> None:
-    ...
+def just_exc() -> None: ...
 
 
 @retry(on=TypeError)
-async def just_exc_async() -> None:
-    ...
+async def just_exc_async() -> None: ...
 
 
 @retry(on=TypeError, timeout=13.0)
-def exc_timeout() -> None:
-    ...
+def exc_timeout() -> None: ...
 
 
 @retry(on=TypeError, timeout=dt.timedelta(seconds=13.0))
-def exc_timeout_timedelta() -> None:
-    ...
+def exc_timeout_timedelta() -> None: ...
 
 
 @retry(on=TypeError, timeout=13.0, attempts=10)
-def exc_timeout_attempts() -> None:
-    ...
+def exc_timeout_attempts() -> None: ...
 
 
 @retry(on=TypeError, timeout=None, attempts=None)
-def exc_timeout_attempts_none() -> None:
-    ...
+def exc_timeout_attempts_none() -> None: ...
 
 
 @retry(
@@ -63,8 +57,7 @@ def exc_timeout_attempts_none() -> None:
     wait_jitter=1.0,
     wait_exp_base=2.0,
 )
-def exc_tune_waiting() -> None:
-    ...
+def exc_tune_waiting() -> None: ...
 
 
 @retry(
@@ -74,8 +67,7 @@ def exc_tune_waiting() -> None:
     wait_jitter=3,
     wait_exp_base=4,
 )
-def exc_tune_waiting_ints() -> None:
-    ...
+def exc_tune_waiting_ints() -> None: ...
 
 
 one_sec = dt.timedelta(seconds=1.0)
@@ -88,8 +80,7 @@ one_sec = dt.timedelta(seconds=1.0)
     wait_max=one_sec,
     wait_jitter=one_sec,
 )
-def exc_tune_waiting_timedelta() -> None:
-    ...
+def exc_tune_waiting_timedelta() -> None: ...
 
 
 set_active(False)

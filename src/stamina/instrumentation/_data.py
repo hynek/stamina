@@ -75,8 +75,7 @@ class RetryHook(Protocol):
     .. versionadded:: 23.2.0
     """
 
-    def __call__(self, details: RetryDetails) -> None:
-        ...
+    def __call__(self, details: RetryDetails) -> None: ...
 
 
 @dataclass(frozen=True)
