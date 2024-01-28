@@ -46,6 +46,21 @@ for attempt in stamina.retry_context(on=httpx.HTTPError):
         resp.raise_for_status()
 ```
 
+If you want to retry just one function call, *stamina* comes with an even easier way in the shape of {class}`stamina.RetryingCaller` and {class}`stamina.AsyncRetryingCaller`:
+
+```python
+def do_something_with_url(url, some_kw):
+    resp = httpx.get(url)
+    resp.raise_for_status()
+    ...
+
+rc = stamina.RetryingCaller(on=httpx.HTTPError)
+
+rc(do_something_with_url, f"https://httpbin.org/status/404", some_kw=42)
+```
+
+The last line calls `do_something_with_url(f"https://httpbin.org/status/404", some_kw=42)` and retries on `httpx.HTTPError`.
+
 
 ## Async
 

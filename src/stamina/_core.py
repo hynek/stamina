@@ -12,7 +12,7 @@ from dataclasses import dataclass, replace
 from functools import wraps
 from inspect import iscoroutinefunction
 from types import TracebackType
-from typing import AsyncIterator, Iterator, TypeVar
+from typing import AsyncIterator, Awaitable, Iterator, TypedDict, TypeVar
 
 import tenacity as _t
 
@@ -124,6 +124,95 @@ class Attempt:
         return self._t_attempt.__exit__(  # type: ignore[no-any-return]
             exc_type, exc_value, traceback
         )
+
+
+class RetryKWs(TypedDict):
+    on: type[Exception] | tuple[type[Exception], ...]
+    attempts: int | None
+    timeout: float | dt.timedelta | None
+    wait_initial: float | dt.timedelta
+    wait_max: float | dt.timedelta
+    wait_jitter: float | dt.timedelta
+    wait_exp_base: float
+
+
+class BaseRetryingCaller:
+    """
+    .. versionadded:: 24.2.0
+    """
+
+    __slots__ = ("_context_kws",)
+
+    _context_kws: RetryKWs
+
+    def __init__(
+        self,
+        on: type[Exception] | tuple[type[Exception], ...],
+        attempts: int | None = 10,
+        timeout: float | dt.timedelta | None = 45.0,
+        wait_initial: float | dt.timedelta = 0.1,
+        wait_max: float | dt.timedelta = 5.0,
+        wait_jitter: float | dt.timedelta = 1.0,
+        wait_exp_base: float = 2.0,
+    ):
+        self._context_kws = {
+            "on": on,
+            "attempts": attempts,
+            "timeout": timeout,
+            "wait_initial": wait_initial,
+            "wait_max": wait_max,
+            "wait_jitter": wait_jitter,
+            "wait_exp_base": wait_exp_base,
+        }
+
+    def __repr__(self) -> str:
+        on = guess_name(self._context_kws["on"])
+        kws = ", ".join(
+            f"{k}={self._context_kws[k]!r}"  # type: ignore[literal-required]
+            for k in sorted(self._context_kws)
+            if k != "on"
+        )
+        return f"<{self.__class__.__name__}(on={on}, {kws})>"
+
+
+class RetryingCaller(BaseRetryingCaller):
+    """
+    An object that will call your callable with retries.
+
+    Instances of `RetryingCaller` may be reused because they create a new
+    :func:`retry_context` iterator on each call.
+
+    .. versionadded:: 24.2.0
+    """
+
+    def __call__(
+        self, func: Callable[P, T], /, *args: P.args, **kw: P.kwargs
+    ) -> T:
+        for attempt in retry_context(**self._context_kws):
+            with attempt:
+                return func(*args, **kw)
+
+        raise SystemError("unreachable")  # pragma: no cover  # noqa: EM101
+
+
+class AsyncRetryingCaller(BaseRetryingCaller):
+    """
+    An object that will call your async callable with retries.
+
+    Instances of `AsyncRetryingCaller` may be reused because they create a new
+    :func:`retry_context` iterator on each call.
+
+    .. versionadded:: 24.2.0
+    """
+
+    async def __call__(
+        self, func: Callable[P, Awaitable[T]], /, *args: P.args, **kw: P.kwargs
+    ) -> T:
+        async for attempt in retry_context(**self._context_kws):
+            with attempt:
+                return await func(*args, **kw)
+
+        raise SystemError("unreachable")  # pragma: no cover  # noqa: EM101
 
 
 _STOP_NO_RETRY = _t.stop_after_attempt(1)

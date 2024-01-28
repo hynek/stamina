@@ -4,7 +4,13 @@
 
 from . import instrumentation
 from ._config import is_active, set_active
-from ._core import Attempt, retry, retry_context
+from ._core import (
+    AsyncRetryingCaller,
+    Attempt,
+    RetryingCaller,
+    retry,
+    retry_context,
+)
 
 
 __all__ = [
@@ -14,6 +20,8 @@ __all__ = [
     "is_active",
     "set_active",
     "instrumentation",
+    "RetryingCaller",
+    "AsyncRetryingCaller",
 ]
 
 

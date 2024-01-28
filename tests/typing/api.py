@@ -12,6 +12,8 @@ from __future__ import annotations
 import datetime as dt
 
 from stamina import (
+    AsyncRetryingCaller,
+    RetryingCaller,
     is_active,
     retry,
     retry_context,
@@ -125,3 +127,22 @@ async def f() -> None:
     ):
         with attempt:
             pass
+
+
+def sync_f(x: int, foo: str) -> bool:
+    return True
+
+
+rc = RetryingCaller(on=ValueError, timeout=13.0, attempts=10)
+b: bool = rc(sync_f, 1, foo="bar")
+
+
+async def async_f(x: int, foo: str) -> bool:
+    return True
+
+
+arc = AsyncRetryingCaller(on=ValueError, timeout=13.0, attempts=10)
+
+
+async def g() -> bool:
+    return await arc(async_f, 1, foo="bar")

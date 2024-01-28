@@ -209,3 +209,27 @@ async def test_retry_blocks_can_be_disabled():
                 raise Exception("passed")
 
     assert 1 == num_called
+
+
+class TestAsyncRetryingCaller:
+    async def test_retries(self):
+        """
+        Retries if the specific error is raised. Arguments are passed through.
+        """
+        i = 0
+
+        async def f(*args, **kw):
+            nonlocal i
+            if i < 1:
+                i += 1
+                raise ValueError
+
+            return args, kw
+
+        arc = stamina.AsyncRetryingCaller(on=ValueError)
+
+        args, kw = await arc(f, 42, foo="bar")
+
+        assert 1 == i
+        assert (42,) == args
+        assert {"foo": "bar"} == kw
