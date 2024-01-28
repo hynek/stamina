@@ -74,7 +74,7 @@ do_something_with_url(f"https://httpbin.org/status/404", some_kw=42)
 ```
 
 and retry on `httpx.HTTPError` and as before, the type hints are preserved.
-You can decide yourself whether you want to share only the retry configuration, or also the exception type to retry on.
+It's up to you whether you want to share only the retry configuration or the exception type to retry on, too.
 
 
 ## Async
