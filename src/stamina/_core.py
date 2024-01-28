@@ -138,7 +138,8 @@ class RetryKWs(TypedDict):
 
 class BaseRetryingCaller:
     """
-    .. versionadded:: 24.2.0
+    Simple base class that transforms retry parameters into a dictionary that
+    can be `**`-passed into `retry_context`.
     """
 
     __slots__ = ("_context_kws",)
