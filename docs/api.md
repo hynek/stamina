@@ -16,7 +16,7 @@
           resp = httpx.get(url).raise_for_status()
           ...
 
-      rc = stamina.RetryingCaller()
+      rc = stamina.RetryingCaller(attempts=5)
 
       rc(httpx.HTTPError, do_something_with_url, f"https://httpbin.org/status/404", some_kw=42)
 

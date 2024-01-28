@@ -176,6 +176,8 @@ class RetryingCaller(BaseRetryingCaller):
     """
     Call your callables with retries.
 
+    Arguments have the same meaning as for :func:`stamina.retry`.
+
     Tip:
         Instances of ``RetryingCaller`` may be reused because they internally
         create a new :func:`retry_context` iterator on each call.

@@ -57,7 +57,7 @@ def do_something_with_url(url, some_kw):
     resp.raise_for_status()
     ...
 
-rc = stamina.RetryingCaller()
+rc = stamina.RetryingCaller(attempts=5)
 
 rc(httpx.HTTPError, do_something_with_url, f"https://httpbin.org/status/404", some_kw=42)
 
@@ -74,6 +74,7 @@ do_something_with_url(f"https://httpbin.org/status/404", some_kw=42)
 ```
 
 and retry on `httpx.HTTPError`.
+You can decide yourself whether you want to share only the retry configuration, or also the exception type to retry on.
 
 
 ## Async
