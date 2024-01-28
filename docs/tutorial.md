@@ -49,7 +49,7 @@ for attempt in stamina.retry_context(on=httpx.HTTPError):
 
 ## Retry One Function or Method Call
 
-If you want to retry just one function call, *stamina* comes with an even easier way in the shape of {class}`stamina.RetryingCaller` and {class}`stamina.AsyncRetryingCaller`:
+If you want to retry just one function or method call, *stamina* comes with an even easier way in the shape of {class}`stamina.RetryingCaller` and {class}`stamina.AsyncRetryingCaller`:
 
 ```python
 def do_something_with_url(url, some_kw):
