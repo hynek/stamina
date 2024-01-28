@@ -18,7 +18,13 @@ else:
     import tomli as tomllib
 
 
-nox.options.sessions = ["pre_commit", "tests", "mypy_api", "mypy_pkg"]
+nox.options.sessions = [
+    "pre_commit",
+    "tests",
+    "mypy_api",
+    "pyright_api",
+    "mypy_pkg",
+]
 nox.options.reuse_existing_virtualenvs = True
 nox.options.error_on_external_run = True
 
@@ -43,6 +49,13 @@ def mypy_api(session: nox.Session) -> None:
     session.install(".[typing]", "structlog", "prometheus-client")
 
     session.run("mypy", "tests/typing")
+
+
+@nox.session(python=ALL_SUPPORTED)
+def pyright_api(session: nox.Session) -> None:
+    session.install(".[typing]", "pyright", "structlog", "prometheus-client")
+
+    session.run("pyright", "tests/typing")
 
 
 @nox.session

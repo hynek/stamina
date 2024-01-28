@@ -137,12 +137,19 @@ jobs:
           allow-prereleases: true
           cache: pip
 
-      - name: Prepare & run Nox
+      - run: python -Im pip install nox "tomli; python_version<'3.11'"
+
+      - name: Check using Mypy
         run: |
-          python -Im pip install nox "tomli; python_version<'3.11'"
           python -Im nox \
             --python ${{ matrix.python-version }} \
             --sessions mypy_api
+
+      - name: Check using Pyright
+        run: |
+          python -Im nox \
+            --python ${{ matrix.python-version }} \
+            --sessions pyright_api
 
   mypy-pkg:
     name: Type-check package
