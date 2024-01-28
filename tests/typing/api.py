@@ -13,6 +13,8 @@ import datetime as dt
 
 from stamina import (
     AsyncRetryingCaller,
+    BoundAsyncRetryingCaller,
+    BoundRetryingCaller,
     RetryingCaller,
     is_active,
     retry,
@@ -133,16 +135,24 @@ def sync_f(x: int, foo: str) -> bool:
     return True
 
 
-rc = RetryingCaller(on=ValueError, timeout=13.0, attempts=10)
-b: bool = rc(sync_f, 1, foo="bar")
+rc = RetryingCaller(timeout=13.0, attempts=10)
+
+bound_rc: BoundRetryingCaller = rc.on(ValueError)
+
+b: bool = rc(ValueError, sync_f, 1, foo="bar")
+b = bound_rc(sync_f, 1, foo="bar")
 
 
 async def async_f(x: int, foo: str) -> bool:
     return True
 
 
-arc = AsyncRetryingCaller(on=ValueError, timeout=13.0, attempts=10)
+arc = AsyncRetryingCaller(timeout=13.0, attempts=10)
+bound_arc: BoundAsyncRetryingCaller = arc.on(ValueError)
 
 
 async def g() -> bool:
-    return await arc(async_f, 1, foo="bar")
+    global b  # noqa: PLW0603
+
+    b = await arc(KeyError, async_f, 1, foo="bar")
+    return await bound_arc(async_f, 1, foo="bar")

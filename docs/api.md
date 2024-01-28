@@ -8,21 +8,39 @@
 .. autoclass:: Attempt
    :members: num
 .. autoclass:: RetryingCaller
+   :members: on, __call__
 
    For example::
 
       def do_something_with_url(url, some_kw):
-          resp = httpx.get(url)
-          resp.raise_for_status()
+          resp = httpx.get(url).raise_for_status()
           ...
 
-      rc = stamina.RetryingCaller(on=httpx.HTTPError)
+      rc = stamina.RetryingCaller()
 
-      rc(do_something_with_url, f"https://httpbin.org/status/404", some_kw=42)
+      rc(httpx.HTTPError, do_something_with_url, f"https://httpbin.org/status/404", some_kw=42)
 
-   Runs ``do_something_with_url(f"https://httpbin.org/status/404", some_kw=42)`` and retries on ``httpx.HTTPError``.
+      # Equivalent:
+      bound_rc = rc.on(httpx.HTTPError)
+
+      bound_rc(do_something_with_url, f"https://httpbin.org/status/404", some_kw=42)
+
+   Both calls to ``rc`` and ``bound_rc`` run
+
+   .. code-block:: python
+
+      do_something_with_url(f"https://httpbin.org/status/404", some_kw=42)
+
+   and retry on ``httpx.HTTPError``.
+
+.. autoclass:: BoundRetryingCaller
+   :members: __call__
 
 .. autoclass:: AsyncRetryingCaller
+   :members: on, __call__
+
+.. autoclass:: BoundAsyncRetryingCaller
+   :members: __call__
 ```
 
 
