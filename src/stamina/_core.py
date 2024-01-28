@@ -189,7 +189,7 @@ class RetryingCaller(BaseRetryingCaller):
         callable_: Callable[P, T],
         /,
         *args: P.args,
-        **kw: P.kwargs,
+        **kwargs: P.kwargs,
     ) -> T:
         r"""
         Call ``callable_(*args, **kw)`` with retries if *on* is raised.
@@ -205,7 +205,7 @@ class RetryingCaller(BaseRetryingCaller):
         """
         for attempt in retry_context(on, **self._context_kws):
             with attempt:
-                return callable_(*args, **kw)
+                return callable_(*args, **kwargs)
 
         raise SystemError("unreachable")  # pragma: no cover  # noqa: EM101
 
@@ -251,13 +251,13 @@ class BoundRetryingCaller:
         )
 
     def __call__(
-        self, callable_: Callable[P, T], /, *args: P.args, **kw: P.kwargs
+        self, callable_: Callable[P, T], /, *args: P.args, **kwargs: P.kwargs
     ) -> T:
         """
         Same as :func:`RetryingCaller.__call__`, except retry on the exception
         that is bound to this instance.
         """
-        return self._caller(self._on, callable_, *args, **kw)
+        return self._caller(self._on, callable_, *args, **kwargs)
 
 
 class AsyncRetryingCaller(BaseRetryingCaller):
@@ -273,14 +273,14 @@ class AsyncRetryingCaller(BaseRetryingCaller):
         callable_: Callable[P, Awaitable[T]],
         /,
         *args: P.args,
-        **kw: P.kwargs,
+        **kwargs: P.kwargs,
     ) -> T:
         """
         Same as :meth:`RetryingCaller.__call__`, but *callable_* is awaited.
         """
         async for attempt in retry_context(on, **self._context_kws):
             with attempt:
-                return await callable_(*args, **kw)
+                return await callable_(*args, **kwargs)
 
         raise SystemError("unreachable")  # pragma: no cover  # noqa: EM101
 
@@ -328,13 +328,13 @@ class BoundAsyncRetryingCaller:
         callable_: Callable[P, Awaitable[T]],
         /,
         *args: P.args,
-        **kw: P.kwargs,
+        **kwargs: P.kwargs,
     ) -> T:
         """
         Same as :func:`AsyncRetryingCaller.__call__`, except retry on the
         exception that is bound to this instance.
         """
-        return await self._caller(self._on, callable_, *args, **kw)
+        return await self._caller(self._on, callable_, *args, **kwargs)
 
 
 _STOP_NO_RETRY = _t.stop_after_attempt(1)
