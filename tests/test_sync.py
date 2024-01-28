@@ -172,3 +172,47 @@ class TestMakeStop:
         If all conditions are None, return stop_never.
         """
         assert tenacity.stop_never is _make_stop(attempts=None, timeout=None)
+
+
+class TestRetryingCaller:
+    def test_retries(self):
+        """
+        Retries if the specific error is raised. Arguments are passed through.
+        """
+        i = 0
+
+        def f(*args, **kw):
+            nonlocal i
+            if i < 1:
+                i += 1
+                raise ValueError
+
+            return args, kw
+
+        rc = stamina.RetryingCaller(on=ValueError)
+
+        args, kw = rc(f, 42, foo="bar")
+
+        assert 1 == i
+        assert (42,) == args
+        assert {"foo": "bar"} == kw
+
+    def test_repr(self):
+        """
+        repr() is useful.
+        """
+        rc = stamina.RetryingCaller(
+            on=ValueError,
+            attempts=42,
+            timeout=13.0,
+            wait_initial=23,
+            wait_max=123,
+            wait_jitter=0.42,
+            wait_exp_base=666,
+        )
+
+        assert (
+            "<RetryingCaller(on=ValueError, attempts=42, timeout=13.0, "
+            "wait_exp_base=666, wait_initial=23, wait_jitter=0.42, "
+            "wait_max=123)>"
+        ) == repr(rc)

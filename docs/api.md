@@ -7,6 +7,8 @@
 .. autofunction:: retry_context
 .. autoclass:: Attempt
    :members: num
+.. autoclass:: RetryingCaller
+.. autoclass:: AsyncRetryingCaller
 ```
 
 
