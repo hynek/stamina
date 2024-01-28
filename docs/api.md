@@ -8,6 +8,20 @@
 .. autoclass:: Attempt
    :members: num
 .. autoclass:: RetryingCaller
+
+   For example::
+
+      def do_something_with_url(url, some_kw):
+          resp = httpx.get(url)
+          resp.raise_for_status()
+          ...
+
+      rc = stamina.RetryingCaller(on=httpx.HTTPError)
+
+      rc(do_something_with_url, f"https://httpbin.org/status/404", some_kw=42)
+
+   Runs ``do_something_with_url(f"https://httpbin.org/status/404", some_kw=42)`` and retries on ``httpx.HTTPError``.
+
 .. autoclass:: AsyncRetryingCaller
 ```
 

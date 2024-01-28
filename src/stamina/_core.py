@@ -177,10 +177,11 @@ class BaseRetryingCaller:
 
 class RetryingCaller(BaseRetryingCaller):
     """
-    An object that will call your callable with retries.
+    Call your callables with retries.
 
-    Instances of `RetryingCaller` may be reused because they create a new
-    :func:`retry_context` iterator on each call.
+    Tip:
+        Instances of ``RetryingCaller`` may be reused because they create a new
+        :func:`retry_context` iterator on each call.
 
     .. versionadded:: 24.2.0
     """
@@ -197,10 +198,7 @@ class RetryingCaller(BaseRetryingCaller):
 
 class AsyncRetryingCaller(BaseRetryingCaller):
     """
-    An object that will call your async callable with retries.
-
-    Instances of `AsyncRetryingCaller` may be reused because they create a new
-    :func:`retry_context` iterator on each call.
+    Same as :class:`RetryingCaller`, but for async callables.
 
     .. versionadded:: 24.2.0
     """
