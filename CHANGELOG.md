@@ -17,7 +17,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ### Added
 
-- `stamina.RetryingCaller` and `stamina.AsyncRetryingCaller` that allow even easier retries single callables.
+- `stamina.RetryingCaller` and `stamina.AsyncRetryingCaller` that allow even easier retries of single callables.
   [#56](https://github.com/hynek/stamina/pull/56)
 
 
