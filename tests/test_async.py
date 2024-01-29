@@ -226,10 +226,34 @@ class TestAsyncRetryingCaller:
 
             return args, kw
 
-        arc = stamina.AsyncRetryingCaller(on=ValueError)
+        arc = stamina.AsyncRetryingCaller().on(ValueError)
 
         args, kw = await arc(f, 42, foo="bar")
 
         assert 1 == i
         assert (42,) == args
         assert {"foo": "bar"} == kw
+
+    def test_repr(self):
+        """
+        repr() is useful
+        """
+        arc = stamina.AsyncRetryingCaller(
+            attempts=42,
+            timeout=13.0,
+            wait_initial=23,
+            wait_max=123,
+            wait_jitter=0.42,
+            wait_exp_base=666,
+        )
+
+        r = repr(arc)
+
+        assert (
+            "<AsyncRetryingCaller(attempts=42, timeout=13.0, "
+            "wait_exp_base=666, wait_initial=23, wait_jitter=0.42, "
+            "wait_max=123)>"
+        ) == r
+        assert f"<BoundAsyncRetryingCaller(ValueError, {r})>" == repr(
+            arc.on(ValueError)
+        )

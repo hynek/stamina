@@ -127,7 +127,6 @@ class Attempt:
 
 
 class RetryKWs(TypedDict):
-    on: type[Exception] | tuple[type[Exception], ...]
     attempts: int | None
     timeout: float | dt.timedelta | None
     wait_initial: float | dt.timedelta
@@ -148,7 +147,6 @@ class BaseRetryingCaller:
 
     def __init__(
         self,
-        on: type[Exception] | tuple[type[Exception], ...],
         attempts: int | None = 10,
         timeout: float | dt.timedelta | None = 45.0,
         wait_initial: float | dt.timedelta = 0.1,
@@ -157,7 +155,6 @@ class BaseRetryingCaller:
         wait_exp_base: float = 2.0,
     ):
         self._context_kws = {
-            "on": on,
             "attempts": attempts,
             "timeout": timeout,
             "wait_initial": wait_initial,
@@ -167,34 +164,105 @@ class BaseRetryingCaller:
         }
 
     def __repr__(self) -> str:
-        on = guess_name(self._context_kws["on"])
         kws = ", ".join(
             f"{k}={self._context_kws[k]!r}"  # type: ignore[literal-required]
             for k in sorted(self._context_kws)
             if k != "on"
         )
-        return f"<{self.__class__.__name__}(on={on}, {kws})>"
+        return f"<{self.__class__.__name__}({kws})>"
 
 
 class RetryingCaller(BaseRetryingCaller):
     """
     Call your callables with retries.
 
+    Arguments have the same meaning as for :func:`stamina.retry`.
+
     Tip:
-        Instances of ``RetryingCaller`` may be reused because they create a new
-        :func:`retry_context` iterator on each call.
+        Instances of ``RetryingCaller`` may be reused because they internally
+        create a new :func:`retry_context` iterator on each call.
 
     .. versionadded:: 24.2.0
     """
 
     def __call__(
-        self, func: Callable[P, T], /, *args: P.args, **kw: P.kwargs
+        self,
+        on: type[Exception] | tuple[type[Exception], ...],
+        callable_: Callable[P, T],
+        /,
+        *args: P.args,
+        **kwargs: P.kwargs,
     ) -> T:
-        for attempt in retry_context(**self._context_kws):
-            with attempt:
-                return func(*args, **kw)
+        r"""
+        Call ``callable_(*args, **kw)`` with retries if *on* is raised.
 
-        raise SystemError("unreachable")  # pragma: no cover  # noqa: EM101
+        Args:
+            on: Exception(s) to retry on.
+
+            callable\_: Callable to call.
+
+            args: Positional arguments to pass to *callable_*.
+
+            kw: Keyword arguments to pass to *callable_*.
+        """
+        for attempt in retry_context(on, **self._context_kws):
+            with attempt:
+                return callable_(*args, **kwargs)
+
+        raise SystemError("unreachable")  # noqa: EM101
+
+    def on(
+        self, on: type[Exception] | tuple[type[Exception], ...], /
+    ) -> BoundRetryingCaller:
+        """
+        Create a new instance of :class:`BoundRetryingCaller` with the same
+        parameters, but bound to a specific exception type.
+
+        .. versionadded:: 24.2.0
+        """
+        # This should be a `functools.partial`, but unfortunately it's
+        # impossible to provide a nicely typed API with it, so we use a
+        # separate class.
+        return BoundRetryingCaller(self, on)
+
+
+class BoundRetryingCaller:
+    """
+    Same as :class:`RetryingCaller`, but pre-bound to a specific exception
+    type.
+
+    Caution:
+        Returned by :meth:`RetryingCaller.on` -- do not instantiate directly.
+
+    .. versionadded:: 24.2.0
+    """
+
+    __slots__ = ("_caller", "_on")
+
+    _caller: RetryingCaller
+    _on: type[Exception] | tuple[type[Exception], ...]
+
+    def __init__(
+        self,
+        caller: RetryingCaller,
+        on: type[Exception] | tuple[type[Exception], ...],
+    ):
+        self._caller = caller
+        self._on = on
+
+    def __repr__(self) -> str:
+        return (
+            f"<BoundRetryingCaller({guess_name(self._on)}, {self._caller!r})>"
+        )
+
+    def __call__(
+        self, callable_: Callable[P, T], /, *args: P.args, **kwargs: P.kwargs
+    ) -> T:
+        """
+        Same as :func:`RetryingCaller.__call__`, except retry on the exception
+        that is bound to this instance.
+        """
+        return self._caller(self._on, callable_, *args, **kwargs)
 
 
 class AsyncRetryingCaller(BaseRetryingCaller):
@@ -205,13 +273,73 @@ class AsyncRetryingCaller(BaseRetryingCaller):
     """
 
     async def __call__(
-        self, func: Callable[P, Awaitable[T]], /, *args: P.args, **kw: P.kwargs
+        self,
+        on: type[Exception] | tuple[type[Exception], ...],
+        callable_: Callable[P, Awaitable[T]],
+        /,
+        *args: P.args,
+        **kwargs: P.kwargs,
     ) -> T:
-        async for attempt in retry_context(**self._context_kws):
+        """
+        Same as :meth:`RetryingCaller.__call__`, but *callable_* is awaited.
+        """
+        async for attempt in retry_context(on, **self._context_kws):
             with attempt:
-                return await func(*args, **kw)
+                return await callable_(*args, **kwargs)
 
-        raise SystemError("unreachable")  # pragma: no cover  # noqa: EM101
+        raise SystemError("unreachable")  # noqa: EM101
+
+    def on(
+        self, on: type[Exception] | tuple[type[Exception], ...], /
+    ) -> BoundAsyncRetryingCaller:
+        """
+        Create a new instance of :class:`BoundAsyncRetryingCaller` with the
+        same parameters, but bound to a specific exception type.
+
+        .. versionadded:: 24.2.0
+        """
+        return BoundAsyncRetryingCaller(self, on)
+
+
+class BoundAsyncRetryingCaller:
+    """
+    Same as :class:`BoundRetryingCaller`, but for async callables.
+
+    Caution:
+        Returned by :meth:`AsyncRetryingCaller.on` -- do not instantiate
+        directly.
+
+    .. versionadded:: 24.2.0
+    """
+
+    __slots__ = ("_caller", "_on")
+
+    _caller: AsyncRetryingCaller
+    _on: type[Exception] | tuple[type[Exception], ...]
+
+    def __init__(
+        self,
+        caller: AsyncRetryingCaller,
+        on: type[Exception] | tuple[type[Exception], ...],
+    ):
+        self._caller = caller
+        self._on = on
+
+    def __repr__(self) -> str:
+        return f"<BoundAsyncRetryingCaller({guess_name(self._on)}, {self._caller!r})>"
+
+    async def __call__(
+        self,
+        callable_: Callable[P, Awaitable[T]],
+        /,
+        *args: P.args,
+        **kwargs: P.kwargs,
+    ) -> T:
+        """
+        Same as :func:`AsyncRetryingCaller.__call__`, except retry on the
+        exception that is bound to this instance.
+        """
+        return await self._caller(self._on, callable_, *args, **kwargs)
 
 
 _STOP_NO_RETRY = _t.stop_after_attempt(1)

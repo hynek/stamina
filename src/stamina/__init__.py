@@ -7,6 +7,8 @@ from ._config import is_active, set_active
 from ._core import (
     AsyncRetryingCaller,
     Attempt,
+    BoundAsyncRetryingCaller,
+    BoundRetryingCaller,
     RetryingCaller,
     retry,
     retry_context,
@@ -14,14 +16,16 @@ from ._core import (
 
 
 __all__ = [
-    "Attempt",
-    "retry",
-    "retry_context",
-    "is_active",
-    "set_active",
-    "instrumentation",
-    "RetryingCaller",
     "AsyncRetryingCaller",
+    "Attempt",
+    "BoundAsyncRetryingCaller",
+    "BoundRetryingCaller",
+    "instrumentation",
+    "is_active",
+    "retry_context",
+    "retry",
+    "RetryingCaller",
+    "set_active",
 ]
 
 

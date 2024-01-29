@@ -189,9 +189,9 @@ class TestRetryingCaller:
 
             return args, kw
 
-        rc = stamina.RetryingCaller(on=ValueError)
+        bound_rc = stamina.RetryingCaller().on(ValueError)
 
-        args, kw = rc(f, 42, foo="bar")
+        args, kw = bound_rc(f, 42, foo="bar")
 
         assert 1 == i
         assert (42,) == args
@@ -202,7 +202,6 @@ class TestRetryingCaller:
         repr() is useful.
         """
         rc = stamina.RetryingCaller(
-            on=ValueError,
             attempts=42,
             timeout=13.0,
             wait_initial=23,
@@ -211,8 +210,13 @@ class TestRetryingCaller:
             wait_exp_base=666,
         )
 
+        r = repr(rc)
+
         assert (
-            "<RetryingCaller(on=ValueError, attempts=42, timeout=13.0, "
+            "<RetryingCaller(attempts=42, timeout=13.0, "
             "wait_exp_base=666, wait_initial=23, wait_jitter=0.42, "
             "wait_max=123)>"
-        ) == repr(rc)
+        ) == r
+        assert f"<BoundRetryingCaller(ValueError, {r})>" == repr(
+            rc.on(ValueError)
+        )

@@ -46,7 +46,10 @@ for attempt in stamina.retry_context(on=httpx.HTTPError):
         resp.raise_for_status()
 ```
 
-If you want to retry just one function call, *stamina* comes with an even easier way in the shape of {class}`stamina.RetryingCaller` and {class}`stamina.AsyncRetryingCaller`:
+
+## Retry One Function or Method Call
+
+If you want to retry just one function or method call, *stamina* comes with an even easier way in the shape of {class}`stamina.RetryingCaller` and {class}`stamina.AsyncRetryingCaller`:
 
 ```python
 def do_something_with_url(url, some_kw):
@@ -54,12 +57,24 @@ def do_something_with_url(url, some_kw):
     resp.raise_for_status()
     ...
 
-rc = stamina.RetryingCaller(on=httpx.HTTPError)
+rc = stamina.RetryingCaller(attempts=5)
 
-rc(do_something_with_url, f"https://httpbin.org/status/404", some_kw=42)
+rc(httpx.HTTPError, do_something_with_url, f"https://httpbin.org/status/404", some_kw=42)
+
+# You can also create a caller with a pre-bound exception type:
+bound_rc = rc.on(httpx.HTTPError)
+
+bound_rc(do_something_with_url, f"https://httpbin.org/status/404", some_kw=42)
 ```
 
-The last line calls `do_something_with_url(f"https://httpbin.org/status/404", some_kw=42)` and retries on `httpx.HTTPError`.
+Both `rc` and `bound_rc` run:
+
+```python
+do_something_with_url(f"https://httpbin.org/status/404", some_kw=42)
+```
+
+and retry on `httpx.HTTPError` and as before, the type hints are preserved.
+It's up to you whether you want to share only the retry configuration or the exception type to retry on, too.
 
 
 ## Async
