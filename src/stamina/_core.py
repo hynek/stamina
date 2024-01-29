@@ -220,6 +220,9 @@ class RetryingCaller(BaseRetryingCaller):
 
         .. versionadded:: 24.2.0
         """
+        # This should be a `functools.partial`, but unfortunately it's
+        # impossible to provide a nicely typed API with it, so we use a
+        # separate class.
         return BoundRetryingCaller(self, on)
 
 
