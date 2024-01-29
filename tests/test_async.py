@@ -212,6 +212,17 @@ async def test_retry_blocks_can_be_disabled():
 
 
 class TestAsyncRetryingCaller:
+    async def test_ok(self):
+        """
+        No error, no problem.
+        """
+        arc = stamina.AsyncRetryingCaller().on(BaseException)
+
+        async def f():
+            return 42
+
+        assert 42 == await arc(f)
+
     async def test_retries(self):
         """
         Retries if the specific error is raised. Arguments are passed through.

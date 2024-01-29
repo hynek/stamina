@@ -175,6 +175,17 @@ class TestMakeStop:
 
 
 class TestRetryingCaller:
+    def test_ok(self):
+        """
+        No error, no problem.
+        """
+        rc = stamina.RetryingCaller().on(BaseException)
+
+        def f():
+            return 42
+
+        assert 42 == rc(f)
+
     def test_retries(self):
         """
         Retries if the specific error is raised. Arguments are passed through.
