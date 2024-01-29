@@ -209,7 +209,7 @@ class RetryingCaller(BaseRetryingCaller):
             with attempt:
                 return callable_(*args, **kwargs)
 
-        raise SystemError("unreachable")  # pragma: no cover  # noqa: EM101
+        raise SystemError("unreachable")  # noqa: EM101
 
     def on(
         self, on: type[Exception] | tuple[type[Exception], ...], /
@@ -287,7 +287,7 @@ class AsyncRetryingCaller(BaseRetryingCaller):
             with attempt:
                 return await callable_(*args, **kwargs)
 
-        raise SystemError("unreachable")  # pragma: no cover  # noqa: EM101
+        raise SystemError("unreachable")  # noqa: EM101
 
     def on(
         self, on: type[Exception] | tuple[type[Exception], ...], /
