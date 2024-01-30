@@ -145,6 +145,7 @@ You will find the built documentation in `docs/_build/html`.
   - Added `stamina.func()` that does foo.
     It's pretty cool.
     [#1](https://github.com/hynek/stamina/pull/1)
+
   - `stamina.func()` now doesn't crash the Large Hadron Collider anymore.
     That was a nasty bug!
     [#2](https://github.com/hynek/stamina/pull/2)
