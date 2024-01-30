@@ -69,15 +69,20 @@ You will find the built documentation in `docs/_build/html`.
 ## Code
 
 - Obey [PEP 8] and [PEP 257].
-  We use the `"""`-on-separate-lines style for docstrings with [Napoleon](https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html)-style API documentation:
+  We use the `"""`-on-separate-lines style for docstrings with [Napoleon]-style API documentation:
 
   ```python
-  def func(x: str) -> str:
+  def func(x: str, y: int) -> str:
       """
       Do something.
 
       Args:
-          x: A very important parameter.
+          x: A very important argument.
+
+          y:
+            Another very important argument, but its description is so long
+            that it doesn't fit on one line. So we start the whole block on a
+            fresh new line to keep the block together.
 
       Returns:
           The result of doing something.
