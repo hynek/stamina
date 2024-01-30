@@ -17,7 +17,10 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ### Added
 
-- `stamina.RetryingCaller` and `stamina.AsyncRetryingCaller` that allow even easier retries of single callables.
+- `stamina.RetryingCaller` and `stamina.AsyncRetryingCaller` that allow even easier retries of single callables: `stamina.RetryingCaller(attempts=5).on(ValueError)(do_something, "foo", bar=42)` and `stamina.RetryingCaller(attempts=5)(ValueError, do_something, "foo", bar=42)` will call `do_something("foo", bar=42)` and retry on `ValueError` up to 5 times.
+
+  `stamina.RetryingCaller` and `stamina.AsyncRetryingCaller` take the same arguments as `stamina.retry()`, except for `on` that can be bound separately.
+
   [#56](https://github.com/hynek/stamina/pull/56)
   [#57](https://github.com/hynek/stamina/pull/57)
 
