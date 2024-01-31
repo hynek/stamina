@@ -65,9 +65,6 @@ nitpick_ignore = [
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True
 
-# If true, the current module name will be prepended to all description
-# unit titles (such as .. function::).
-
 # Move type hints into the description block, instead of the func definition.
 autodoc_typehints = "description"
 autodoc_typehints_description_target = "documented"
@@ -107,7 +104,6 @@ rst_epilog = f"""\
 # GitHub has rate limits
 linkcheck_ignore = [
     r"https://github.com/.*/(issues|pull|compare)/\d+",
-    r"https://twitter.com/.*",
 ]
 
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
