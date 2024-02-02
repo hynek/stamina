@@ -162,6 +162,8 @@ line-length = 79
 
 [tool.ruff]
 src = ["src", "tests", "noxfile.py", "docs/conf.py"]
+
+[tool.ruff.lint]
 select = ["ALL"]
 ignore = [
   "A001",    # shadowing is fine
@@ -182,7 +184,7 @@ ignore = [
   "TID252",  # relative imports are always awesome
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/*" = [
   "ARG005", # we need stub lambdas
   "S101",   # assert
@@ -194,6 +196,6 @@ ignore = [
 ]
 
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 lines-between-types = 1
 lines-after-imports = 2
