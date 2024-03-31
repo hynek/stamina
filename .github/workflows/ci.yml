@@ -215,18 +215,22 @@ jobs:
         run: |
           uv venv
           uv pip install -e .[dev]
-          # Double-check plain Pip works too.
-          pip3 --python .venv/bin/python install -e .[dev]
 
       - name: Try to import on Linux
         run: >
           source .venv/bin/activate
+
+          # Double-check plain Pip works too.
+          python -Im pip install -e .[dev]
           python -Ic 'import stamina; print(stamina.__version__)'
         if: runner.os == 'Linux'
 
       - name: Try to import on Windows
         run: >
           .venv\Scripts\activate
+
+          # Double-check plain Pip works too.
+          python -Im pip install -e .[dev]
           python -Ic 'import stamina; print(stamina.__version__)'
         if: runner.os == 'Windows'
 
