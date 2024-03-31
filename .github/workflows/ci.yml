@@ -58,7 +58,7 @@ jobs:
 
       - name: Prepare & run Nox
         run: |
-          python -Im pip install nox "tomli; python_version<'3.11'"
+          python -Im pip install nox[uv] "tomli; python_version<'3.11'"
           python -Im nox \
             --python ${{ matrix.python-version }} \
             --sessions tests \
@@ -137,7 +137,7 @@ jobs:
           allow-prereleases: true
           cache: pip
 
-      - run: python -Im pip install nox "tomli; python_version<'3.11'"
+      - run: python -Im pip install nox[uv] "tomli; python_version<'3.11'"
 
       - name: Check using Mypy
         run: |
@@ -170,7 +170,7 @@ jobs:
 
       - name: Prepare & run Nox
         run: |
-          python -Im pip install nox
+          python -Im pip install nox[uv]
           python -Im nox \
             --sessions mypy_pkg
 
@@ -193,7 +193,7 @@ jobs:
 
       - name: Prepare & run Nox
         run: |
-          python -Im pip install nox
+          python -Im pip install nox[uv]
           python -Im nox \
             --session docs
 
