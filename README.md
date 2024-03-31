@@ -13,7 +13,7 @@ To make your systems resilient, you need to **retry** failed operations.
 But bad retries can make things *much worse*.
 
 *stamina* is an opinionated wrapper around the great-but-unopinionated [Tenacity](https://tenacity.readthedocs.io/) package.
-Its goal is to be as **ergonomic** as possible while doing the **right thing by default** and minimizing the potential for **misuse**.
+Our goal is to be as **ergonomic** as possible, while doing the **right thing by default**, and minimizing the potential for **misuse**.
 It is the result of years of copy-pasting the same configuration over and over again:
 
 - Retry only on certain exceptions.
