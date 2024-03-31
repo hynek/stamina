@@ -28,6 +28,9 @@ nox.options.sessions = [
 nox.options.reuse_existing_virtualenvs = True
 nox.options.error_on_external_run = True
 
+nox.needs_version = ">=2024.3.2"
+nox.options.default_venv_backend = "uv|virtualenv"
+
 
 pyp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
 ALL_SUPPORTED = [

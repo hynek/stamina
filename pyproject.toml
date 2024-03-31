@@ -23,13 +23,13 @@ classifiers = [
   "Framework :: AsyncIO",
   "Framework :: Trio",
 ]
-dependencies = ["tenacity", "typing-extensions; python_version<'3.10'"]
+dependencies = ["tenacity", "typing-extensions; python_version < '3.10'"]
 
 [project.optional-dependencies]
 tests = ["pytest", "anyio"]
-typing = ["mypy>=1.4"]
+typing = ["mypy >= 1.4"]
 docs = [
-  "sphinx>=7.2.2",
+  "sphinx >= 7.2.2",
   "furo",
   "myst-parser",
   "sphinx-notfound-page",
@@ -39,11 +39,14 @@ docs = [
 ]
 dev = [
   "stamina[tests,typing]",
-  "nox",
-  "tomli; python_version<'3.11'",
+  # First version with uv support.
+  "nox >= 2024.3.2",
+  "tomli; python_version < '3.11'",
   "structlog",
   "prometheus-client",
   "trio",
+  # Earlier versions don't allow to install directories w/o -e.
+  "uv >= 0.1.24",
 ]
 
 [project.urls]
