@@ -217,7 +217,7 @@ jobs:
           uv pip install -e .[dev]
 
       - name: Try to import on Linux
-        run: >
+        run: |
           source .venv/bin/activate
 
           # Double-check plain Pip works too.
@@ -226,7 +226,7 @@ jobs:
         if: runner.os == 'Linux'
 
       - name: Try to import on Windows
-        run: >
+        run: |
           .venv\Scripts\activate
 
           # Double-check plain Pip works too.
