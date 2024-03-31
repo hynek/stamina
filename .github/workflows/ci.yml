@@ -210,12 +210,24 @@ jobs:
           python-version-file: .python-version-default
       - uses: hynek/setup-cached-uv@v1
 
-      - name: Install in dev mode & import
+      - name: Install in dev mode
         run: |
           uv venv
           uv pip install -e .[dev]
+          # Double-check plain Pip works too.
           pip3 --python .venv/bin/python install -e .[dev]
-          .venv/bin/python -Ic 'import stamina; print(stamina.__version__)'
+
+      - name: Try to import on Linux
+        run: >
+          source .venv/bin/activate
+          python -Ic 'import stamina; print(stamina.__version__)'
+        if: runner.os == 'Linux'
+
+      - name: Try to import on Windows
+        run: >
+          .venv\Scripts\activate
+          python -Ic 'import stamina; print(stamina.__version__)'
+        if: runner.os == 'Windows'
 
   required-checks-pass:
     name: Ensure everything required is passing for branch protection
