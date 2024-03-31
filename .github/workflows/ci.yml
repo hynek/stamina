@@ -214,7 +214,7 @@ jobs:
         run: |
           uv venv
           uv pip install -e .[dev]
-          .venv/bin/python -Im pip install -e .[dev]
+          pip3 --python .venv/bin/python install -e .[dev]
           .venv/bin/python -Ic 'import stamina; print(stamina.__version__)'
 
   required-checks-pass:
