@@ -54,10 +54,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
           cache: pip
+      - uses: hynek/setup-cached-uv@v1
 
       - name: Prepare & run Nox
         run: |
-          python -Im pip install nox[uv] "tomli; python_version<'3.11'"
+          uv pip install --system nox "tomli; python_version<'3.11'"
           python -Im nox \
             --python ${{ matrix.python-version }} \
             --sessions tests \
@@ -83,6 +84,7 @@ jobs:
         with:
           cache: pip
           python-version-file: .python-version-default
+      - uses: hynek/setup-cached-uv@v1
 
       - uses: actions/download-artifact@v4
         with:
@@ -91,7 +93,7 @@ jobs:
 
       - name: Combine coverage & fail if it's <100%.
         run: |
-          python -Im pip install --upgrade coverage[toml]
+          uv pip install --system --upgrade coverage[toml]
 
           python -Im coverage combine
           python -Im coverage html --skip-covered --skip-empty
@@ -130,8 +132,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
           cache: pip
+      - uses: hynek/setup-cached-uv@v1
 
-      - run: python -Im pip install nox[uv] "tomli; python_version<'3.11'"
+      - run: uv pip install --system nox "tomli; python_version<'3.11'"
 
       - name: Check using Mypy
         run: |
@@ -161,10 +164,11 @@ jobs:
         with:
           cache: pip
           python-version-file: .python-version-default
+      - uses: hynek/setup-cached-uv@v1
 
       - name: Prepare & run Nox
         run: |
-          python -Im pip install nox[uv]
+          uv pip install --system nox
           python -Im nox \
             --sessions mypy_pkg
 
@@ -184,10 +188,11 @@ jobs:
           # Keep in sync with .readthedocs.yaml
           python-version: "3.12"
           cache: pip
+      - uses: hynek/setup-cached-uv@v1
 
       - name: Prepare & run Nox
         run: |
-          python -Im pip install nox[uv]
+          uv pip install --system nox
           python -Im nox \
             --session docs
 
@@ -204,11 +209,26 @@ jobs:
         with:
           cache: pip
           python-version-file: .python-version-default
+      - uses: hynek/setup-cached-uv@v1
 
-      - name: Install in dev mode & import
+      - name: Install in dev mode
         run: |
-          python -Im pip install -e .[dev]
+          uv venv
+          uv pip install -e .[dev]
+
+      - name: Try to import on Linux
+        run: |
+          source .venv/bin/activate
+
           python -Ic 'import stamina; print(stamina.__version__)'
+        if: runner.os == 'Linux'
+
+      - name: Try to import on Windows
+        run: |
+          .venv\Scripts\activate
+
+          python -Ic 'import stamina; print(stamina.__version__)'
+        if: runner.os == 'Windows'
 
   required-checks-pass:
     name: Ensure everything required is passing for branch protection
