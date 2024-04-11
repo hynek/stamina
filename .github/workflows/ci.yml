@@ -11,6 +11,7 @@ env:
   FORCE_COLOR: "1" # Make tools pretty.
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
   PIP_NO_PYTHON_VERSION_WARNING: "1"
+  UV_SYSTEM_PYTHON: "1"
 
 permissions: {}
 
@@ -58,7 +59,7 @@ jobs:
 
       - name: Prepare & run Nox
         run: |
-          uv pip install --system nox "tomli; python_version<'3.11'"
+          uv pip install nox "tomli; python_version<'3.11'"
           python -Im nox \
             --python ${{ matrix.python-version }} \
             --sessions tests \
@@ -93,7 +94,7 @@ jobs:
 
       - name: Combine coverage & fail if it's <100%.
         run: |
-          uv pip install --system --upgrade coverage[toml]
+          uv pip install --upgrade coverage[toml]
 
           python -Im coverage combine
           python -Im coverage html --skip-covered --skip-empty
@@ -134,7 +135,7 @@ jobs:
           cache: pip
       - uses: hynek/setup-cached-uv@v1
 
-      - run: uv pip install --system nox "tomli; python_version<'3.11'"
+      - run: uv pip install nox "tomli; python_version<'3.11'"
 
       - name: Check using Mypy
         run: |
@@ -168,7 +169,7 @@ jobs:
 
       - name: Prepare & run Nox
         run: |
-          uv pip install --system nox
+          uv pip install nox
           python -Im nox \
             --sessions mypy_pkg
 
@@ -192,12 +193,14 @@ jobs:
 
       - name: Prepare & run Nox
         run: |
-          uv pip install --system nox
+          uv pip install nox
           python -Im nox \
             --session docs
 
   install-dev:
     name: Verify dev env
+    env:
+      UV_SYSTEM_PYTHON: "0"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
