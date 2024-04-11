@@ -11,7 +11,7 @@ env:
   FORCE_COLOR: "1" # Make tools pretty.
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
   PIP_NO_PYTHON_VERSION_WARNING: "1"
-  UV_SYSTEM_PYTHON: "1"
+  UV_SYSTEM_PYTHON: "true"
 
 permissions: {}
 
@@ -200,7 +200,7 @@ jobs:
   install-dev:
     name: Verify dev env
     env:
-      UV_SYSTEM_PYTHON: "0"
+      UV_SYSTEM_PYTHON: "false"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
