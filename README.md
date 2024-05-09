@@ -5,6 +5,7 @@
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7550/badge)](https://bestpractices.coreinfrastructure.org/projects/7550)
 [![PyPI - Version](https://img.shields.io/pypi/v/stamina.svg)](https://pypi.org/project/stamina)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/stamina.svg)](https://pypi.org/project/stamina)
+[![Downloads](https://static.pepy.tech/badge/stamina/month)](https://pepy.tech/project/stamina)
 
 ---
 
