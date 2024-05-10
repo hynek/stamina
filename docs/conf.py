@@ -81,7 +81,7 @@ html_theme_options = {
         "SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace",
     },
     # None of the options work, so we disable the button completely.
-    "top_of_page_button": None,
+    "top_of_page_buttons": [],
 }
 
 html_static_path = ["_static"]
