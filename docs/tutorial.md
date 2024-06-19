@@ -121,6 +121,7 @@ For example, here's a *pytest* fixture that automatically turns off retries at t
 
 ```python
 import pytest
+import stamina
 
 @pytest.fixture(autouse=True, scope="session")
 def deactivate_retries():
