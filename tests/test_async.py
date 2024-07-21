@@ -11,7 +11,7 @@ import stamina
 
 pytestmark = pytest.mark.anyio
 parametrize_on_value_error = pytest.mark.parametrize(
-    "on", [ValueError, (ValueError,)]
+    "on", [ValueError, (ValueError,), lambda exc: isinstance(exc, ValueError)]
 )
 
 

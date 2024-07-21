@@ -59,7 +59,11 @@ async def _smart_sleep(delay: float) -> None:
 T = TypeVar("T")
 P = ParamSpec("P")
 if TYPE_CHECKING:
-    On = type[Exception] | tuple[type[Exception], ...]
+    On = (
+        type[Exception]
+        | tuple[type[Exception], ...]
+        | Callable[[Exception], bool]
+    )
 
 
 def retry_context(
@@ -389,12 +393,20 @@ class _RetryContextIterator:
         args: tuple[object, ...],
         kw: dict[str, object],
     ) -> _RetryContextIterator:
+        if (
+            isinstance(on, type)
+            and issubclass(on, BaseException)
+            or isinstance(on, tuple)
+        ):
+            _retry = _t.retry_if_exception_type(on)
+        else:
+            _retry = _t.retry_if_exception(on)
         return cls(
             _name=name,
             _args=args,
             _kw=kw,
             _t_kw={
-                "retry": _t.retry_if_exception_type(on),
+                "retry": _retry,
                 "wait": _t.wait_exponential_jitter(
                     initial=(
                         wait_initial.total_seconds()

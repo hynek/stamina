@@ -13,7 +13,7 @@ from stamina._core import _make_stop
 
 
 parametrize_on_value_error = pytest.mark.parametrize(
-    "on", [ValueError, (ValueError,)]
+    "on", [ValueError, (ValueError,), lambda exc: isinstance(exc, ValueError)]
 )
 
 
