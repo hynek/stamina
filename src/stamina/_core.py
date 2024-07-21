@@ -12,7 +12,14 @@ from dataclasses import dataclass, replace
 from functools import wraps
 from inspect import iscoroutinefunction
 from types import TracebackType
-from typing import AsyncIterator, Awaitable, Iterator, TypedDict, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    AsyncIterator,
+    Awaitable,
+    Iterator,
+    TypedDict,
+    TypeVar,
+)
 
 import tenacity as _t
 
@@ -51,10 +58,12 @@ async def _smart_sleep(delay: float) -> None:
 
 T = TypeVar("T")
 P = ParamSpec("P")
+if TYPE_CHECKING:
+    On = type[Exception] | tuple[type[Exception], ...]
 
 
 def retry_context(
-    on: type[Exception] | tuple[type[Exception], ...],
+    on: On,
     attempts: int | None = 10,
     timeout: float | dt.timedelta | None = 45.0,
     wait_initial: float | dt.timedelta = 0.1,
@@ -187,7 +196,7 @@ class RetryingCaller(BaseRetryingCaller):
 
     def __call__(
         self,
-        on: type[Exception] | tuple[type[Exception], ...],
+        on: On,
         callable_: Callable[P, T],
         /,
         *args: P.args,
@@ -211,9 +220,7 @@ class RetryingCaller(BaseRetryingCaller):
 
         raise SystemError("unreachable")  # noqa: EM101
 
-    def on(
-        self, on: type[Exception] | tuple[type[Exception], ...], /
-    ) -> BoundRetryingCaller:
+    def on(self, on: On, /) -> BoundRetryingCaller:
         """
         Create a new instance of :class:`BoundRetryingCaller` with the same
         parameters, but bound to a specific exception type.
@@ -240,12 +247,12 @@ class BoundRetryingCaller:
     __slots__ = ("_caller", "_on")
 
     _caller: RetryingCaller
-    _on: type[Exception] | tuple[type[Exception], ...]
+    _on: On
 
     def __init__(
         self,
         caller: RetryingCaller,
-        on: type[Exception] | tuple[type[Exception], ...],
+        on: On,
     ):
         self._caller = caller
         self._on = on
@@ -274,7 +281,7 @@ class AsyncRetryingCaller(BaseRetryingCaller):
 
     async def __call__(
         self,
-        on: type[Exception] | tuple[type[Exception], ...],
+        on: On,
         callable_: Callable[P, Awaitable[T]],
         /,
         *args: P.args,
@@ -289,9 +296,7 @@ class AsyncRetryingCaller(BaseRetryingCaller):
 
         raise SystemError("unreachable")  # noqa: EM101
 
-    def on(
-        self, on: type[Exception] | tuple[type[Exception], ...], /
-    ) -> BoundAsyncRetryingCaller:
+    def on(self, on: On, /) -> BoundAsyncRetryingCaller:
         """
         Create a new instance of :class:`BoundAsyncRetryingCaller` with the
         same parameters, but bound to a specific exception type.
@@ -315,12 +320,12 @@ class BoundAsyncRetryingCaller:
     __slots__ = ("_caller", "_on")
 
     _caller: AsyncRetryingCaller
-    _on: type[Exception] | tuple[type[Exception], ...]
+    _on: On
 
     def __init__(
         self,
         caller: AsyncRetryingCaller,
-        on: type[Exception] | tuple[type[Exception], ...],
+        on: On,
     ):
         self._caller = caller
         self._on = on
@@ -373,7 +378,7 @@ class _RetryContextIterator:
     @classmethod
     def from_params(
         cls,
-        on: type[Exception] | tuple[type[Exception], ...],
+        on: On,
         attempts: int | None,
         timeout: float | dt.timedelta | None,
         wait_initial: float | dt.timedelta,
@@ -521,7 +526,7 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
 
 def retry(
     *,
-    on: type[Exception] | tuple[type[Exception], ...],
+    on: On,
     attempts: int | None = 10,
     timeout: float | dt.timedelta | None = 45.0,
     wait_initial: float | dt.timedelta = 0.1,
