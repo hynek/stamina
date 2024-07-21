@@ -7,18 +7,20 @@ from __future__ import annotations
 import datetime as dt
 import sys
 
-from collections.abc import Callable
 from dataclasses import dataclass, replace
 from functools import wraps
 from inspect import iscoroutinefunction
 from types import TracebackType
 from typing import (
-    TYPE_CHECKING,
     AsyncIterator,
     Awaitable,
+    Callable,
     Iterator,
+    Tuple,
+    Type,
     TypedDict,
     TypeVar,
+    Union,
 )
 
 import tenacity as _t
@@ -58,12 +60,10 @@ async def _smart_sleep(delay: float) -> None:
 
 T = TypeVar("T")
 P = ParamSpec("P")
-if TYPE_CHECKING:
-    On = (
-        type[Exception]
-        | tuple[type[Exception], ...]
-        | Callable[[Exception], bool]
-    )
+# for backwards compatibility with Python<3.10
+On = Union[
+    Type[Exception], Tuple[Type[Exception], ...], Callable[[Exception], bool]
+]
 
 
 def retry_context(
