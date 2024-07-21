@@ -10,6 +10,9 @@ import stamina
 
 
 pytestmark = pytest.mark.anyio
+parametrize_on_value_error = pytest.mark.parametrize(
+    "on", [ValueError, (ValueError,)]
+)
 
 
 @pytest.mark.parametrize("attempts", [None, 1])
@@ -47,16 +50,17 @@ async def test_ok(attempts, timeout, duration):
     assert 42 == await C().f()
 
 
+@parametrize_on_value_error
 @pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
 @pytest.mark.parametrize("duration", [0, dt.timedelta(days=0)])
-async def test_retries(duration, timeout):
+async def test_retries(duration, timeout, on):
     """
     Retries if the specific error is raised.
     """
     i = 0
 
     @stamina.retry(
-        on=ValueError,
+        on=on,
         timeout=timeout,
         wait_max=duration,
         wait_initial=duration,
@@ -74,14 +78,15 @@ async def test_retries(duration, timeout):
     assert 1 == i
 
 
-async def test_retries_method():
+@parametrize_on_value_error
+async def test_retries_method(on):
     """
     Retries if the specific error is raised.
     """
     i = 0
 
     class C:
-        @stamina.retry(on=ValueError, wait_max=0)
+        @stamina.retry(on=on, wait_max=0)
         async def f(self):
             nonlocal i
             if i == 0:
@@ -94,12 +99,13 @@ async def test_retries_method():
     assert 1 == i
 
 
-async def test_wrong_exception():
+@parametrize_on_value_error
+async def test_wrong_exception(on):
     """
     Exceptions that are not passed as `on` are left through.
     """
 
-    @stamina.retry(on=ValueError)
+    @stamina.retry(on=on)
     async def f():
         raise TypeError("passed")
 
@@ -177,13 +183,14 @@ async def test_retry_inactive_block_ok():
     assert 1 == num_called
 
 
-async def test_retry_block():
+@parametrize_on_value_error
+async def test_retry_block(on):
     """
     Async retry_context blocks are retried.
     """
     num_called = 0
 
-    async for attempt in stamina.retry_context(on=ValueError, wait_max=0):
+    async for attempt in stamina.retry_context(on=on, wait_max=0):
         with attempt:
             num_called += 1
 
@@ -223,7 +230,8 @@ class TestAsyncRetryingCaller:
 
         assert 42 == await arc(f)
 
-    async def test_retries(self):
+    @parametrize_on_value_error
+    async def test_retries(self, on):
         """
         Retries if the specific error is raised. Arguments are passed through.
         """
@@ -237,7 +245,7 @@ class TestAsyncRetryingCaller:
 
             return args, kw
 
-        arc = stamina.AsyncRetryingCaller().on(ValueError)
+        arc = stamina.AsyncRetryingCaller().on(on)
 
         args, kw = await arc(f, 42, foo="bar")
 

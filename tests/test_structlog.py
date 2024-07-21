@@ -81,7 +81,7 @@ def test_context_sync(log_output):
     """
     from tests.test_sync import test_retry_block
 
-    test_retry_block()
+    test_retry_block(ValueError)
 
     assert [
         {
@@ -105,7 +105,7 @@ async def test_context_async(log_output):
     """
     from tests.test_async import test_retry_block
 
-    await test_retry_block()
+    await test_retry_block(ValueError)
 
     assert [
         {
