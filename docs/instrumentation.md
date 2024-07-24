@@ -60,6 +60,12 @@ If *structlog* instrumentation is active, scheduled retries are logged using a *
 
 You can activate it manually by adding {data}`stamina.instrumentation.StructlogOnRetryHook` to the list of hooks passed to {func}`stamina.instrumentation.set_on_retry_hooks`.
 
+:::{warning}
+*structlog* integration does **not** work with the deprecated `structlog.stdlib.AsyncBoundLogger` because it won't await log method calls.
+Use `structlog.stdlib.BoundLogger` and explicit async methods like `ainfo()` instead of `info()`.
+:::
+
+
 (logging)=
 
 ## Standard Library's `logging`
