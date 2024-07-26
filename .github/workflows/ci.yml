@@ -53,7 +53,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-      - uses: hynek/setup-cached-uv@4553200edb588b7b98044b49804e3732082aba83
+      - uses: hynek/setup-cached-uv@v2
 
       - name: Prepare & run Nox
         run: |
@@ -82,7 +82,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version-default
-      - uses: hynek/setup-cached-uv@4553200edb588b7b98044b49804e3732082aba83
+      - uses: hynek/setup-cached-uv@v2
 
       - uses: actions/download-artifact@v4
         with:
@@ -129,7 +129,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-      - uses: hynek/setup-cached-uv@4553200edb588b7b98044b49804e3732082aba83
+      - uses: hynek/setup-cached-uv@v2
 
       - run: uv pip install --system nox "tomli; python_version<'3.11'"
 
@@ -160,7 +160,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version-default
-      - uses: hynek/setup-cached-uv@4553200edb588b7b98044b49804e3732082aba83
+      - uses: hynek/setup-cached-uv@v2
 
       - name: Prepare & run Nox
         run: |
@@ -183,7 +183,7 @@ jobs:
         with:
           # Keep in sync with .readthedocs.yaml
           python-version: "3.12"
-      - uses: hynek/setup-cached-uv@4553200edb588b7b98044b49804e3732082aba83
+      - uses: hynek/setup-cached-uv@v2
 
       - name: Prepare & run Nox
         run: |
@@ -203,7 +203,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version-default
-      - uses: hynek/setup-cached-uv@4553200edb588b7b98044b49804e3732082aba83
+      - uses: hynek/setup-cached-uv@v2
 
       - name: Install in dev mode
         run: |
