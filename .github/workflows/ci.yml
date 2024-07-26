@@ -262,7 +262,7 @@ jobs:
       - coverage
       - install-dev
       - docs
-      - mypy-api
+      - type-check-api
       - mypy-pkg
 
     runs-on: ubuntu-latest
