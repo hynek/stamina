@@ -53,9 +53,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-      - uses: hynek/setup-cached-uv@v1
-        with:
-          cache-suffix: -tests
+      - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
 
       - name: Prepare & run Nox
         run: |
@@ -65,8 +63,6 @@ jobs:
             --sessions tests \
             -- \
             --installpkg dist/*.whl
-
-          uv cache prune --ci
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v4
@@ -86,9 +82,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version-default
-      - uses: hynek/setup-cached-uv@v1
-        with:
-          cache-suffix: -coverage
+      - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
 
       - uses: actions/download-artifact@v4
         with:
@@ -107,8 +101,6 @@ jobs:
 
           # Report again and fail if under 100%.
           python -Im coverage report --fail-under=100
-
-          uv cache prune --ci
 
       - name: Upload HTML report if check failed.
         uses: actions/upload-artifact@v4
@@ -137,10 +129,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-      - uses: hynek/setup-cached-uv@v1
-        with:
-          cache-suffix: -mypy-api
-
+      - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
 
       - run: uv pip install --system nox "tomli; python_version<'3.11'"
 
@@ -150,16 +139,11 @@ jobs:
             --python ${{ matrix.python-version }} \
             --sessions mypy_api
 
-          uv cache prune --ci
-
       - name: Check using Pyright
         run: |
           python -Im nox \
             --python ${{ matrix.python-version }} \
             --sessions pyright_api
-
-      - name: remove cache files that shouldn't be preserved.
-        run: uv cache prune --ci
 
   mypy-pkg:
     name: Type-check package
@@ -176,18 +160,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version-default
-      - uses: hynek/setup-cached-uv@v1
-        with:
-          cache-suffix: -mypy-pkg
+      - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
 
       - name: Prepare & run Nox
         run: |
           uv pip install --system nox
-
           python -Im nox \
             --sessions mypy_pkg
-
-          uv cache prune --ci
 
   docs:
     name: Build docs & run doctests
@@ -204,18 +183,13 @@ jobs:
         with:
           # Keep in sync with .readthedocs.yaml
           python-version: "3.12"
-      - uses: hynek/setup-cached-uv@v1
-        with:
-          cache-suffix: -mypy-docs
+      - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
 
       - name: Prepare & run Nox
         run: |
           uv pip install --system nox
-
           python -Im nox \
             --session docs
-
-          uv cache prune --ci
 
   install-dev:
     name: Verify dev env
@@ -229,16 +203,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version-default
-      - uses: hynek/setup-cached-uv@v1
-        with:
-          cache-suffix: -dev
+      - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
 
       - name: Install in dev mode
         run: |
           uv venv
           uv pip install -e .[dev]
-
-          uv cache prune --ci
 
       - name: Try to import on Linux
         run: |
