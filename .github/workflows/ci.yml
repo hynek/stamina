@@ -27,6 +27,13 @@ jobs:
       - uses: hynek/build-and-inspect-python-package@v2
         id: baipp
 
+      - name: Create cache-busting suffix for setup-cached-uv
+        id: cache-busting-suffix
+        run: |
+          # We use the current calendar week as part of the cache key so it gets
+          # busted weekly.
+          echo WEEK=$(date +%V) >>$GITHUB_ENV
+
     outputs:
       python-versions: ${{ steps.baipp.outputs.supported_python_classifiers_json_array }}
 
@@ -54,6 +61,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
       - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
+        with:
+          cache-suffix: ${{ env.WEEK }}
 
       - name: Prepare & run Nox
         run: |
@@ -83,6 +92,8 @@ jobs:
         with:
           python-version-file: .python-version-default
       - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
+        with:
+          cache-suffix: ${{ env.WEEK }}
 
       - uses: actions/download-artifact@v4
         with:
@@ -130,6 +141,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
       - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
+        with:
+          cache-suffix: ${{ env.WEEK }}
 
       - run: uv pip install --system nox "tomli; python_version<'3.11'"
 
@@ -161,6 +174,8 @@ jobs:
         with:
           python-version-file: .python-version-default
       - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
+        with:
+          cache-suffix: ${{ env.WEEK }}
 
       - name: Prepare & run Nox
         run: |
@@ -184,6 +199,8 @@ jobs:
           # Keep in sync with .readthedocs.yaml
           python-version: "3.12"
       - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
+        with:
+          cache-suffix: ${{ env.WEEK }}
 
       - name: Prepare & run Nox
         run: |
