@@ -61,7 +61,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-      - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
+      - uses: hynek/setup-cached-uv@73250b9f1c332375d16c0997a11cf37b7f7d3585
         with:
           cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
@@ -92,7 +92,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version-default
-      - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
+      - uses: hynek/setup-cached-uv@73250b9f1c332375d16c0997a11cf37b7f7d3585
         with:
           cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
@@ -141,7 +141,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-      - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
+      - uses: hynek/setup-cached-uv@73250b9f1c332375d16c0997a11cf37b7f7d3585
         with:
           cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
@@ -174,7 +174,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version-default
-      - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
+      - uses: hynek/setup-cached-uv@73250b9f1c332375d16c0997a11cf37b7f7d3585
         with:
           cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
@@ -199,7 +199,7 @@ jobs:
         with:
           # Keep in sync with .readthedocs.yaml
           python-version: "3.12"
-      - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
+      - uses: hynek/setup-cached-uv@73250b9f1c332375d16c0997a11cf37b7f7d3585
         with:
           cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
@@ -221,7 +221,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version-default
-      - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
+      - uses: hynek/setup-cached-uv@73250b9f1c332375d16c0997a11cf37b7f7d3585
 
       - name: Install in dev mode
         run: |
