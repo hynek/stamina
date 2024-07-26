@@ -32,7 +32,7 @@ jobs:
         run: |
           # We use the current calendar week as part of the cache key so it gets
           # busted weekly.
-          echo CW=$(date +%V) >>$GITHUB_OUTPUT
+          echo CW="-CW$(date +%V)"" >>$GITHUB_OUTPUT
 
     outputs:
       python-versions: ${{ steps.baipp.outputs.supported_python_classifiers_json_array }}
