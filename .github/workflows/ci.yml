@@ -74,7 +74,7 @@ jobs:
   coverage:
     name: Combine & check coverage
     runs-on: ubuntu-latest
-    needs: [build-package, tests]
+    needs: tests
     if: always()
 
     steps:
