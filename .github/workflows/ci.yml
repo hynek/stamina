@@ -66,6 +66,8 @@ jobs:
             -- \
             --installpkg dist/*.whl
 
+          uv cache purge --ci
+
       - name: Upload coverage data
         uses: actions/upload-artifact@v4
         with:
@@ -106,6 +108,8 @@ jobs:
           # Report again and fail if under 100%.
           python -Im coverage report --fail-under=100
 
+          uv cache purge --ci
+
       - name: Upload HTML report if check failed.
         uses: actions/upload-artifact@v4
         with:
@@ -113,7 +117,7 @@ jobs:
           path: htmlcov
         if: ${{ failure() }}
 
-  mypy-api:
+  type-check-api:
     name: Type-check API on ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     needs: build-package
@@ -146,11 +150,16 @@ jobs:
             --python ${{ matrix.python-version }} \
             --sessions mypy_api
 
+          uv cache purge --ci
+
       - name: Check using Pyright
         run: |
           python -Im nox \
             --python ${{ matrix.python-version }} \
             --sessions pyright_api
+
+      - name: remove cache files that shouldn't be preserved.
+        run: uv cache purge --ci
 
   mypy-pkg:
     name: Type-check package
@@ -174,8 +183,11 @@ jobs:
       - name: Prepare & run Nox
         run: |
           uv pip install --system nox
+
           python -Im nox \
             --sessions mypy_pkg
+
+          uv cache purge --ci
 
   docs:
     name: Build docs & run doctests
@@ -199,8 +211,11 @@ jobs:
       - name: Prepare & run Nox
         run: |
           uv pip install --system nox
+
           python -Im nox \
             --session docs
+
+          uv cache purge --ci
 
   install-dev:
     name: Verify dev env
@@ -222,6 +237,8 @@ jobs:
         run: |
           uv venv
           uv pip install -e .[dev]
+
+          uv cache purge --ci
 
       - name: Try to import on Linux
         run: |
