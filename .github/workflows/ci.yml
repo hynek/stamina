@@ -32,10 +32,11 @@ jobs:
         run: |
           # We use the current calendar week as part of the cache key so it gets
           # busted weekly.
-          echo WEEK=$(date +%V) >>$GITHUB_ENV
+          echo CW=$(date +%V) >>$GITHUB_OUTPUT
 
     outputs:
       python-versions: ${{ steps.baipp.outputs.supported_python_classifiers_json_array }}
+      cache-busting-suffix: ${{ steps.cache-busting-suffix.outputs.CW }}
 
   tests:
     name: Tests on ${{ matrix.python-version }}
@@ -62,7 +63,7 @@ jobs:
           allow-prereleases: true
       - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
         with:
-          cache-suffix: ${{ env.WEEK }}
+          cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
       - name: Prepare & run Nox
         run: |
@@ -93,7 +94,7 @@ jobs:
           python-version-file: .python-version-default
       - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
         with:
-          cache-suffix: ${{ env.WEEK }}
+          cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
       - uses: actions/download-artifact@v4
         with:
@@ -142,7 +143,7 @@ jobs:
           allow-prereleases: true
       - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
         with:
-          cache-suffix: ${{ env.WEEK }}
+          cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
       - run: uv pip install --system nox "tomli; python_version<'3.11'"
 
@@ -175,7 +176,7 @@ jobs:
           python-version-file: .python-version-default
       - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
         with:
-          cache-suffix: ${{ env.WEEK }}
+          cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
       - name: Prepare & run Nox
         run: |
@@ -200,7 +201,7 @@ jobs:
           python-version: "3.12"
       - uses: hynek/setup-cached-uv@5ecc74c38b689a0f9965c15ee662a4d2334903cb
         with:
-          cache-suffix: ${{ env.WEEK }}
+          cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
       - name: Prepare & run Nox
         run: |
