@@ -27,16 +27,8 @@ jobs:
       - uses: hynek/build-and-inspect-python-package@v2
         id: baipp
 
-      - name: Create cache-busting suffix for setup-cached-uv
-        id: cache-busting-suffix
-        run: |
-          # We use the current calendar week as part of the cache key so it gets
-          # busted weekly.
-          echo CW="-cache-bust-$(date +%V)" >>$GITHUB_OUTPUT
-
     outputs:
       python-versions: ${{ steps.baipp.outputs.supported_python_classifiers_json_array }}
-      cache-busting-suffix: ${{ steps.cache-busting-suffix.outputs.CW }}
 
   tests:
     name: Tests on ${{ matrix.python-version }}
@@ -62,8 +54,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
       - uses: hynek/setup-cached-uv@73250b9f1c332375d16c0997a11cf37b7f7d3585
-        with:
-          cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
       - name: Prepare & run Nox
         run: |
@@ -93,8 +83,6 @@ jobs:
         with:
           python-version-file: .python-version-default
       - uses: hynek/setup-cached-uv@73250b9f1c332375d16c0997a11cf37b7f7d3585
-        with:
-          cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
       - uses: actions/download-artifact@v4
         with:
@@ -142,8 +130,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
       - uses: hynek/setup-cached-uv@73250b9f1c332375d16c0997a11cf37b7f7d3585
-        with:
-          cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
       - run: uv pip install --system nox "tomli; python_version<'3.11'"
 
@@ -175,8 +161,6 @@ jobs:
         with:
           python-version-file: .python-version-default
       - uses: hynek/setup-cached-uv@73250b9f1c332375d16c0997a11cf37b7f7d3585
-        with:
-          cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
       - name: Prepare & run Nox
         run: |
@@ -200,8 +184,6 @@ jobs:
           # Keep in sync with .readthedocs.yaml
           python-version: "3.12"
       - uses: hynek/setup-cached-uv@73250b9f1c332375d16c0997a11cf37b7f7d3585
-        with:
-          cache-suffix: ${{ needs.build-package.outputs.cache-busting-suffix }}
 
       - name: Prepare & run Nox
         run: |
