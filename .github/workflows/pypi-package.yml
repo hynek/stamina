@@ -11,6 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  attestations: write
   contents: read
   id-token: write
 
@@ -25,6 +26,8 @@ jobs:
           fetch-depth: 0
 
       - uses: hynek/build-and-inspect-python-package@v2
+        with:
+          attest-build-provenance-github: 'true'
 
   release-test-pypi:
     name: Publish in-dev package to test.pypi.org
