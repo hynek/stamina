@@ -12,11 +12,6 @@ import stamina
 from stamina._core import _make_stop
 
 
-parametrize_on_value_error = pytest.mark.parametrize(
-    "on", [ValueError, (ValueError,), lambda exc: isinstance(exc, ValueError)]
-)
-
-
 @pytest.mark.parametrize("attempts", [None, 1])
 @pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
 @pytest.mark.parametrize("duration", [1, dt.timedelta(days=1)])
@@ -39,7 +34,6 @@ def test_ok(attempts, timeout, duration):
     assert 42 == f()
 
 
-@parametrize_on_value_error
 @pytest.mark.parametrize(
     "timeout",
     [None, 1, dt.timedelta(days=1)],
@@ -70,7 +64,6 @@ def test_retries(duration, timeout, on):
     assert 1 == i
 
 
-@parametrize_on_value_error
 def test_wrong_exception(on):
     """
     Exceptions that are not passed as `on` are left through.
@@ -154,7 +147,6 @@ def test_retry_inactive_block_ok():
     assert 1 == num_called
 
 
-@parametrize_on_value_error
 def test_retry_block(on):
     """
     Sync retry_context blocks are retried.
@@ -194,7 +186,6 @@ class TestRetryingCaller:
 
         assert 42 == rc(f)
 
-    @parametrize_on_value_error
     def test_retries(self, on):
         """
         Retries if the specific error is raised. Arguments are passed through.

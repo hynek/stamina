@@ -26,3 +26,18 @@ if importlib.util.find_spec("trio"):
 @pytest.fixture(params=BACKENDS)
 def anyio_backend(request):
     return request.param
+
+
+@pytest.fixture(
+    name="on",
+    params=[
+        ValueError,
+        (ValueError,),
+        lambda exc: isinstance(exc, ValueError),
+    ],
+)
+def _on(request):
+    """
+    Parametrize over different ways to specify the exception to retry on.
+    """
+    return request.param

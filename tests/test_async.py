@@ -10,9 +10,6 @@ import stamina
 
 
 pytestmark = pytest.mark.anyio
-parametrize_on_value_error = pytest.mark.parametrize(
-    "on", [ValueError, (ValueError,), lambda exc: isinstance(exc, ValueError)]
-)
 
 
 @pytest.mark.parametrize("attempts", [None, 1])
@@ -50,7 +47,6 @@ async def test_ok(attempts, timeout, duration):
     assert 42 == await C().f()
 
 
-@parametrize_on_value_error
 @pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
 @pytest.mark.parametrize("duration", [0, dt.timedelta(days=0)])
 async def test_retries(duration, timeout, on):
@@ -78,7 +74,6 @@ async def test_retries(duration, timeout, on):
     assert 1 == i
 
 
-@parametrize_on_value_error
 async def test_retries_method(on):
     """
     Retries if the specific error is raised.
@@ -99,7 +94,6 @@ async def test_retries_method(on):
     assert 1 == i
 
 
-@parametrize_on_value_error
 async def test_wrong_exception(on):
     """
     Exceptions that are not passed as `on` are left through.
@@ -183,7 +177,6 @@ async def test_retry_inactive_block_ok():
     assert 1 == num_called
 
 
-@parametrize_on_value_error
 async def test_retry_block(on):
     """
     Async retry_context blocks are retried.
@@ -230,7 +223,6 @@ class TestAsyncRetryingCaller:
 
         assert 42 == await arc(f)
 
-    @parametrize_on_value_error
     async def test_retries(self, on):
         """
         Retries if the specific error is raised. Arguments are passed through.
