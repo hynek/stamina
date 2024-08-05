@@ -4,9 +4,18 @@
 
 import importlib.util
 
+from importlib.metadata import version
+
 import pytest
 
 import stamina._config
+
+
+def pytest_report_header(config):
+    return f"""\
+Tenacity: {version("tenacity")}
+stamina: {version("stamina")}\
+"""
 
 
 @pytest.fixture(autouse=True)
