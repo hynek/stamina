@@ -35,7 +35,8 @@ Sometimes, an exception is too broad, though.
 For example, *httpx* raises [`httpx.HTTPStatusError`](https://www.python-httpx.org/exceptions/) on all HTTP errors.
 But some errors, like 404 (Not Found) or 403 (Forbidden), usually shouldn't be retried!
 
-To solve problems like this, you can pass a callable to `on` that will be called with the exception that was raised and whose return value will be used to decide whether to retry or not.
+To solve problems like this, you can pass a *predicate* to `on`.
+A predicate is a callable that's called with the exception that was raised and whose return value will be used to decide whether to retry or not.
 
 So, calling the following `do_it` function will only retry if <https://httpbin.org> returns a 5xx status code:
 

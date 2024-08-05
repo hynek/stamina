@@ -571,11 +571,14 @@ def retry(
             An Exception or a tuple of Exceptions on which the decorated
             callable will be retried.
 
-            You can also pass a callable that takes an exception and returns a
-            bool which decides whether the exception should be retried. This
-            allows more fine-grained control over when to retry. For example,
-            to only retry on HTTP errors in the 500s range that indicate server
-            errors, but not those in the 400s which indicate a client error.
+            You can also pass a *predicate* in the form of a callable that
+            takes an exception and returns a bool which decides whether the
+            exception should be retried -- True meaning yes.
+
+            This allows more fine-grained control over when to retry. For
+            example, to only retry on HTTP errors in the 500s range that
+            indicate server errors, but not those in the 400s which indicate a
+            client error.
 
             There is no default -- you *must* pass this explicitly.
 
