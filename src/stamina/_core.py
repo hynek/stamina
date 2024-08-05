@@ -569,8 +569,15 @@ def retry(
     Args:
         on:
             An Exception or a tuple of Exceptions on which the decorated
-            callable will be retried. There is no default -- you *must* pass
-            this explicitly.
+            callable will be retried.
+
+            You can also pass a callable that takes an exception and returns a
+            bool which decides whether the exception should be retried. This
+            allows more fine-grained control over when to retry. For example,
+            to only retry on HTTP errors in the 500s range that indicate server
+            errors, but not those in the 400s which indicate a client error.
+
+            There is no default -- you *must* pass this explicitly.
 
         attempts:
             Maximum total number of attempts. Can be combined with *timeout*.
@@ -594,6 +601,8 @@ def retry(
        :class:`datetime.timedelta`.
 
     .. versionadded:: 23.3.0 `Trio <https://trio.readthedocs.io/>`_ support.
+
+    .. versionadded:: 24.3.0 *on* can be a callable now.
     """
     retry_ctx = _RetryContextIterator.from_params(
         on=on,

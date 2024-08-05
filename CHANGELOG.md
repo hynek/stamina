@@ -15,6 +15,12 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/24.2.0...HEAD)
 
+### Added
+
+- The *on* argument in all retry functions now can be a callable that takes an exception and returns a bool which decides whether or not a retry should be scheduled.
+  [#70](https://github.com/hynek/stamina/pull/70)
+
+
 
 ## [24.2.0](https://github.com/hynek/stamina/compare/24.1.0...24.2.0) - 2024-01-31
 
