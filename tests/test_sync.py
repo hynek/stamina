@@ -39,14 +39,14 @@ def test_ok(attempts, timeout, duration):
     [None, 1, dt.timedelta(days=1)],
 )
 @pytest.mark.parametrize("duration", [0, dt.timedelta(days=0)])
-def test_retries(duration, timeout):
+def test_retries(duration, timeout, on):
     """
     Retries if the specific error is raised.
     """
     i = 0
 
     @stamina.retry(
-        on=ValueError,
+        on=on,
         timeout=timeout,
         wait_max=duration,
         wait_initial=duration,
@@ -64,12 +64,12 @@ def test_retries(duration, timeout):
     assert 1 == i
 
 
-def test_wrong_exception():
+def test_wrong_exception(on):
     """
     Exceptions that are not passed as `on` are left through.
     """
 
-    @stamina.retry(on=ValueError)
+    @stamina.retry(on=on)
     def f():
         raise TypeError("passed")
 
@@ -147,13 +147,13 @@ def test_retry_inactive_block_ok():
     assert 1 == num_called
 
 
-def test_retry_block():
+def test_retry_block(on):
     """
     Sync retry_context blocks are retried.
     """
     i = 0
 
-    for attempt in stamina.retry_context(on=ValueError, wait_max=0):
+    for attempt in stamina.retry_context(on=on, wait_max=0):
         with attempt:
             i += 1
 
@@ -186,7 +186,7 @@ class TestRetryingCaller:
 
         assert 42 == rc(f)
 
-    def test_retries(self):
+    def test_retries(self, on):
         """
         Retries if the specific error is raised. Arguments are passed through.
         """
@@ -200,7 +200,7 @@ class TestRetryingCaller:
 
             return args, kw
 
-        bound_rc = stamina.RetryingCaller().on(ValueError)
+        bound_rc = stamina.RetryingCaller().on(on)
 
         args, kw = bound_rc(f, 42, foo="bar")
 

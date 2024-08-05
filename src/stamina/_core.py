@@ -7,12 +7,21 @@ from __future__ import annotations
 import datetime as dt
 import sys
 
-from collections.abc import Callable
 from dataclasses import dataclass, replace
 from functools import wraps
 from inspect import iscoroutinefunction
 from types import TracebackType
-from typing import AsyncIterator, Awaitable, Iterator, TypedDict, TypeVar
+from typing import (
+    AsyncIterator,
+    Awaitable,
+    Callable,
+    Iterator,
+    Tuple,
+    Type,
+    TypedDict,
+    TypeVar,
+    Union,
+)
 
 import tenacity as _t
 
@@ -51,10 +60,14 @@ async def _smart_sleep(delay: float) -> None:
 
 T = TypeVar("T")
 P = ParamSpec("P")
+# for backwards compatibility with Python<3.10
+ExcOrPredicate = Union[
+    Type[Exception], Tuple[Type[Exception], ...], Callable[[Exception], bool]
+]
 
 
 def retry_context(
-    on: type[Exception] | tuple[type[Exception], ...],
+    on: ExcOrPredicate,
     attempts: int | None = 10,
     timeout: float | dt.timedelta | None = 45.0,
     wait_initial: float | dt.timedelta = 0.1,
@@ -187,7 +200,7 @@ class RetryingCaller(BaseRetryingCaller):
 
     def __call__(
         self,
-        on: type[Exception] | tuple[type[Exception], ...],
+        on: ExcOrPredicate,
         callable_: Callable[P, T],
         /,
         *args: P.args,
@@ -211,9 +224,7 @@ class RetryingCaller(BaseRetryingCaller):
 
         raise SystemError("unreachable")  # noqa: EM101
 
-    def on(
-        self, on: type[Exception] | tuple[type[Exception], ...], /
-    ) -> BoundRetryingCaller:
+    def on(self, on: ExcOrPredicate, /) -> BoundRetryingCaller:
         """
         Create a new instance of :class:`BoundRetryingCaller` with the same
         parameters, but bound to a specific exception type.
@@ -240,12 +251,12 @@ class BoundRetryingCaller:
     __slots__ = ("_caller", "_on")
 
     _caller: RetryingCaller
-    _on: type[Exception] | tuple[type[Exception], ...]
+    _on: ExcOrPredicate
 
     def __init__(
         self,
         caller: RetryingCaller,
-        on: type[Exception] | tuple[type[Exception], ...],
+        on: ExcOrPredicate,
     ):
         self._caller = caller
         self._on = on
@@ -274,7 +285,7 @@ class AsyncRetryingCaller(BaseRetryingCaller):
 
     async def __call__(
         self,
-        on: type[Exception] | tuple[type[Exception], ...],
+        on: ExcOrPredicate,
         callable_: Callable[P, Awaitable[T]],
         /,
         *args: P.args,
@@ -289,9 +300,7 @@ class AsyncRetryingCaller(BaseRetryingCaller):
 
         raise SystemError("unreachable")  # noqa: EM101
 
-    def on(
-        self, on: type[Exception] | tuple[type[Exception], ...], /
-    ) -> BoundAsyncRetryingCaller:
+    def on(self, on: ExcOrPredicate, /) -> BoundAsyncRetryingCaller:
         """
         Create a new instance of :class:`BoundAsyncRetryingCaller` with the
         same parameters, but bound to a specific exception type.
@@ -315,12 +324,12 @@ class BoundAsyncRetryingCaller:
     __slots__ = ("_caller", "_on")
 
     _caller: AsyncRetryingCaller
-    _on: type[Exception] | tuple[type[Exception], ...]
+    _on: ExcOrPredicate
 
     def __init__(
         self,
         caller: AsyncRetryingCaller,
-        on: type[Exception] | tuple[type[Exception], ...],
+        on: ExcOrPredicate,
     ):
         self._caller = caller
         self._on = on
@@ -373,7 +382,7 @@ class _RetryContextIterator:
     @classmethod
     def from_params(
         cls,
-        on: type[Exception] | tuple[type[Exception], ...],
+        on: ExcOrPredicate,
         attempts: int | None,
         timeout: float | dt.timedelta | None,
         wait_initial: float | dt.timedelta,
@@ -384,12 +393,20 @@ class _RetryContextIterator:
         args: tuple[object, ...],
         kw: dict[str, object],
     ) -> _RetryContextIterator:
+        if (
+            isinstance(on, type)
+            and issubclass(on, BaseException)
+            or isinstance(on, tuple)
+        ):
+            _retry = _t.retry_if_exception_type(on)
+        else:
+            _retry = _t.retry_if_exception(on)
         return cls(
             _name=name,
             _args=args,
             _kw=kw,
             _t_kw={
-                "retry": _t.retry_if_exception_type(on),
+                "retry": _retry,
                 "wait": _t.wait_exponential_jitter(
                     initial=(
                         wait_initial.total_seconds()
@@ -521,7 +538,7 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
 
 def retry(
     *,
-    on: type[Exception] | tuple[type[Exception], ...],
+    on: ExcOrPredicate,
     attempts: int | None = 10,
     timeout: float | dt.timedelta | None = 45.0,
     wait_initial: float | dt.timedelta = 0.1,
@@ -552,8 +569,18 @@ def retry(
     Args:
         on:
             An Exception or a tuple of Exceptions on which the decorated
-            callable will be retried. There is no default -- you *must* pass
-            this explicitly.
+            callable will be retried.
+
+            You can also pass a *predicate* in the form of a callable that
+            takes an exception and returns a bool which decides whether the
+            exception should be retried -- True meaning yes.
+
+            This allows more fine-grained control over when to retry. For
+            example, to only retry on HTTP errors in the 500s range that
+            indicate server errors, but not those in the 400s which indicate a
+            client error.
+
+            There is no default -- you *must* pass this explicitly.
 
         attempts:
             Maximum total number of attempts. Can be combined with *timeout*.
@@ -577,6 +604,8 @@ def retry(
        :class:`datetime.timedelta`.
 
     .. versionadded:: 23.3.0 `Trio <https://trio.readthedocs.io/>`_ support.
+
+    .. versionadded:: 24.3.0 *on* can be a callable now.
     """
     retry_ctx = _RetryContextIterator.from_params(
         on=on,
