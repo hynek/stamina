@@ -46,8 +46,8 @@ dev = [
   "structlog",
   "prometheus-client",
   "trio",
-  # Earlier versions don't allow to install directories w/o -e.
-  "uv >= 0.1.24",
+  # Later versions don't re-install local packages.
+  "uv == 0.2.27",
 ]
 
 [project.urls]
