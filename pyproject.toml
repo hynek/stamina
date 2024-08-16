@@ -195,13 +195,13 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
-  "ARG005", # we need stub lambdas
-  "S101",   # assert
-  "SIM300", # Yoda rocks in asserts
-  "PT005",  # we always add underscores and explicit name
-  "PT011",  # broad is fine
-  "TRY002", # stock exceptions are fine in tests
-  "EM101",  # no need for exception msg hygiene in tests
+  "ARG005",   # we need stub lambdas
+  "ASYNC109", # we use timeout only for parametrization
+  "S101",     # assert
+  "SIM300",   # Yoda rocks in asserts
+  "PT011",    # broad is fine
+  "TRY002",   # stock exceptions are fine in tests
+  "EM101",    # no need for exception msg hygiene in tests
 ]
 
 
