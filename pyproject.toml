@@ -156,17 +156,12 @@ module = "tenacity.*"
 follow_imports = "skip"
 
 [[tool.mypy.overrides]]
-module = "noxfile.*"
+module = "noxfile"
 disallow_untyped_decorators = false
 
 
 [tool.black]
 line-length = 79
-
-
-[tool.uv]
-# Ensure Nox always gets a fresh package.
-reinstall-package = ["stamina"]
 
 
 [tool.ruff]
@@ -186,7 +181,6 @@ ignore = [
   "INP001",  # sometimes we want Python files outside of packages
   "PLR0913", # yes, many arguments, but most have defaults
   "PLR2004", # numbers are sometimes fine
-  "RUF001",  # leave my smart characters alone
   "SLF001",  # private members are accessed by friendly functions
   "TCH",     # TYPE_CHECKING blocks break autodocs
   "TD",      # we don't follow other people's todo style
@@ -197,14 +191,19 @@ ignore = [
 "tests/*" = [
   "ARG005",   # we need stub lambdas
   "ASYNC109", # we use timeout only for parametrization
+  "EM",       # no need for exception msg hygiene in tests
+  "PT011",    # broad is fine
   "S101",     # assert
   "SIM300",   # Yoda rocks in asserts
-  "PT011",    # broad is fine
   "TRY002",   # stock exceptions are fine in tests
-  "EM101",    # no need for exception msg hygiene in tests
 ]
 
 
 [tool.ruff.lint.isort]
 lines-between-types = 1
 lines-after-imports = 2
+
+
+[tool.uv]
+# Ensure Nox always gets a fresh package.
+reinstall-package = ["stamina"]
