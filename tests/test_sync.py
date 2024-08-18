@@ -220,6 +220,10 @@ def test_testing_mode():
 
     assert not stamina.is_testing()
 
+    for attempt in stamina.retry_context(on=ValueError):
+        assert 0.0 != attempt.next_wait
+        break
+
 
 class TestMakeStop:
     def test_never(self):

@@ -228,6 +228,10 @@ async def test_testing_mode():
 
     assert not stamina.is_testing()
 
+    async for attempt in stamina.retry_context(on=ValueError):
+        assert 0.0 != attempt.next_wait
+        break
+
 
 async def test_retry_blocks_can_be_disabled():
     """
