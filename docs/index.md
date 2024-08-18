@@ -19,13 +19,13 @@ motivation
 tutorial
 instrumentation
 api
-credits
 ```
 
 ```{toctree}
 :hidden:
 :caption: Meta
 
+credits
 PyPI <https://pypi.org/project/stamina/>
 GitHub <https://github.com/hynek/stamina/>
 Changelog <https://github.com/hynek/stamina/blob/main/CHANGELOG.md>
