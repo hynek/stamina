@@ -158,12 +158,30 @@ def test_retry_block(on):
             i += 1
 
             assert i == attempt.num
-            assert f"<Attempt num={i}>" == repr(attempt)
+            assert 0.0 == attempt.next_wait
+            assert f"<Attempt num={i}, next_wait=0.0>" == repr(attempt)
 
             if i < 2:
                 raise ValueError
 
     assert 2 == i
+
+
+def test_next_wait():
+    """
+    The next_wait property is updated.
+    """
+    i = 0
+
+    for attempt in stamina.retry_context(on=ValueError, wait_max=0.001):
+        with attempt:
+            if i == 0:
+                assert 0.0 == attempt.next_wait
+
+                i += 1
+                raise ValueError
+
+            assert pytest.approx(0.001) == attempt.next_wait
 
 
 class TestMakeStop:
