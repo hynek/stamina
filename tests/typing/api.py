@@ -111,6 +111,7 @@ hooks: tuple[RetryHook, ...] = get_on_retry_hooks()
 for attempt in retry_context(on=ValueError, timeout=13):
     with attempt:
         x: int = attempt.num
+        y: float = attempt.next_wait
 
 for attempt in retry_context(
     on=ValueError, timeout=dt.timedelta(seconds=13.0)
