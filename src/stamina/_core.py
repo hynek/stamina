@@ -542,26 +542,41 @@ class _RetryContextIterator:
 
         *num* is 1-based.
         """
-        if CONFIG.testing is not None:
-            return 0.0
-
-        return min(
-            self._wait_max,
-            self._wait_initial * (self._wait_exp_base ** (num - 1)),
+        return _backoff(
+            num, self._wait_max, self._wait_initial, self._wait_exp_base, 0
         )
 
     def _jittered_backoff_for_rcs(self, rcs: _t.RetryCallState) -> float:
         """
         Compute the backoff for *rcs*.
         """
-        if CONFIG.testing is not None:
-            return 0.0
-
-        return min(
+        return _backoff(
+            rcs.attempt_number,
             self._wait_max,
-            self._backoff_for_attempt_number(rcs.attempt_number)
-            + self._random.uniform(0, self._wait_jitter),
+            self._wait_initial,
+            self._wait_exp_base,
+            self._wait_jitter,
         )
+
+
+def _backoff(
+    num: int,
+    max_backoff: float,
+    initial: float,
+    exp_base: float,
+    jitter: float,
+) -> float:
+    """
+    If not in testing mode, compute the backoff for attempt *num* with the
+    given parameters.
+    """
+    if CONFIG.testing is not None:
+        return 0.0
+
+    return min(
+        max_backoff,
+        initial * (exp_base ** (num - 1)) + jitter,
+    )
 
 
 def _make_before_sleep(
