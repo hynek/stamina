@@ -16,7 +16,6 @@ from typing import (
     AsyncIterator,
     Awaitable,
     Callable,
-    ClassVar,
     Iterator,
     Tuple,
     Type,
@@ -420,8 +419,6 @@ class _RetryContextIterator:
     _wait_max: float
     _wait_exp_base: float
 
-    _random: ClassVar[random.Random] = random.Random()  # noqa: S311
-
     @classmethod
     def from_params(
         cls,
@@ -542,7 +539,7 @@ class _RetryContextIterator:
 
         *num* is 1-based.
         """
-        return _backoff(
+        return _compute_backoff(
             num, self._wait_max, self._wait_initial, self._wait_exp_base, 0
         )
 
@@ -550,7 +547,7 @@ class _RetryContextIterator:
         """
         Compute the backoff for *rcs*.
         """
-        return _backoff(
+        return _compute_backoff(
             rcs.attempt_number,
             self._wait_max,
             self._wait_initial,
@@ -559,24 +556,23 @@ class _RetryContextIterator:
         )
 
 
-def _backoff(
+def _compute_backoff(
     num: int,
     max_backoff: float,
     initial: float,
     exp_base: float,
-    jitter: float,
+    max_jitter: float,
 ) -> float:
     """
     If not in testing mode, compute the backoff for attempt *num* with the
-    given parameters.
+    given parameters and clamp it to *max_backoff*.
     """
     if CONFIG.testing is not None:
         return 0.0
 
-    return min(
-        max_backoff,
-        initial * (exp_base ** (num - 1)) + jitter,
-    )
+    jitter = random.uniform(0, max_jitter) if max_jitter else 0  # noqa: S311
+
+    return min(max_backoff, initial * (exp_base ** (num - 1)) + jitter)
 
 
 def _make_before_sleep(
