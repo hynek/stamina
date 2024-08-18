@@ -27,7 +27,7 @@ from typing import (
 
 import tenacity as _t
 
-from ._config import CONFIG, _Config
+from ._config import CONFIG, _Config, _Testing
 from .instrumentation._data import RetryDetails, guess_name
 
 
@@ -489,6 +489,19 @@ class _RetryContextIterator:
         """
         return replace(self, _name=name, _args=args, _kw=kw)
 
+    def _apply_maybe_test_mode_to_tenacity_kw(
+        self, testing: _Testing | None
+    ) -> dict[str, object]:
+        if testing is None:
+            return self._t_kw
+
+        t_kw = self._t_kw.copy()
+
+        del t_kw["wait"]
+        t_kw["stop"] = _t.stop_after_attempt(testing.attempts)
+
+        return t_kw
+
     def __iter__(self) -> Iterator[Attempt]:
         if not CONFIG.is_active:
             for r in _t.Retrying(reraise=True, stop=_STOP_NO_RETRY):
@@ -500,7 +513,7 @@ class _RetryContextIterator:
             before_sleep=_make_before_sleep(
                 self._name, CONFIG, self._args, self._kw
             ),
-            **self._t_kw,
+            **self._apply_maybe_test_mode_to_tenacity_kw(CONFIG.testing),
         ):
             yield Attempt(r, self._backoff_for_attempt_number)
 
@@ -511,7 +524,7 @@ class _RetryContextIterator:
                 before_sleep=_make_before_sleep(
                     self._name, CONFIG, self._args, self._kw
                 ),
-                **self._t_kw,
+                **self._apply_maybe_test_mode_to_tenacity_kw(CONFIG.testing),
             )
 
         self._t_a_retrying = self._t_a_retrying.__aiter__()

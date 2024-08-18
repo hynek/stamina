@@ -12,6 +12,21 @@ from .instrumentation._hooks import get_default_hooks, init_hooks
 from .typing import RetryHook
 
 
+class _Testing:
+    """
+    Test mode specification.
+
+    Strictly private.
+    """
+
+    __slots__ = ("attempts",)
+
+    attempts: int
+
+    def __init__(self, attempts: int) -> None:
+        self.attempts = attempts
+
+
 class _Config:
     """
     Global stamina configuration.
@@ -19,10 +34,17 @@ class _Config:
     Strictly private.
     """
 
-    __slots__ = ("lock", "_is_active", "_on_retry", "_get_on_retry")
+    __slots__ = (
+        "lock",
+        "_is_active",
+        "_on_retry",
+        "_get_on_retry",
+        "_testing",
+    )
 
     lock: Lock
     _is_active: bool
+    _testing: _Testing | None
     _on_retry: (
         tuple[RetryHook, ...] | tuple[RetryHook | RetryHookFactory, ...] | None
     )
@@ -31,6 +53,7 @@ class _Config:
     def __init__(self, lock: Lock) -> None:
         self.lock = lock
         self._is_active = True
+        self._testing = None
 
         # Prepare delayed initialization.
         self._on_retry = None
@@ -44,6 +67,15 @@ class _Config:
     def is_active(self, value: bool) -> None:
         with self.lock:
             self._is_active = value
+
+    @property
+    def testing(self) -> _Testing | None:
+        return self._testing
+
+    @testing.setter
+    def testing(self, value: _Testing | None) -> None:
+        with self.lock:
+            self._testing = value
 
     @property
     def on_retry(self) -> tuple[RetryHook, ...]:
@@ -94,3 +126,26 @@ def set_active(active: bool) -> None:
     Is idempotent and can be called repeatedly with the same value.
     """
     CONFIG.is_active = bool(active)
+
+
+def is_testing() -> bool:
+    """
+    Check whether test mode is enabled.
+
+    .. versionadded:: 24.3.0
+    """
+    return CONFIG.testing is not None
+
+
+def set_testing(testing: bool, *, attempts: int = 1) -> None:
+    """
+    Activate or deactivate test mode.
+
+    In testing mode, backoffs are disabled, and attempts are capped to
+    *attempts*.
+
+    Is idempotent and can be called repeatedly with the same values.
+
+    .. versionadded:: 24.3.0
+    """
+    CONFIG.testing = _Testing(attempts) if testing else None
