@@ -116,7 +116,7 @@ class Attempt:
         self._t_attempt = attempt
 
     def __repr__(self) -> str:
-        return f"<Attempt num={self.num}>"
+        return f"<Attempt num={self.num}, next_wait={float(self.next_wait)}>"
 
     @property
     def num(self) -> int:
@@ -124,6 +124,16 @@ class Attempt:
         The number of the current attempt.
         """
         return self._t_attempt.retry_state.attempt_number  # type: ignore[no-any-return]
+
+    @property
+    def next_wait(self) -> float:
+        """
+        The number of seconds of backoff before next attempt, if this attempt
+        fails.
+
+        .. versionadded:: 24.3.0
+        """
+        return self._t_attempt.retry_state.upcoming_sleep  # type: ignore[no-any-return]
 
     def __enter__(self) -> None:
         return self._t_attempt.__enter__()  # type: ignore[no-any-return]

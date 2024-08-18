@@ -20,6 +20,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 - The *on* argument in all retry functions now can be a callable that takes an exception and returns a bool which decides whether or not a retry should be scheduled.
   [#70](https://github.com/hynek/stamina/pull/70)
 
+- `stamina.Attempt` now has the `next_wait` attribute that contains the time the *next* backoff will wait, if the *current* attempt fails.
 
 
 ## [24.2.0](https://github.com/hynek/stamina/compare/24.1.0...24.2.0) - 2024-01-31

@@ -195,6 +195,23 @@ async def test_retry_block(on):
     assert 2 == num_called
 
 
+async def test_next_wait():
+    """
+    The next_wait property is updated.
+    """
+    i = 0
+
+    async for attempt in stamina.retry_context(on=ValueError, wait_max=0.001):
+        with attempt:
+            if i == 0:
+                assert 0.0 == attempt.next_wait
+
+                i += 1
+                raise ValueError
+
+            assert pytest.approx(0.001) == attempt.next_wait
+
+
 async def test_retry_blocks_can_be_disabled():
     """
     Async context retries respect the config.
