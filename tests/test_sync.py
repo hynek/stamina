@@ -4,6 +4,8 @@
 
 import datetime as dt
 
+from types import SimpleNamespace
+
 import pytest
 import tenacity
 
@@ -171,17 +173,30 @@ def test_next_wait():
     """
     The next_wait property is updated.
     """
-    i = 0
 
-    for attempt in stamina.retry_context(on=ValueError, wait_max=0.001):
+    for attempt in stamina.retry_context(on=ValueError, wait_max=0.0001):
         with attempt:
-            if i == 0:
-                assert 0.0 == attempt.next_wait
+            assert pytest.approx(0.0001) == attempt.next_wait
 
-                i += 1
+            if attempt.num == 1:
                 raise ValueError
 
-            assert pytest.approx(0.001) == attempt.next_wait
+
+def test_backoff_computation_clamps():
+    """
+    The backoff returned by _RetryContextIterator._backoff_for_attempt_number
+    and _RetryContextIterator._jittered_backoff_for_rcs never exceeds wait_max.
+    """
+    rci = stamina.retry_context(on=ValueError, wait_max=0.42)
+
+    for i in range(1, 10):
+        backoff = rci._backoff_for_attempt_number(i)
+        assert backoff <= 0.42
+
+        jittered = rci._jittered_backoff_for_rcs(
+            SimpleNamespace(attempt_number=i)
+        )
+        assert jittered <= 0.42
 
 
 class TestMakeStop:

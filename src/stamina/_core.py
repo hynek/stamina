@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import random
 import sys
 
 from dataclasses import dataclass, replace
@@ -15,6 +16,7 @@ from typing import (
     AsyncIterator,
     Awaitable,
     Callable,
+    ClassVar,
     Iterator,
     Tuple,
     Type,
@@ -108,12 +110,17 @@ class Attempt:
     .. versionadded:: 23.2.0
     """
 
-    __slots__ = ("_t_attempt",)
+    __slots__ = ("_t_attempt", "_next_wait_fn")
 
     _t_attempt: _t.AttemptManager
 
-    def __init__(self, attempt: _t.AttemptManager):
+    def __init__(
+        self,
+        attempt: _t.AttemptManager,
+        next_wait_fn: Callable[[int], float] | None,
+    ):
         self._t_attempt = attempt
+        self._next_wait_fn = next_wait_fn
 
     def __repr__(self) -> str:
         return f"<Attempt num={self.num}, next_wait={float(self.next_wait)}>"
@@ -131,9 +138,18 @@ class Attempt:
         The number of seconds of backoff before the *next* attempt if *this*
         attempt fails.
 
+
+        .. warning::
+            This value does **not** include a possible random jitter and is
+            therefore just a *lower bound* of the actual value.
+
         .. versionadded:: 24.3.0
         """
-        return self._t_attempt.retry_state.upcoming_sleep  # type: ignore[no-any-return]
+        return (
+            self._next_wait_fn(self._t_attempt.retry_state.attempt_number + 1)
+            if self._next_wait_fn
+            else 0.0
+        )
 
     def __enter__(self) -> None:
         return self._t_attempt.__enter__()  # type: ignore[no-any-return]
@@ -382,12 +398,29 @@ _LAZY_NO_ASYNC_RETRY = _LazyNoAsyncRetry()
 
 @dataclass
 class _RetryContextIterator:
-    __slots__ = ("_t_kw", "_t_a_retrying", "_name", "_args", "_kw")
+    __slots__ = (
+        "_t_kw",
+        "_t_a_retrying",
+        "_name",
+        "_args",
+        "_kw",
+        "_wait_jitter",
+        "_wait_initial",
+        "_wait_max",
+        "_wait_exp_base",
+    )
     _t_kw: dict[str, object]
     _t_a_retrying: _t.AsyncRetrying
     _name: str
     _args: tuple[object, ...]
     _kw: dict[str, object]
+
+    _wait_jitter: float
+    _wait_initial: float
+    _wait_max: float
+    _wait_exp_base: float
+
+    _random: ClassVar[random.Random] = random.Random()  # noqa: S311
 
     @classmethod
     def from_params(
@@ -411,30 +444,26 @@ class _RetryContextIterator:
             _retry = _t.retry_if_exception_type(on)
         else:
             _retry = _t.retry_if_exception(on)
-        return cls(
+
+        if isinstance(wait_initial, dt.timedelta):
+            wait_initial = wait_initial.total_seconds()
+
+        if isinstance(wait_max, dt.timedelta):
+            wait_max = wait_max.total_seconds()
+
+        if isinstance(wait_jitter, dt.timedelta):
+            wait_jitter = wait_jitter.total_seconds()
+
+        inst = cls(
             _name=name,
             _args=args,
             _kw=kw,
+            _wait_jitter=wait_jitter,
+            _wait_initial=wait_initial,
+            _wait_max=wait_max,
+            _wait_exp_base=wait_exp_base,
             _t_kw={
                 "retry": _retry,
-                "wait": _t.wait_exponential_jitter(
-                    initial=(
-                        wait_initial.total_seconds()
-                        if isinstance(wait_initial, dt.timedelta)
-                        else wait_initial
-                    ),
-                    max=(
-                        wait_max.total_seconds()
-                        if isinstance(wait_max, dt.timedelta)
-                        else wait_max
-                    ),
-                    exp_base=wait_exp_base,
-                    jitter=(
-                        wait_jitter.total_seconds()
-                        if isinstance(wait_jitter, dt.timedelta)
-                        else wait_jitter
-                    ),
-                ),
                 "stop": _make_stop(
                     attempts=attempts,
                     timeout=(
@@ -448,6 +477,10 @@ class _RetryContextIterator:
             _t_a_retrying=_LAZY_NO_ASYNC_RETRY,
         )
 
+        inst._t_kw["wait"] = inst._jittered_backoff_for_rcs
+
+        return inst
+
     def with_name(
         self, name: str, args: tuple[object, ...], kw: dict[str, object]
     ) -> _RetryContextIterator:
@@ -459,7 +492,7 @@ class _RetryContextIterator:
     def __iter__(self) -> Iterator[Attempt]:
         if not CONFIG.is_active:
             for r in _t.Retrying(reraise=True, stop=_STOP_NO_RETRY):
-                yield Attempt(r)
+                yield Attempt(r, None)
 
             return
 
@@ -469,7 +502,7 @@ class _RetryContextIterator:
             ),
             **self._t_kw,
         ):
-            yield Attempt(r)
+            yield Attempt(r, self._backoff_for_attempt_number)
 
     def __aiter__(self) -> AsyncIterator[Attempt]:
         if CONFIG.is_active:
@@ -486,7 +519,31 @@ class _RetryContextIterator:
         return self
 
     async def __anext__(self) -> Attempt:
-        return Attempt(await self._t_a_retrying.__anext__())
+        return Attempt(
+            await self._t_a_retrying.__anext__(),
+            self._backoff_for_attempt_number,
+        )
+
+    def _backoff_for_attempt_number(self, num: int) -> float:
+        """
+        Compute a jitter-less lower bound for backoff number *num*.
+
+        *num* is 1-based.
+        """
+        return min(
+            self._wait_max,
+            self._wait_initial * (self._wait_exp_base ** (num - 1)),
+        )
+
+    def _jittered_backoff_for_rcs(self, rcs: _t.RetryCallState) -> float:
+        """
+        Compute the backoff for *rcs*.
+        """
+        return min(
+            self._wait_max,
+            self._backoff_for_attempt_number(rcs.attempt_number)
+            + self._random.uniform(0, self._wait_jitter),
+        )
 
 
 def _make_before_sleep(
