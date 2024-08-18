@@ -497,7 +497,6 @@ class _RetryContextIterator:
 
         t_kw = self._t_kw.copy()
 
-        del t_kw["wait"]
         t_kw["stop"] = _t.stop_after_attempt(testing.attempts)
 
         return t_kw
@@ -543,6 +542,9 @@ class _RetryContextIterator:
 
         *num* is 1-based.
         """
+        if CONFIG.testing is not None:
+            return 0.0
+
         return min(
             self._wait_max,
             self._wait_initial * (self._wait_exp_base ** (num - 1)),
@@ -552,6 +554,9 @@ class _RetryContextIterator:
         """
         Compute the backoff for *rcs*.
         """
+        if CONFIG.testing is not None:
+            return 0.0
+
         return min(
             self._wait_max,
             self._backoff_for_attempt_number(rcs.attempt_number)
