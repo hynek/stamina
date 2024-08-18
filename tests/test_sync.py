@@ -218,7 +218,7 @@ class TestRetryingCaller:
 
             return args, kw
 
-        bound_rc = stamina.RetryingCaller().on(on)
+        bound_rc = stamina.RetryingCaller(wait_max=0).on(on)
 
         args, kw = bound_rc(f, 42, foo="bar")
 

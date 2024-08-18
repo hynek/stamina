@@ -254,7 +254,7 @@ class TestAsyncRetryingCaller:
 
             return args, kw
 
-        arc = stamina.AsyncRetryingCaller().on(on)
+        arc = stamina.AsyncRetryingCaller(wait_max=0).on(on)
 
         args, kw = await arc(f, 42, foo="bar")
 
