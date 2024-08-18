@@ -171,17 +171,13 @@ def test_next_wait():
     """
     The next_wait property is updated.
     """
-    i = 0
 
-    for attempt in stamina.retry_context(on=ValueError, wait_max=0.001):
+    for attempt in stamina.retry_context(on=ValueError, wait_max=0.0001):
         with attempt:
-            if i == 0:
-                assert 0.0 == attempt.next_wait
+            assert pytest.approx(0.0001) == attempt.next_wait
 
-                i += 1
+            if attempt.num == 1:
                 raise ValueError
-
-            assert pytest.approx(0.001) == attempt.next_wait
 
 
 class TestMakeStop:
