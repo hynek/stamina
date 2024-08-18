@@ -128,8 +128,8 @@ class Attempt:
     @property
     def next_wait(self) -> float:
         """
-        The number of seconds of backoff before next attempt, if this attempt
-        fails.
+        The number of seconds of backoff before the *next* attempt if *this*
+        attempt fails.
 
         .. versionadded:: 24.3.0
         """

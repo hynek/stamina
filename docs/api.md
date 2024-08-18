@@ -6,7 +6,7 @@
 .. autofunction:: retry
 .. autofunction:: retry_context
 .. autoclass:: Attempt
-   :members: num
+   :members: num, next_wait
 .. autoclass:: RetryingCaller
    :members: on, __call__
 
