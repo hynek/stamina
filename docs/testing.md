@@ -13,7 +13,7 @@ import stamina
 
 @pytest.fixture(autouse=True, scope="session")
 def deactivate_retries():
- stamina.set_active(False)
+    stamina.set_active(False)
 ```
 
 This is a great approach when you're only using our decorator-based API.
