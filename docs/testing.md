@@ -21,6 +21,9 @@ This is a great approach when you're only using our decorator-based API.
 
 ## Limiting Retries
 
+:::{versionadded} 24.3.0
+:::
+
 When you need more control, you will use the iterator-based APIs around {func}`stamina.retry_context`.
 
 In that case, triggering retries and testing what happens can make sense.
