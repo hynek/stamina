@@ -1,8 +1,11 @@
 # Testing
 
-Testing code that has retry logic can be tricky, therefore *stamina* helps you with dedicated testing helpers.
+Testing code with retry logic can be tricky, so *stamina* provides dedicated testing helpers that allow you to affect retrying behavior *globally*.
 
-The easiest way is to disable retries globally using {func}`stamina.set_active`:
+
+## Turn Off Retries
+
+The easiest way is to turn off retries using {func}`stamina.set_active`:
 
 ```python
 import pytest
@@ -10,21 +13,22 @@ import stamina
 
 @pytest.fixture(autouse=True, scope="session")
 def deactivate_retries():
-    stamina.set_active(False)
+ stamina.set_active(False)
 ```
 
-This is a great approach when you're only using the decorator-based API.
+This is a great approach when you're only using our decorator-based API.
 
----
 
-When you need more control, you're going to use the iterator-based APIs around {func}`stamina.retry_context`.
+## Limiting Retries
 
-Here, it can make sense to actually trigger retries and test what happens.
-However, you don't want the backoff and you probably don't want to go to the full number of attempts.
+When you need more control, you will use the iterator-based APIs around {func}`stamina.retry_context`.
 
-For this use-case *stamina* comes with a dedicated testing mode that disables backoff and caps retries -- by default to a single attempt: {func}`stamina.set_testing`.
+In that case, triggering retries and testing what happens can make sense.
+However, you don't want the backoff and probably want to avoid going to the full number of attempts -- otherwise, your test suite will run forever.
 
-Therefore this script will only print "trying 1" and "trying 2" very quickly and raise a `ValueError`:
+For this use-case, *stamina* comes with a dedicated testing mode that turns off backoff and caps retries -- by default to a single attempt: {func}`stamina.set_testing`.
+
+Therefore, this script will only print "trying 1" and "trying 2" very quickly and raise a `ValueError`:
 
 ```python
 import stamina
@@ -37,5 +41,5 @@ for attempt in stamina.retry_context(on=ValueError):
         print("trying", attempt.num)
         raise ValueError("nope")
 
-stamina.set_testing(False)
+stamina.set_testing(False)  # back to business as usual
 ```
