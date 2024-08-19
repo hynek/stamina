@@ -39,7 +39,7 @@ import stamina
 stamina.set_testing(True)  # no backoff, 1 attempt
 stamina.set_testing(True, attempts=2)  # no backoff, 2 attempts
 
-for attempt in stamina.retry_context(on=ValueError):
+for attempt in stamina.retry_context(on=ValueError, attempts=1_000):
     with attempt:
         print("trying", attempt.num)
         raise ValueError("nope")
