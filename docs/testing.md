@@ -24,7 +24,7 @@ This is a great approach when you're only using our decorator-based API.
 :::{versionadded} 24.3.0
 :::
 
-When you need more control, you will use the iterator-based APIs around {func}`stamina.retry_context`.
+When you need more control, you can use the iterator-based APIs around {func}`stamina.retry_context`.
 
 In that case, triggering retries and testing what happens can make sense.
 However, you don't want the backoff and probably want to avoid going to the full number of attempts -- otherwise, your test suite will run forever.
