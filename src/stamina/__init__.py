@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 from . import instrumentation
-from ._config import is_active, set_active
+from ._config import is_active, is_testing, set_active, set_testing
 from ._core import (
     AsyncRetryingCaller,
     Attempt,
@@ -22,10 +22,12 @@ __all__ = [
     "BoundRetryingCaller",
     "instrumentation",
     "is_active",
+    "is_testing",
     "retry_context",
     "retry",
     "RetryingCaller",
     "set_active",
+    "set_testing",
 ]
 
 

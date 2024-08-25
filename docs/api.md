@@ -51,6 +51,16 @@
 .. autofunction:: is_active
 ```
 
+## Testing
+
+::: {seealso}
+{doc}`testing`
+:::
+
+```{eval-rst}
+.. autofunction:: set_testing
+.. autofunction:: is_testing
+```
 
 ## Instrumentation
 

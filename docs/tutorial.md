@@ -142,18 +142,10 @@ async def with_block(code: int) -> httpx.Response:
 Note how you can also pass {class}`datetime.timedelta` objects to *timeout*, *wait_initial*, *wait_max*, and *wait_jitter*.
 
 
-## Deactivating Retries Globally
+## Testing
 
-Occasionally, turning off retries globally is handy -- for instance, in tests.
-*stamina* has two helpers for controlling and inspecting whether retrying is active:
-{func}`stamina.is_active()` and {func}`stamina.set_active()` (it's idempotent: you can call `set_active(True)` as many times as you want in a row).
-For example, here's a *pytest* fixture that automatically turns off retries at the beginning of a test run:
+Testing software with retries can be tricky, so *stamina* comes with dedicated testing helpers to make your life easier.
 
-```python
-import pytest
-import stamina
+You can *globally* turn them off altogether, remove backoff, and limit the number of retries.
 
-@pytest.fixture(autouse=True, scope="session")
-def deactivate_retries():
-    stamina.set_active(False)
-```
+Check out {doc}`testing` to learn more!

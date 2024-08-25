@@ -17,9 +17,11 @@ from stamina import (
     BoundRetryingCaller,
     RetryingCaller,
     is_active,
+    is_testing,
     retry,
     retry_context,
     set_active,
+    set_testing,
 )
 from stamina.instrumentation import (
     RetryDetails,
@@ -93,6 +95,14 @@ if is_active() is True:
     ...
 
 set_active(False)
+
+set_testing(True)
+set_testing(True, attempts=2)
+
+if is_testing() is False:
+    ...
+
+set_testing(False)
 
 
 def hook(details: RetryDetails) -> None:

@@ -16,7 +16,6 @@ from typing import (
     AsyncIterator,
     Awaitable,
     Callable,
-    ClassVar,
     Iterator,
     Tuple,
     Type,
@@ -27,7 +26,7 @@ from typing import (
 
 import tenacity as _t
 
-from ._config import CONFIG, _Config
+from ._config import CONFIG, _Config, _Testing
 from .instrumentation._data import RetryDetails, guess_name
 
 
@@ -420,8 +419,6 @@ class _RetryContextIterator:
     _wait_max: float
     _wait_exp_base: float
 
-    _random: ClassVar[random.Random] = random.Random()  # noqa: S311
-
     @classmethod
     def from_params(
         cls,
@@ -489,6 +486,18 @@ class _RetryContextIterator:
         """
         return replace(self, _name=name, _args=args, _kw=kw)
 
+    def _apply_maybe_test_mode_to_tenacity_kw(
+        self, testing: _Testing | None
+    ) -> dict[str, object]:
+        if testing is None:
+            return self._t_kw
+
+        t_kw = self._t_kw.copy()
+
+        t_kw["stop"] = _t.stop_after_attempt(testing.attempts)
+
+        return t_kw
+
     def __iter__(self) -> Iterator[Attempt]:
         if not CONFIG.is_active:
             for r in _t.Retrying(reraise=True, stop=_STOP_NO_RETRY):
@@ -500,7 +509,7 @@ class _RetryContextIterator:
             before_sleep=_make_before_sleep(
                 self._name, CONFIG, self._args, self._kw
             ),
-            **self._t_kw,
+            **self._apply_maybe_test_mode_to_tenacity_kw(CONFIG.testing),
         ):
             yield Attempt(r, self._backoff_for_attempt_number)
 
@@ -511,7 +520,7 @@ class _RetryContextIterator:
                 before_sleep=_make_before_sleep(
                     self._name, CONFIG, self._args, self._kw
                 ),
-                **self._t_kw,
+                **self._apply_maybe_test_mode_to_tenacity_kw(CONFIG.testing),
             )
 
         self._t_a_retrying = self._t_a_retrying.__aiter__()
@@ -530,20 +539,40 @@ class _RetryContextIterator:
 
         *num* is 1-based.
         """
-        return min(
-            self._wait_max,
-            self._wait_initial * (self._wait_exp_base ** (num - 1)),
+        return _compute_backoff(
+            num, self._wait_max, self._wait_initial, self._wait_exp_base, 0
         )
 
     def _jittered_backoff_for_rcs(self, rcs: _t.RetryCallState) -> float:
         """
         Compute the backoff for *rcs*.
         """
-        return min(
+        return _compute_backoff(
+            rcs.attempt_number,
             self._wait_max,
-            self._backoff_for_attempt_number(rcs.attempt_number)
-            + self._random.uniform(0, self._wait_jitter),
+            self._wait_initial,
+            self._wait_exp_base,
+            self._wait_jitter,
         )
+
+
+def _compute_backoff(
+    num: int,
+    max_backoff: float,
+    initial: float,
+    exp_base: float,
+    max_jitter: float,
+) -> float:
+    """
+    If not in testing mode, compute the backoff for attempt *num* with the
+    given parameters and clamp it to *max_backoff*.
+    """
+    if CONFIG.testing is not None:
+        return 0.0
+
+    jitter = random.uniform(0, max_jitter) if max_jitter else 0  # noqa: S311
+
+    return min(max_backoff, initial * (exp_base ** (num - 1)) + jitter)
 
 
 def _make_before_sleep(

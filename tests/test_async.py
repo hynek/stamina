@@ -207,6 +207,32 @@ async def test_next_wait():
                 raise ValueError
 
 
+async def test_testing_mode():
+    """
+    Testing mode can be set and reset.
+    """
+    stamina.set_testing(True, attempts=3)
+
+    assert stamina.is_testing()
+
+    with pytest.raises(ValueError):  # noqa: PT012
+        async for attempt in stamina.retry_context(on=ValueError):
+            assert 0.0 == attempt.next_wait
+
+            with attempt:
+                raise ValueError
+
+    assert 3 == attempt.num
+
+    stamina.set_testing(False)
+
+    assert not stamina.is_testing()
+
+    async for attempt in stamina.retry_context(on=ValueError):
+        assert 0.0 != attempt.next_wait
+        break
+
+
 async def test_retry_blocks_can_be_disabled():
     """
     Async context retries respect the config.

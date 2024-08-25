@@ -23,6 +23,10 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 - `stamina.Attempt` now has a `next_wait` attribute that contains the time the *next* backoff will wait, if the *current* attempt fails (sans jitter).
   [#72](https://github.com/hynek/stamina/pull/72)
 
+- It is now possible to switch *stamina* into a testing mode using `stamina.set_testing()`.
+  It disables backoffs and caps the number of retries.
+  [#73](https://github.com/hynek/stamina/pull/73)
+
 
 ## [24.2.0](https://github.com/hynek/stamina/compare/24.1.0...24.2.0) - 2024-01-31
 
