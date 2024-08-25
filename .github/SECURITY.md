@@ -9,6 +9,7 @@ That said, you shouldn't be afraid to upgrade if you only use our documented pub
 Whenever there is a need to break compatibility, it is announced in the changelog and raises a `DeprecationWarning` for a year (if possible) before it's finally really broken.
 
 
-## Reporting a Vulnerability
+## Security Contact Information
 
-If you think you found a vulnerability, please use [GitHub's security advisory form](https://github.com/hynek/stamina/security/advisories/new), or email Hynek Schlawack at <hs@ox.cx>.
+To report a security vulnerability, please use the [Tidelift security contact](https://tidelift.com/security).
+Tidelift will coordinate the fix and disclosure.
