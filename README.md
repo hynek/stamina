@@ -63,3 +63,11 @@ Check out our [tutorial](https://stamina.hynek.me/en/latest/tutorial.html) for m
 The development is kindly supported by my employer [Variomedia AG](https://www.variomedia.de/) and all my amazing [GitHub Sponsors](https://github.com/sponsors/hynek).
 
 This project would not be possible without the years of incredible work that went into [Tenacity](https://tenacity.readthedocs.io/).
+
+
+## *stamina* for Enterprise
+
+Available as part of the [Tidelift Subscription](https://tidelift.com/?utm_source=lifter&utm_medium=referral&utm_campaign=hynek).
+
+The maintainers of *stamina* and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open-source packages you use to build your applications.
+Save time, reduce risk, and improve code health, while paying the maintainers of the exact packages you use.
