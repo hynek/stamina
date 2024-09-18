@@ -58,11 +58,11 @@ jobs:
       - name: Prepare & run Nox
         run: >
           uvx
-            --with "tomli; python_version<'3.11'"
+          --with "tomli; python_version<'3.11'"
           nox
-            --python ${{ matrix.python-version }}
-            --sessions tests
-            -- --installpkg dist/*.whl
+          --python ${{ matrix.python-version }}
+          --sessions tests
+          -- --installpkg dist/*.whl
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v4
@@ -135,18 +135,18 @@ jobs:
       - name: Check using Mypy
         run: >
           uvx
-            --with "tomli; python_version<'3.11'"
+          --with "tomli; python_version<'3.11'"
           nox
-            --python ${{ matrix.python-version }}
-            --sessions mypy_api
+          --python ${{ matrix.python-version }}
+          --sessions mypy_api
 
       - name: Check using Pyright
         run: >
           uvx
-            --with "tomli; python_version<'3.11'"
+          --with "tomli; python_version<'3.11'"
           nox
-            --python ${{ matrix.python-version }}
-            --sessions pyright_api
+          --python ${{ matrix.python-version }}
+          --sessions pyright_api
 
   mypy-pkg:
     name: Type-check package
