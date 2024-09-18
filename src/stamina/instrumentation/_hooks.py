@@ -13,7 +13,7 @@ from ._structlog import StructlogOnRetryHook
 
 
 def init_hooks(
-    maybe_delayed: tuple[RetryHook | RetryHookFactory, ...]
+    maybe_delayed: tuple[RetryHook | RetryHookFactory, ...],
 ) -> tuple[RetryHook, ...]:
     """
     Execute delayed hook factories and return a tuple of finalized hooks.

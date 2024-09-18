@@ -134,7 +134,6 @@ def docs(session: nox.Session) -> None:
 
     for cmd in cmds:
         session.run(
-            # fmt: off
             "python", "-Im", "sphinx",
             "-T", "-E",
             "-W", "--keep-going",
@@ -144,5 +143,4 @@ def docs(session: nox.Session) -> None:
             "-n",
             "docs",
             "docs/_build/html",
-            # fmt: on
-        )
+        )  # fmt: skip
