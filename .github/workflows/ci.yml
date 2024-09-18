@@ -56,13 +56,13 @@ jobs:
       - uses: hynek/setup-cached-uv@v2
 
       - name: Prepare & run Nox
-        run: |
-          uv pip install --system nox "tomli; python_version<'3.11'"
-          python -Im nox \
-            --python ${{ matrix.python-version }} \
-            --sessions tests \
-            -- \
-            --installpkg dist/*.whl
+        run: >
+          uvx
+          --with "tomli; python_version<'3.11'"
+          nox
+          --python ${{ matrix.python-version }}
+          --sessions tests
+          -- --installpkg dist/*.whl
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v4
@@ -92,16 +92,16 @@ jobs:
 
       - name: Combine coverage & fail if it's <100%.
         run: |
-          uv pip install --system --upgrade coverage[toml]
+          uv tool install coverage[toml]
 
-          python -Im coverage combine
-          python -Im coverage html --skip-covered --skip-empty
+          coverage combine
+          coverage html --skip-covered --skip-empty
 
           # Report and write to summary.
-          python -Im coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+          coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
 
           # Report again and fail if under 100%.
-          python -Im coverage report --fail-under=100
+          coverage report --fail-under=100
 
       - name: Upload HTML report if check failed.
         uses: actions/upload-artifact@v4
@@ -132,19 +132,21 @@ jobs:
           allow-prereleases: true
       - uses: hynek/setup-cached-uv@v2
 
-      - run: uv pip install --system nox "tomli; python_version<'3.11'"
-
       - name: Check using Mypy
-        run: |
-          python -Im nox \
-            --python ${{ matrix.python-version }} \
-            --sessions mypy_api
+        run: >
+          uvx
+          --with "tomli; python_version<'3.11'"
+          nox
+          --python ${{ matrix.python-version }}
+          --sessions mypy_api
 
       - name: Check using Pyright
-        run: |
-          python -Im nox \
-            --python ${{ matrix.python-version }} \
-            --sessions pyright_api
+        run: >
+          uvx
+          --with "tomli; python_version<'3.11'"
+          nox
+          --python ${{ matrix.python-version }}
+          --sessions pyright_api
 
   mypy-pkg:
     name: Type-check package
@@ -164,10 +166,7 @@ jobs:
       - uses: hynek/setup-cached-uv@v2
 
       - name: Prepare & run Nox
-        run: |
-          uv pip install --system nox
-          python -Im nox \
-            --sessions mypy_pkg
+        run: uvx nox --sessions mypy_pkg
 
   docs:
     name: Build docs & run doctests
@@ -187,10 +186,7 @@ jobs:
       - uses: hynek/setup-cached-uv@v2
 
       - name: Prepare & run Nox
-        run: |
-          uv pip install --system nox
-          python -Im nox \
-            --session docs
+        run: uvx nox --session docs
 
   install-dev:
     name: Verify dev env
