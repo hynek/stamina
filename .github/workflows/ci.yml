@@ -56,13 +56,13 @@ jobs:
       - uses: hynek/setup-cached-uv@v2
 
       - name: Prepare & run Nox
-        run: |
-          uv pip install --system nox "tomli; python_version<'3.11'"
-          python -Im nox \
-            --python ${{ matrix.python-version }} \
-            --sessions tests \
-            -- \
-            --installpkg dist/*.whl
+        run: >
+          uvx
+            --with "tomli; python_version<'3.11'"
+          nox
+            --python ${{ matrix.python-version }}
+            --sessions tests
+            -- --installpkg dist/*.whl
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v4
@@ -132,18 +132,20 @@ jobs:
           allow-prereleases: true
       - uses: hynek/setup-cached-uv@v2
 
-      - run: uv pip install --system nox "tomli; python_version<'3.11'"
-
       - name: Check using Mypy
-        run: |
-          python -Im nox \
-            --python ${{ matrix.python-version }} \
+        run: >
+          uvx
+            --with "tomli; python_version<'3.11'"
+          nox
+            --python ${{ matrix.python-version }}
             --sessions mypy_api
 
       - name: Check using Pyright
-        run: |
-          python -Im nox \
-            --python ${{ matrix.python-version }} \
+        run: >
+          uvx
+            --with "tomli; python_version<'3.11'"
+          nox
+            --python ${{ matrix.python-version }}
             --sessions pyright_api
 
   mypy-pkg:
@@ -164,10 +166,7 @@ jobs:
       - uses: hynek/setup-cached-uv@v2
 
       - name: Prepare & run Nox
-        run: |
-          uv pip install --system nox
-          python -Im nox \
-            --sessions mypy_pkg
+        run: uvx nox --sessions mypy_pkg
 
   docs:
     name: Build docs & run doctests
@@ -187,10 +186,7 @@ jobs:
       - uses: hynek/setup-cached-uv@v2
 
       - name: Prepare & run Nox
-        run: |
-          uv pip install --system nox
-          python -Im nox \
-            --session docs
+        run: uvx nox --session docs
 
   install-dev:
     name: Verify dev env
