@@ -42,7 +42,7 @@ ALL_SUPPORTED = [
 
 @nox.session
 def pre_commit(session: nox.Session) -> None:
-    session.install("pre-commit")
+    session.install("pre-commit-uv")
 
     session.run("pre-commit", "run", "--all-files")
 
