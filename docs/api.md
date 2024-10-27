@@ -44,7 +44,7 @@
 ```
 
 
-## Activation and Deactivation
+## Activation and deactivation
 
 ```{eval-rst}
 .. autofunction:: set_active

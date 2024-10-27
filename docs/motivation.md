@@ -1,6 +1,6 @@
 # Motivation
 
-## The Need for Retries
+## The need for retries
 
 Retries are essential for making distributed systems resilient.
 Transient errors are unavoidable and can happen for the wildest reasons:
@@ -15,7 +15,7 @@ And sometimes, one never finds out because a [cosmic ray](https://en.wikipedia.o
 The bigger the scale, the more likely it is that something will go wrong -- but the chance is never zero.
 
 
-## The Dangers of Retries
+## The dangers of retries
 
 However, retries are also very dangerous if done naïvely.
 Simply repeating an operation until it succeeds can lead to [*cascading failures*](https://en.wikipedia.org/wiki/Cascading_failure) and [*thundering herds*](https://en.wikipedia.org/wiki/Thundering_herd_problem) and ultimately take down your whole system, just because a database had a brief hiccup.
@@ -60,7 +60,7 @@ You can [tune all these parameters](stamina.retry) to your liking, but the defau
 I hope you're now all motivated and ready to jump into our {doc}`tutorial`!
 
 
-## Supplemental Literature
+## Supplemental literature
 
 - The [*Exponential Backoff And Jitter*](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) article on the *AWS Architecture Blog* is a good explanation of the basics with pretty graphs.
 - [*Resiliency in Distributed Systems*](https://blog.pragmaticengineer.com/resiliency-in-distributed-systems/) takes a broader view and explains how to build resilient systems in general.

@@ -3,7 +3,7 @@
 Testing code with retry logic can be tricky, so *stamina* provides dedicated testing helpers that allow you to affect retrying behavior *globally*.
 
 
-## Turn Off Retries
+## Turn off retries
 
 The easiest way is to turn off retries using {func}`stamina.set_active`:
 
@@ -19,7 +19,7 @@ def deactivate_retries():
 This is a great approach when you're only using our decorator-based API.
 
 
-## Limiting Retries
+## Limiting retries
 
 :::{versionadded} 24.3.0
 :::

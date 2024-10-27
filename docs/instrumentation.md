@@ -68,7 +68,7 @@ Use `structlog.stdlib.BoundLogger` and explicit async methods like `ainfo()` ins
 
 (logging)=
 
-## Standard Library's `logging`
+## Standard library's `logging`
 
 If standard library's `logging` integration is active, logging happens at warning level and includes the following *extra fields*:
 

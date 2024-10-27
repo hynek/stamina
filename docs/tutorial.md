@@ -62,7 +62,7 @@ def do_it(code: int) -> httpx.Response:
 To give you observability of your application's retrying, *stamina* will count the retries using [*prometheus-client*](https://github.com/prometheus/client_python) in the `stamina_retries_total` counter (if installed) and log them out using [*structlog*](https://www.structlog.org/) with a fallback to {mod}`logging`.
 
 
-## Arbitrary Code Blocks
+## Arbitrary code blocks
 
 Sometimes you only want to retry a part of a function.
 
@@ -77,7 +77,7 @@ for attempt in stamina.retry_context(on=httpx.HTTPError):
 ```
 
 
-## Retry One Function or Method Call
+## Retry one function or method call
 
 If you want to retry just one function or method call, *stamina* comes with an even easier way in the shape of {class}`stamina.RetryingCaller` and {class}`stamina.AsyncRetryingCaller`:
 
