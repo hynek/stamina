@@ -19,12 +19,29 @@ class _Testing:
     Strictly private.
     """
 
-    __slots__ = ("attempts",)
+    __slots__ = ("attempts", "cap")
 
     attempts: int
+    cap: bool
 
-    def __init__(self, attempts: int) -> None:
+    def __init__(self, attempts: int, cap: bool) -> None:
         self.attempts = attempts
+        self.cap = cap
+
+    def get_attempts(self, non_testing_attempts: int | None) -> int:
+        """
+        Get the number of attempts to use.
+
+        Args:
+            non_testing_attempts: The number of attempts specified by the user.
+
+        Returns:
+            The number of attempts to use.
+        """
+        if self.cap:
+            return min(self.attempts, non_testing_attempts or self.attempts)
+
+        return self.attempts
 
 
 class _Config:
@@ -137,14 +154,21 @@ def is_testing() -> bool:
     return CONFIG.testing is not None
 
 
-def set_testing(testing: bool, *, attempts: int = 1) -> None:
+def set_testing(
+    testing: bool, *, attempts: int = 1, cap: bool = False
+) -> None:
     """
     Activate or deactivate test mode.
 
     In testing mode, backoffs are disabled, and attempts are set to *attempts*.
 
+    If *cap* is True, the number of attempts is not set but capped at
+    *attempts*. This means that if *attempts* is greater than the number of
+    attempts specified by the user, the user's value is used.
+
     Is idempotent and can be called repeatedly with the same values.
 
     .. versionadded:: 24.3.0
+    .. versionadded:: 24.4.0 *cap*
     """
-    CONFIG.testing = _Testing(attempts) if testing else None
+    CONFIG.testing = _Testing(attempts, cap) if testing else None

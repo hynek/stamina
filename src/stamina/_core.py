@@ -403,6 +403,7 @@ class _RetryContextIterator:
         "_name",
         "_args",
         "_kw",
+        "_attempts",
         "_wait_jitter",
         "_wait_initial",
         "_wait_max",
@@ -414,6 +415,7 @@ class _RetryContextIterator:
     _args: tuple[object, ...]
     _kw: dict[str, object]
 
+    _attempts: int | None
     _wait_jitter: float
     _wait_initial: float
     _wait_max: float
@@ -455,6 +457,7 @@ class _RetryContextIterator:
             _name=name,
             _args=args,
             _kw=kw,
+            _attempts=attempts,
             _wait_jitter=wait_jitter,
             _wait_initial=wait_initial,
             _wait_max=wait_max,
@@ -494,7 +497,9 @@ class _RetryContextIterator:
 
         t_kw = self._t_kw.copy()
 
-        t_kw["stop"] = _t.stop_after_attempt(testing.attempts)
+        t_kw["stop"] = _t.stop_after_attempt(
+            testing.get_attempts(self._attempts)
+        )
 
         return t_kw
 

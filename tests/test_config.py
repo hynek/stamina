@@ -5,7 +5,7 @@
 from threading import Lock
 
 from stamina import is_active, set_active
-from stamina._config import _Config
+from stamina._config import _Config, _Testing
 
 
 def test_activate_deactivate():
@@ -38,3 +38,32 @@ def test_config_init_concurrently():
 
     assert (1, 2) == cfg._init_on_first_retry()
     assert fake_on_retry is cfg._get_on_retry
+
+
+class TestTesting:
+    def test_cap_true(self):
+        """
+        If cap is True, get_attempts returns the lower of the two values.
+        """
+        t = _Testing(2, True)
+
+        assert 1 == t.get_attempts(1)
+        assert 2 == t.get_attempts(3)
+
+    def test_cap_false(self):
+        """
+        If cap is False, get_attempts always returns the testing value.
+        """
+        t = _Testing(2, False)
+
+        assert 2 == t.get_attempts(1)
+        assert 2 == t.get_attempts(3)
+
+    def test_cap_true_with_none(self):
+        """
+        If cap is True and attempts is None, get_attempts returns the
+        testing value.
+        """
+        t = _Testing(100, True)
+
+        assert 100 == t.get_attempts(None)
