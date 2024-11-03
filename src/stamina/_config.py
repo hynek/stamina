@@ -141,8 +141,7 @@ def set_testing(testing: bool, *, attempts: int = 1) -> None:
     """
     Activate or deactivate test mode.
 
-    In testing mode, backoffs are disabled, and attempts are capped to
-    *attempts*.
+    In testing mode, backoffs are disabled, and attempts are set to *attempts*.
 
     Is idempotent and can be called repeatedly with the same values.
 
