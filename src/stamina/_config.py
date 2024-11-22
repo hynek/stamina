@@ -52,11 +52,11 @@ class _Config:
     """
 
     __slots__ = (
-        "lock",
+        "_get_on_retry",
         "_is_active",
         "_on_retry",
-        "_get_on_retry",
         "_testing",
+        "lock",
     )
 
     lock: Lock

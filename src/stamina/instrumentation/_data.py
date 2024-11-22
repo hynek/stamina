@@ -46,13 +46,13 @@ class RetryDetails:
     """
 
     __slots__ = (
-        "name",
         "args",
+        "caused_by",
         "kwargs",
+        "name",
         "retry_num",
         "wait_for",
         "waited_so_far",
-        "caused_by",
     )
 
     name: str

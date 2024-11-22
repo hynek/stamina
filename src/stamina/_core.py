@@ -109,7 +109,7 @@ class Attempt:
     .. versionadded:: 23.2.0
     """
 
-    __slots__ = ("_t_attempt", "_next_wait_fn")
+    __slots__ = ("_next_wait_fn", "_t_attempt")
 
     _t_attempt: _t.AttemptManager
 
@@ -398,16 +398,16 @@ _LAZY_NO_ASYNC_RETRY = _LazyNoAsyncRetry()
 @dataclass
 class _RetryContextIterator:
     __slots__ = (
-        "_t_kw",
-        "_t_a_retrying",
-        "_name",
         "_args",
-        "_kw",
         "_attempts",
-        "_wait_jitter",
-        "_wait_initial",
-        "_wait_max",
+        "_kw",
+        "_name",
+        "_t_a_retrying",
+        "_t_kw",
         "_wait_exp_base",
+        "_wait_initial",
+        "_wait_jitter",
+        "_wait_max",
     )
     _t_kw: dict[str, object]
     _t_a_retrying: _t.AsyncRetrying
@@ -436,10 +436,8 @@ class _RetryContextIterator:
         kw: dict[str, object],
     ) -> _RetryContextIterator:
         if (
-            isinstance(on, type)
-            and issubclass(on, BaseException)
-            or isinstance(on, tuple)
-        ):
+            isinstance(on, type) and issubclass(on, BaseException)
+        ) or isinstance(on, tuple):
             _retry = _t.retry_if_exception_type(on)
         else:
             _retry = _t.retry_if_exception(on)

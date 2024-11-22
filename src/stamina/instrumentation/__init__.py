@@ -12,13 +12,13 @@ from ._structlog import StructlogOnRetryHook
 
 
 __all__ = [
-    "get_on_retry_hooks",
-    "set_on_retry_hooks",
-    "get_prometheus_counter",
     "LoggingOnRetryHook",
     "PrometheusOnRetryHook",
     "RetryDetails",
     "RetryHook",
     "RetryHookFactory",
     "StructlogOnRetryHook",
+    "get_on_retry_hooks",
+    "get_prometheus_counter",
+    "set_on_retry_hooks",
 ]
