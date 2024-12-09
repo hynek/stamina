@@ -45,6 +45,8 @@ def do_it(code: int) -> httpx.Response:
 
 **Async** callables work use the same API and it's possible to retry **arbitrary blocks**, too.
 Check out our [tutorial](https://stamina.hynek.me/en/latest/tutorial.html) for more examples!
+Or, if you prefer video, here's a brief introduction into retries and *stamina*:
+[![Watch the video](https://img.youtube.com/vi/BxikFuvaT1Y/maxresdefault.jpg)](https://youtu.be/BxikFuvaT1Y)
 
 
 ## Project Links
