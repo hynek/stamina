@@ -1,5 +1,10 @@
 # Motivation
 
+:::{tip}
+If you prefer video to text, check out [this video](https://www.youtube.com/watch?v=BxikFuvaT1Y) that explains both the motivation for retries as well as the creation of *stamina*.
+:::
+
+
 ## The need for retries
 
 Retries are essential for making distributed systems resilient.
