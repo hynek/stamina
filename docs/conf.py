@@ -51,7 +51,7 @@ master_doc = "index"
 # General information about the project.
 project = "stamina"
 author = "Hynek Schlawack"
-copyright = f"2022, { author }"
+copyright = f"2022, {author}"
 
 
 # The full version, including alpha/beta/rc tags.
@@ -104,10 +104,10 @@ _title = "stamina"
 rst_epilog = f"""\
 .. meta::
     :property=og:type: website
-    :property=og:site_name: { _title }
-    :property=og:description: { _descr }
+    :property=og:site_name: {_title}
+    :property=og:description: {_descr}
     :property=og:author: Hynek Schlawack
-    :twitter:title: { _title }
+    :twitter:title: {_title}
     :twitter:creator: @hynek
 """
 

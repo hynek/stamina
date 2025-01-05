@@ -181,7 +181,7 @@ ignore = [
   "PLR0913", # yes, many arguments, but most have defaults
   "PLR2004", # numbers are sometimes fine
   "SLF001",  # private members are accessed by friendly functions
-  "TCH",     # TYPE_CHECKING blocks break autodocs
+  "TC",      # TYPE_CHECKING blocks break autodocs
   "TD",      # we don't follow other people's todo style
   "TID252",  # relative imports are always awesome
 ]
