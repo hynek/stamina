@@ -169,6 +169,6 @@ def set_testing(
     Is idempotent and can be called repeatedly with the same values.
 
     .. versionadded:: 24.3.0
-    .. versionadded:: 24.4.0 *cap*
+    .. versionadded:: 25.1.0 *cap*
     """
     CONFIG.testing = _Testing(attempts, cap) if testing else None
