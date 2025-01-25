@@ -169,6 +169,7 @@ line-length = 79
 select = ["ALL"]
 ignore = [
   "A001",    # shadowing is fine
+  "A005",    # shadowing typing is fine
   "ANN",     # Mypy is better at this
   "ARG001",  # unused arguments are normal when implementing interfaces
   "COM",     # Formatter takes care of our commas

@@ -132,6 +132,8 @@ def docs(session: nox.Session) -> None:
     session.install(".[docs]")
     cmds = session.posargs or ["html", "doctest"]
 
+    dest = os.environ.get("READTHEDOCS_OUTPUT", "docs/_build/")
+
     for cmd in cmds:
         session.run(
             "python", "-Im", "sphinx",
@@ -142,5 +144,5 @@ def docs(session: nox.Session) -> None:
             "-D", "language=en",
             "-n",
             "docs",
-            "docs/_build/html",
+            pathlib.Path(dest, "html")
         )  # fmt: skip
