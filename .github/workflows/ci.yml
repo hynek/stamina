@@ -50,10 +50,6 @@ jobs:
         run: |
           tar xf dist/*.tar.gz --strip-components=1
           rm -rf src
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          allow-prereleases: true
       - uses: hynek/setup-cached-uv@v2
 
       - name: Prepare & run Nox
@@ -86,9 +82,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version-file: .python-version-default
       - uses: hynek/setup-cached-uv@v2
 
       - uses: actions/download-artifact@v4
@@ -98,7 +91,7 @@ jobs:
 
       - name: Combine coverage & fail if it's <100%.
         run: |
-          uv tool install coverage
+          uv tool install --python $(cat .python-version-default) coverage
 
           coverage combine
           coverage html --skip-covered --skip-empty
@@ -134,10 +127,6 @@ jobs:
           name: Packages
           path: dist
       - run: tar xf dist/*.tar.gz --strip-components=1
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          allow-prereleases: true
       - uses: hynek/setup-cached-uv@v2
 
       - name: Check using Mypy
@@ -168,13 +157,14 @@ jobs:
           name: Packages
           path: dist
       - run: tar xf dist/*.tar.gz --strip-components=1
-      - uses: actions/setup-python@v5
-        with:
-          python-version-file: .python-version-default
       - uses: hynek/setup-cached-uv@v2
 
       - name: Prepare & run Nox
-        run: uvx nox --sessions mypy_pkg
+        run: >
+          uvx
+          --python $(cat .python-version-default)
+          nox
+          --sessions mypy_pkg
 
   docs:
     name: Run doctests
@@ -187,10 +177,6 @@ jobs:
           name: Packages
           path: dist
       - run: tar xf dist/*.tar.gz --strip-components=1
-      - uses: actions/setup-python@v5
-        with:
-          # Keep in sync with .readthedocs.yaml
-          python-version: "3.13"
       - uses: hynek/setup-cached-uv@v2
 
       - name: Prepare & run Nox
@@ -207,14 +193,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version-file: .python-version-default
       - uses: hynek/setup-cached-uv@v2
 
       - name: Install in dev mode
         run: |
-          uv venv
+          uv venv --python $(cat .python-version-default)
           uv pip install -e .[dev]
 
       - name: Try to import on Linux
