@@ -290,3 +290,24 @@ class TestRetryingCaller:
         assert f"<BoundRetryingCaller(ValueError, {r})>" == repr(
             rc.on(ValueError)
         )
+
+
+def test_testing_mode_context():
+    """
+    Testing mode context manager works with sync code.
+    """
+    assert not stamina.is_testing()
+
+    with stamina.set_testing(True, attempts=3):
+        assert stamina.is_testing()
+
+        with pytest.raises(ValueError):  # noqa: PT012
+            for attempt in stamina.retry_context(on=ValueError):
+                assert 0.0 == attempt.next_wait
+
+                with attempt:
+                    raise ValueError
+
+        assert 3 == attempt.num
+
+    assert not stamina.is_testing()

@@ -306,3 +306,24 @@ class TestAsyncRetryingCaller:
         assert f"<BoundAsyncRetryingCaller(ValueError, {r})>" == repr(
             arc.on(ValueError)
         )
+
+
+async def test_testing_mode_context():
+    """
+    Testing mode context manager works with async code.
+    """
+    assert not stamina.is_testing()
+
+    with stamina.set_testing(True, attempts=3):
+        assert stamina.is_testing()
+
+        with pytest.raises(ValueError):  # noqa: PT012
+            async for attempt in stamina.retry_context(on=ValueError):
+                assert 0.0 == attempt.next_wait
+
+                with attempt:
+                    raise ValueError
+
+        assert 3 == attempt.num
+
+    assert not stamina.is_testing()

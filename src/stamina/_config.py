@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 from threading import Lock
+from types import TracebackType
 from typing import Callable
 
 from .instrumentation import RetryHookFactory
@@ -154,9 +155,25 @@ def is_testing() -> bool:
     return CONFIG.testing is not None
 
 
+class _RestoreTestingCM:
+    def __init__(self, old: _Testing | None) -> None:
+        self.old = old
+
+    def __enter__(self) -> None:
+        pass
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        CONFIG.testing = self.old
+
+
 def set_testing(
     testing: bool, *, attempts: int = 1, cap: bool = False
-) -> None:
+) -> _RestoreTestingCM:
     """
     Activate or deactivate test mode.
 
@@ -170,5 +187,9 @@ def set_testing(
 
     .. versionadded:: 24.3.0
     .. versionadded:: 25.1.0 *cap*
+    .. versionadded:: 25.1.0 Can be used as a context manager.
     """
+    old = CONFIG.testing
     CONFIG.testing = _Testing(attempts, cap) if testing else None
+
+    return _RestoreTestingCM(old)

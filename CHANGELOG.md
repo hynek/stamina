@@ -22,6 +22,8 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   When `cap=True`, it is used as an upper cap; that means that if the original attempts number is lower, it's not changed.
   [#80](https://github.com/hynek/stamina/pull/80)
 
+- `stamina.set_testing()` can now be used as a context manager.
+
 
 ## [24.3.0](https://github.com/hynek/stamina/compare/24.2.0...24.3.0) - 2024-08-27
 
