@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import os
 import pathlib
+import re
 import shutil
 import sys
 
@@ -38,6 +39,12 @@ ALL_SUPPORTED = [
     for pv in pyp["project"]["classifiers"]
     if pv.startswith("Programming Language :: Python :: ")
 ]
+
+DOCS_PYTHON = re.search(  # type: ignore[union-attr]
+    r'^ +python: "(3\.\d+)"$',
+    pathlib.Path(".readthedocs.yaml").read_text(),
+    flags=re.MULTILINE,
+).group(1)
 
 
 @nox.session
@@ -107,7 +114,7 @@ def coverage_report(session: nox.Session) -> None:
     session.run("coverage", "report")
 
 
-@nox.session
+@nox.session(python=DOCS_PYTHON)
 def docs(session: nox.Session) -> None:
     shutil.rmtree("docs/_build", ignore_errors=True)
 
