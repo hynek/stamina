@@ -4,7 +4,11 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
+
 import pytest
+
+from dirty_equals import IsInstance
 
 import stamina
 
@@ -13,7 +17,7 @@ from stamina.instrumentation import (
     get_on_retry_hooks,
     set_on_retry_hooks,
 )
-from stamina.instrumentation._data import guess_name
+from stamina.instrumentation._data import RetryDetails, guess_name
 from stamina.instrumentation._hooks import get_default_hooks
 from stamina.instrumentation._structlog import init_structlog
 
@@ -191,3 +195,139 @@ class TestSetOnRetryHooks:
             hook,
             delayed_hook,
         ) == get_on_retry_hooks()
+
+    def test_context_manager_hooks(self):
+        """
+        If a hook is a context manager, it's entered before retries start and exited
+        after they finish.
+        """
+        entered = False
+        exited = False
+        deets = []
+
+        @contextmanager
+        def cm1(details):
+            nonlocal entered
+            entered = True
+
+            deets.append(details)
+            yield
+
+            nonlocal exited
+            exited = True
+
+        class CM:
+            def __init__(self):
+                self.entered = False
+                self.exited = False
+                self.deets = []
+
+            def __call__(self, details):
+                self.deets.append(details)
+                return self
+
+            def __enter__(self):
+                self.entered = True
+
+            def __exit__(self, *_):
+                self.exited = True
+
+        cm2 = CM()
+
+        set_on_retry_hooks([cm1, cm2])
+
+        @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+        def f():
+            raise ValueError
+
+        with pytest.raises(ValueError):
+            f()
+
+        assert entered
+        assert exited
+        assert cm2.entered
+        assert cm2.exited
+
+        assert (
+            [
+                RetryDetails(
+                    name="tests.test_instrumentation.TestSetOnRetryHooks.test_context_manager_hooks.<locals>.f",
+                    args=(),
+                    kwargs={},
+                    retry_num=1,
+                    wait_for=0.0,
+                    waited_so_far=0.0,
+                    caused_by=IsInstance(ValueError),
+                )
+            ]
+            == cm2.deets
+            == deets
+        )
+
+    @pytest.mark.anyio
+    async def test_context_manager_hooks_async(self):
+        """
+        Context manager hooks work with async functions too.
+        """
+        entered = False
+        exited = False
+        deets = []
+
+        @contextmanager
+        def cm1(details):
+            nonlocal entered
+            entered = True
+
+            deets.append(details)
+            yield
+
+            nonlocal exited
+            exited = True
+
+        class CM:
+            def __init__(self):
+                self.entered = False
+                self.exited = False
+                self.deets = []
+
+            def __call__(self, details):
+                self.deets.append(details)
+                return self
+
+            def __enter__(self):
+                self.entered = True
+
+            def __exit__(self, *_):
+                self.exited = True
+
+        cm2 = CM()
+
+        set_on_retry_hooks([cm1, cm2])
+
+        @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+        async def f():
+            raise ValueError
+
+        with pytest.raises(ValueError):
+            await f()
+
+        assert entered
+        assert exited
+        assert cm2.entered
+        assert cm2.exited
+
+        assert (
+            [
+                RetryDetails(
+                    name="tests.test_instrumentation.TestSetOnRetryHooks.test_context_manager_hooks_async.<locals>.f",
+                    args=(),
+                    kwargs={},
+                    retry_num=1,
+                    wait_for=0.0,
+                    waited_so_far=0.0,
+                    caused_by=IsInstance(ValueError),
+                )
+            ]
+            == cm2.deets
+            == deets
+        )

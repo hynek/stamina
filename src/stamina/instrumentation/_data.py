@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import Callable, Protocol
 
@@ -75,7 +76,9 @@ class RetryHook(Protocol):
     .. versionadded:: 23.2.0
     """
 
-    def __call__(self, details: RetryDetails) -> None: ...
+    def __call__(
+        self, details: RetryDetails
+    ) -> None | AbstractContextManager[None]: ...
 
 
 @dataclass(frozen=True)

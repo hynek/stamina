@@ -27,7 +27,7 @@ classifiers = [
 dependencies = ["tenacity", "typing-extensions; python_version < '3.10'"]
 
 [project.optional-dependencies]
-tests = ["pytest", "anyio"]
+tests = ["pytest", "anyio", "dirty-equals"]
 typing = ["mypy >= 1.4"]
 docs = [
   "sphinx >= 7.2.2",
