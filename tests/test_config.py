@@ -2,10 +2,11 @@
 #
 # SPDX-License-Identifier: MIT
 
+from contextlib import suppress
 from threading import Lock
 
-from stamina import is_active, set_active
-from stamina._config import _Config, _Testing
+from stamina import is_active, is_testing, set_active, set_testing
+from stamina._config import CONFIG, _Config, _Testing
 
 
 def test_activate_deactivate():
@@ -67,3 +68,49 @@ class TestTesting:
         t = _Testing(100, True)
 
         assert 100 == t.get_attempts(None)
+
+    def test_context_manager(self):
+        """
+        set_testing works as a context manager.
+        """
+        assert not is_testing()
+
+        with set_testing(True, attempts=3):
+            assert is_testing()
+            assert 3 == CONFIG.testing.get_attempts(None)
+            assert not CONFIG.testing.cap
+
+        assert not is_testing()
+
+    def test_context_manager_nested(self):
+        """
+        set_testing context managers can be nested.
+        """
+        assert not is_testing()
+
+        with set_testing(True, attempts=3):
+            assert is_testing()
+            assert CONFIG.testing.attempts == 3
+
+            with set_testing(True, attempts=5, cap=True):
+                assert is_testing()
+                assert CONFIG.testing.attempts == 5
+                assert CONFIG.testing.cap
+
+            assert is_testing()
+            assert CONFIG.testing.attempts == 3
+            assert not CONFIG.testing.cap
+
+        assert not is_testing()
+
+    def test_context_manager_exception(self):
+        """
+        set_testing context manager restores state even if an exception occurs.
+        """
+        assert not is_testing()
+
+        with suppress(ValueError), set_testing(True, attempts=3):
+            assert is_testing()
+            raise ValueError("test")
+
+        assert not is_testing()
