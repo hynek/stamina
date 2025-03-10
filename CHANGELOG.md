@@ -25,6 +25,10 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 - `stamina.set_testing()` can now be used as a context manager.
   [#94](https://github.com/hynek/stamina/pull/94)
 
+- Instrumentation hooks can now can return context managers.
+  If they do, they are entered before going to sleep and exited after waking up.
+  [#95](https://github.com/hynek/stamina/pull/95)
+
 
 ## [24.3.0](https://github.com/hynek/stamina/compare/24.2.0...24.3.0) - 2024-08-27
 

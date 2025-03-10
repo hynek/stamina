@@ -4,10 +4,12 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime as dt
 import random
 import sys
 
+from contextlib import AbstractContextManager
 from dataclasses import dataclass, replace
 from functools import wraps
 from inspect import iscoroutinefunction
@@ -400,6 +402,7 @@ class _RetryContextIterator:
     __slots__ = (
         "_args",
         "_attempts",
+        "_cms_to_exit",
         "_kw",
         "_name",
         "_t_a_retrying",
@@ -420,6 +423,8 @@ class _RetryContextIterator:
     _wait_initial: float
     _wait_max: float
     _wait_exp_base: float
+
+    _cms_to_exit: list[AbstractContextManager[None]]
 
     @classmethod
     def from_params(
@@ -473,6 +478,7 @@ class _RetryContextIterator:
                 "reraise": True,
             },
             _t_a_retrying=_LAZY_NO_ASYNC_RETRY,
+            _cms_to_exit=[],
         )
 
         inst._t_kw["wait"] = inst._jittered_backoff_for_rcs
@@ -501,6 +507,10 @@ class _RetryContextIterator:
 
         return t_kw
 
+    def _exit_cms(self, _: _t.RetryCallState | None) -> None:
+        for cm in reversed(self._cms_to_exit):
+            cm.__exit__(None, None, None)
+
     def __iter__(self) -> Iterator[Attempt]:
         if not CONFIG.is_active:
             for r in _t.Retrying(reraise=True, stop=_STOP_NO_RETRY):
@@ -508,10 +518,13 @@ class _RetryContextIterator:
 
             return
 
+        before_sleep = _make_before_sleep(
+            self._name, CONFIG, self._args, self._kw, self._cms_to_exit
+        )
+
         for r in _t.Retrying(
-            before_sleep=_make_before_sleep(
-                self._name, CONFIG, self._args, self._kw
-            ),
+            before=self._exit_cms,
+            before_sleep=before_sleep,
             **self._apply_maybe_test_mode_to_tenacity_kw(CONFIG.testing),
         ):
             yield Attempt(r, self._backoff_for_attempt_number)
@@ -520,8 +533,9 @@ class _RetryContextIterator:
         if CONFIG.is_active:
             self._t_a_retrying = _t.AsyncRetrying(
                 sleep=_smart_sleep,
+                before=self._exit_cms,
                 before_sleep=_make_before_sleep(
-                    self._name, CONFIG, self._args, self._kw
+                    self._name, CONFIG, self._args, self._kw, self._cms_to_exit
                 ),
                 **self._apply_maybe_test_mode_to_tenacity_kw(CONFIG.testing),
             )
@@ -583,10 +597,15 @@ def _make_before_sleep(
     config: _Config,
     args: tuple[object, ...],
     kw: dict[str, object],
+    hook_cms: list[contextlib.AbstractContextManager[None]],
 ) -> Callable[[_t.RetryCallState], None]:
     """
     Create a `before_sleep` callback function that runs our `RetryHook`s with
     the necessary arguments.
+
+    If a hook returns a context manager, it's entered before retries start and
+    exited after they finish by keeping track of the context managers in
+    *hook_cms*.
     """
 
     last_idle_for = 0.0
@@ -607,7 +626,11 @@ def _make_before_sleep(
         )
 
         for hook in config.on_retry:
-            hook(details)
+            maybe_cm = hook(details)
+
+            if isinstance(maybe_cm, AbstractContextManager):
+                maybe_cm.__enter__()
+                hook_cms.append(maybe_cm)
 
         last_idle_for = rcs.idle_for
 

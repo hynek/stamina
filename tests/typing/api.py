@@ -11,6 +11,9 @@ from __future__ import annotations
 
 import datetime as dt
 
+from collections.abc import Generator
+from contextlib import contextmanager
+
 from stamina import (
     AsyncRetryingCaller,
     BoundAsyncRetryingCaller,
@@ -109,11 +112,16 @@ def hook(details: RetryDetails) -> None:
     return None
 
 
+@contextmanager
+def cm_hook(details: RetryDetails) -> Generator[None]:
+    yield
+
+
 def init() -> RetryHook:
     return hook
 
 
-set_on_retry_hooks([hook, RetryHookFactory(init)])
+set_on_retry_hooks([hook, RetryHookFactory(init), cm_hook])
 
 hooks: tuple[RetryHook, ...] = get_on_retry_hooks()
 
