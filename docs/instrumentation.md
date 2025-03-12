@@ -5,7 +5,12 @@ That way, you learn immediately that something went wrong and when *stamina* wil
 
 You can set the hooks using {func}`stamina.instrumentation.set_on_retry_hooks` and retrieve them using {func}`stamina.instrumentation.get_on_retry_hooks`.
 A hook is a callable, like a function, that takes a single argument: a {class}`stamina.instrumentation.RetryDetails` object.
-Its return value is ignored.
+
+Its return value is ignored, unless it's a **context manager**.
+Context managers are entered when the retry is scheduled and exited right before the retry is attempted.
+This allows you, for example, to emit spans for the time spent sleeping.
+
+---
 
 Sometimes (for example, in CLI tools) you may want to delay the initialization of the instrumentation until the first retry is scheduled.
 In that case, write a callable that creates and returns a retry hook, and pass it to {func}`stamina.instrumentation.set_on_retry_hooks` wrapped in a {class}`stamina.instrumentation.RetryHookFactory`.
@@ -83,7 +88,7 @@ If standard library's `logging` integration is active, logging happens at warnin
 - `stamina.caused_by`: The {func}`repr` of the exception that caused the retry.
 
 Please note that extra fields don't appear in log messages by default and require configuration.
-We recommend the usage of [*structlog*] instead.
+We recommend using [*structlog*] instead.
 
 You can activate it manually by adding {data}`stamina.instrumentation.LoggingOnRetryHook` to the list of hooks passed to {func}`stamina.instrumentation.set_on_retry_hooks`.
 
