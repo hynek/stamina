@@ -73,7 +73,13 @@ class RetryHook(Protocol):
     This is a :class:`typing.Protocol` that can be implemented by any callable
     that takes one argument of type :class:`RetryDetails` and returns None.
 
+    If the hook returns a context manager, it will be entered when the retry is
+    scheduled and exited right before the retry is attempted.
+
     .. versionadded:: 23.2.0
+
+    .. versionadded:: 25.1.0
+       Added support for context managers.
     """
 
     def __call__(

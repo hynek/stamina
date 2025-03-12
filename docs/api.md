@@ -64,6 +64,10 @@
 
 ## Instrumentation
 
+::: {seealso}
+{doc}`instrumentation`
+:::
+
 ```{eval-rst}
 .. module:: stamina.instrumentation
 
