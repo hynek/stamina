@@ -26,7 +26,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   [#94](https://github.com/hynek/stamina/pull/94)
 
 - Instrumentation hooks can now can return context managers.
-  If they do, they are entered before going to sleep and exited after waking up.
+  If they do, they are entered when a retry is scheduled and exited right before the retry is attempted.
   [#95](https://github.com/hynek/stamina/pull/95)
 
 
