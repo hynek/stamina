@@ -637,25 +637,23 @@ def _make_before_sleep(
     return before_sleep
 
 
-def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
+def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_any:
     """
     Combine *attempts* and *timeout* into one stop condition.
     """
     stops = []
 
-    if attempts:
+    if attempts is not None:
         stops.append(_t.stop_after_attempt(attempts))
 
-    if timeout:
+    if timeout is not None:
         stops.append(_t.stop_after_delay(timeout))
 
-    if len(stops) > 1:
-        return _t.stop_any(*stops)
-
     if not stops:
-        return _t.stop_never
+        unbounded_stop_condition = "Unbounded stop condition, use `timeout=float('inf')` to intentionally retry forever"
+        raise ValueError(unbounded_stop_condition)
 
-    return stops[0]
+    return _t.stop_any(*stops)
 
 
 def retry(
