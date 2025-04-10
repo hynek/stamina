@@ -7,7 +7,6 @@ import datetime as dt
 from types import SimpleNamespace
 
 import pytest
-import tenacity
 
 import stamina
 
