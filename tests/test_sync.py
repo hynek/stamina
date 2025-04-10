@@ -21,6 +21,8 @@ def test_ok(attempts, timeout, duration):
     """
     No error, no problem.
     """
+    if attempts is None and timeout is None:
+        pytest.skip("Unbounded stop condition")
 
     @stamina.retry(
         on=Exception,
@@ -228,9 +230,12 @@ def test_testing_mode():
 class TestMakeStop:
     def test_never(self):
         """
-        If all conditions are None, return stop_never.
+        If all conditions are None, error.
         """
-        assert tenacity.stop_never is _make_stop(attempts=None, timeout=None)
+        with pytest.raises(ValueError):
+            _make_stop(attempts=None, timeout=None)
+
+        _make_stop(attempts=None, timeout=float("inf"))
 
 
 class TestRetryingCaller:
