@@ -12,13 +12,15 @@ import stamina
 pytestmark = pytest.mark.anyio
 
 
-@pytest.mark.parametrize("attempts", [None, 1])
-@pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
+@pytest.mark.parametrize("attempts", [None, -1, 0, 1])
+@pytest.mark.parametrize("timeout", [None, -1, 0, 1, dt.timedelta(days=1)])
 @pytest.mark.parametrize("duration", [1, dt.timedelta(days=1)])
 async def test_ok(attempts, timeout, duration):
     """
     No error, no problem.
     """
+    if attempts is None and timeout is None:
+        pytest.skip("Unbounded stop condition")
 
     class C:
         @stamina.retry(
