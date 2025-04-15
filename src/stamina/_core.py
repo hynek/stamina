@@ -726,6 +726,10 @@ def retry(
     .. versionadded:: 23.3.0 `Trio <https://trio.readthedocs.io/>`_ support.
 
     .. versionadded:: 24.3.0 *on* can be a callable now.
+
+    .. versionchanged:: 25.2.0
+       Stop condition required, either *attempts* or *timeout* must be specified.
+
     """
     retry_ctx = _RetryContextIterator.from_params(
         on=on,

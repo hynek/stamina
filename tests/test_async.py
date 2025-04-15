@@ -12,8 +12,8 @@ import stamina
 pytestmark = pytest.mark.anyio
 
 
-@pytest.mark.parametrize("attempts", [None, 1])
-@pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
+@pytest.mark.parametrize("attempts", [None, -1, 0, 1])
+@pytest.mark.parametrize("timeout", [None, -1, 0, 1, dt.timedelta(days=1)])
 @pytest.mark.parametrize("duration", [1, dt.timedelta(days=1)])
 async def test_ok(attempts, timeout, duration):
     """
@@ -49,7 +49,7 @@ async def test_ok(attempts, timeout, duration):
     assert 42 == await C().f()
 
 
-@pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
+@pytest.mark.parametrize("timeout", [None, 0, 1, dt.timedelta(days=1)])
 @pytest.mark.parametrize("duration", [0, dt.timedelta(days=0)])
 async def test_retries(duration, timeout, on):
     """
