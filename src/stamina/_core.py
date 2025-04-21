@@ -166,7 +166,7 @@ class RetryKWs(TypedDict):
     wait_initial: float | dt.timedelta
     wait_max: float | dt.timedelta
     wait_jitter: float | dt.timedelta
-    wait_exp_base: float | int
+    wait_exp_base: float
 
 
 class BaseRetryingCaller:
@@ -416,7 +416,7 @@ class _RetryContextIterator:
     _wait_jitter: float
     _wait_initial: float
     _wait_max: float
-    _wait_exp_base: float | int
+    _wait_exp_base: float
 
     _cms_to_exit: list[AbstractContextManager[None]]
 
