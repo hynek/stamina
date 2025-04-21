@@ -77,7 +77,7 @@ def retry_context(
     wait_initial: float | dt.timedelta = 0.1,
     wait_max: float | dt.timedelta = 5.0,
     wait_jitter: float | dt.timedelta = 1.0,
-    wait_exp_base: float = 2,
+    wait_exp_base: float = 2.0,
 ) -> _RetryContextIterator:
     """
     Iterator that yields context managers that can be used to retry code
@@ -193,7 +193,7 @@ class BaseRetryingCaller:
         wait_initial: float | dt.timedelta = 0.1,
         wait_max: float | dt.timedelta = 5.0,
         wait_jitter: float | dt.timedelta = 1.0,
-        wait_exp_base: float = 2,
+        wait_exp_base: float = 2.0,
     ):
         self._context_kws = {
             "attempts": attempts,
@@ -668,7 +668,7 @@ def retry(
     wait_initial: float | dt.timedelta = 0.1,
     wait_max: float | dt.timedelta = 5.0,
     wait_jitter: float | dt.timedelta = 1.0,
-    wait_exp_base: float = 2,
+    wait_exp_base: float = 2.0,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     r"""
     Retry if one of configured exceptions are raised.
