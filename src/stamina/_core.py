@@ -581,7 +581,7 @@ def _compute_backoff(
     if CONFIG.testing is not None:
         return 0.0
 
-    if math.log(max_backoff, exp_base) < num - 1:
+    if max_backoff and math.log(max_backoff / initial, exp_base) < num - 1:
         return max_backoff
     jitter = random.uniform(0, max_jitter) if max_jitter else 0  # noqa: S311
     return min(max_backoff, initial * (exp_base ** (num - 1)) + jitter)

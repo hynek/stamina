@@ -11,7 +11,7 @@ import tenacity
 
 import stamina
 
-from stamina._core import _make_stop
+from stamina._core import _compute_backoff, _make_stop
 
 
 @pytest.mark.parametrize("attempts", [None, 1])
@@ -521,3 +521,19 @@ class TestGeneratorFunctionDecoration:
             next(gen)
 
         assert "Polizei" == exc_info.value.value
+
+
+def test_compute_backoff_uses_logarithm():
+    """
+    _compute_backoff that short circuits to using log.
+    """
+    assert not stamina.is_testing()
+    assert _compute_backoff(6, 60.0, 2.0, 2.0, 0.0) == 60.0
+
+
+def test_compute_backoff_no_uses_logarithm():
+    """
+    _compute_backoff that doesn't short circuit to using log.
+    """
+    assert not stamina.is_testing()
+    assert _compute_backoff(5, 60.0, 2.0, 2.0, 0.0) == 32.0
