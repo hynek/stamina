@@ -544,3 +544,9 @@ def test_compute_backoff_no_uses_logarithm():
     with patch("builtins.min", wraps=min) as mock_min:
         assert _compute_backoff(5, 60.0, 2.0, 2.0, 0.0) == 32.0
         assert mock_min.call_count == 1
+
+
+def test_compute_backoff_zero_initial():
+    """Test _compute_backoff with a zero for initial."""
+    assert not stamina.is_testing()
+    assert _compute_backoff(5, 60.0, 0.0, 2.0, 0.0) == 0.0
