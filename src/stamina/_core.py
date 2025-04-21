@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import contextlib
 import datetime as dt
+import math
 import random
 import sys
 
@@ -76,7 +77,7 @@ def retry_context(
     wait_initial: float | dt.timedelta = 0.1,
     wait_max: float | dt.timedelta = 5.0,
     wait_jitter: float | dt.timedelta = 1.0,
-    wait_exp_base: float = 2.0,
+    wait_exp_base: float | int = 2,
 ) -> _RetryContextIterator:
     """
     Iterator that yields context managers that can be used to retry code
@@ -172,7 +173,7 @@ class RetryKWs(TypedDict):
     wait_initial: float | dt.timedelta
     wait_max: float | dt.timedelta
     wait_jitter: float | dt.timedelta
-    wait_exp_base: float
+    wait_exp_base: float | int
 
 
 class BaseRetryingCaller:
@@ -192,7 +193,7 @@ class BaseRetryingCaller:
         wait_initial: float | dt.timedelta = 0.1,
         wait_max: float | dt.timedelta = 5.0,
         wait_jitter: float | dt.timedelta = 1.0,
-        wait_exp_base: float = 2.0,
+        wait_exp_base: float | int = 2,
     ):
         self._context_kws = {
             "attempts": attempts,
@@ -422,7 +423,7 @@ class _RetryContextIterator:
     _wait_jitter: float
     _wait_initial: float
     _wait_max: float
-    _wait_exp_base: float
+    _wait_exp_base: float | int
 
     _cms_to_exit: list[AbstractContextManager[None]]
 
@@ -435,7 +436,7 @@ class _RetryContextIterator:
         wait_initial: float | dt.timedelta,
         wait_max: float | dt.timedelta,
         wait_jitter: float | dt.timedelta,
-        wait_exp_base: float,
+        wait_exp_base: float | int,
         name: str,
         args: tuple[object, ...],
         kw: dict[str, object],
@@ -577,7 +578,7 @@ def _compute_backoff(
     num: int,
     max_backoff: float,
     initial: float,
-    exp_base: float,
+    exp_base: float | int,
     max_jitter: float,
 ) -> float:
     """
@@ -589,6 +590,8 @@ def _compute_backoff(
 
     jitter = random.uniform(0, max_jitter) if max_jitter else 0  # noqa: S311
 
+    if math.log(max_backoff, exp_base) < num - 1:
+        return max_backoff
     return min(max_backoff, initial * (exp_base ** (num - 1)) + jitter)
 
 
@@ -666,7 +669,7 @@ def retry(
     wait_initial: float | dt.timedelta = 0.1,
     wait_max: float | dt.timedelta = 5.0,
     wait_jitter: float | dt.timedelta = 1.0,
-    wait_exp_base: float = 2.0,
+    wait_exp_base: float | int = 2,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     r"""
     Retry if one of configured exceptions are raised.
