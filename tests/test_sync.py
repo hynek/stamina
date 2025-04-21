@@ -5,6 +5,7 @@
 import datetime as dt
 
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 import tenacity
@@ -528,7 +529,10 @@ def test_compute_backoff_uses_logarithm():
     _compute_backoff that short circuits to using log.
     """
     assert not stamina.is_testing()
-    assert _compute_backoff(6, 60.0, 2.0, 2.0, 0.0) == 60.0
+
+    with patch("builtins.min", wraps=min) as mock_min:
+        assert _compute_backoff(6, 60.0, 2.0, 2.0, 0.0) == 60.0
+        assert mock_min.call_count == 0
 
 
 def test_compute_backoff_no_uses_logarithm():
@@ -536,4 +540,7 @@ def test_compute_backoff_no_uses_logarithm():
     _compute_backoff that doesn't short circuit to using log.
     """
     assert not stamina.is_testing()
-    assert _compute_backoff(5, 60.0, 2.0, 2.0, 0.0) == 32.0
+
+    with patch("builtins.min", wraps=min) as mock_min:
+        assert _compute_backoff(5, 60.0, 2.0, 2.0, 0.0) == 32.0
+        assert mock_min.call_count == 1
