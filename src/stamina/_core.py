@@ -77,7 +77,7 @@ def retry_context(
     wait_initial: float | dt.timedelta = 0.1,
     wait_max: float | dt.timedelta = 5.0,
     wait_jitter: float | dt.timedelta = 1.0,
-    wait_exp_base: float | int = 2,
+    wait_exp_base: float = 2,
 ) -> _RetryContextIterator:
     """
     Iterator that yields context managers that can be used to retry code
@@ -193,7 +193,7 @@ class BaseRetryingCaller:
         wait_initial: float | dt.timedelta = 0.1,
         wait_max: float | dt.timedelta = 5.0,
         wait_jitter: float | dt.timedelta = 1.0,
-        wait_exp_base: float | int = 2,
+        wait_exp_base: float = 2,
     ):
         self._context_kws = {
             "attempts": attempts,
@@ -436,7 +436,7 @@ class _RetryContextIterator:
         wait_initial: float | dt.timedelta,
         wait_max: float | dt.timedelta,
         wait_jitter: float | dt.timedelta,
-        wait_exp_base: float | int,
+        wait_exp_base: float,
         name: str,
         args: tuple[object, ...],
         kw: dict[str, object],
@@ -578,7 +578,7 @@ def _compute_backoff(
     num: int,
     max_backoff: float,
     initial: float,
-    exp_base: float | int,
+    exp_base: float,
     max_jitter: float,
 ) -> float:
     """
@@ -669,7 +669,7 @@ def retry(
     wait_initial: float | dt.timedelta = 0.1,
     wait_max: float | dt.timedelta = 5.0,
     wait_jitter: float | dt.timedelta = 1.0,
-    wait_exp_base: float | int = 2,
+    wait_exp_base: float = 2,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     r"""
     Retry if one of configured exceptions are raised.
