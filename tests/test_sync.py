@@ -316,7 +316,7 @@ def test_testing_mode_context():
 
 def test_compute_backoff_uses_logarithm():
     """
-    _compute_backoff short-circuits by using logarithm due to smaller max_backoff.
+    _compute_backoff short-circuits by using logarithm due to smaller max_backoff than exp calculation.
     """
     assert not stamina.is_testing()
 
@@ -327,7 +327,7 @@ def test_compute_backoff_uses_logarithm():
 
 def test_compute_backoff_no_uses_logarithm():
     """
-    _compute_backoff short-circuits by using logarithm due to larger max_backoff.
+    _compute_backoff does not short-circuit due to larger max_backoff than exp calculation.
     """
     assert not stamina.is_testing()
 
