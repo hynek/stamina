@@ -19,8 +19,6 @@ async def test_ok(attempts, timeout, duration):
     """
     No error, no problem.
     """
-    if attempts is None and timeout is None:
-        pytest.skip("Unbounded stop condition")
 
     class C:
         @stamina.retry(

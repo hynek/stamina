@@ -15,15 +15,9 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/25.1.0...HEAD)
 
-### Changed
-
-- Raise `ValueError` when *attempts* and *timeout* are both `None` to prevent unbounded stop condition.
-  [#102](https://github.com/hynek/stamina/pull/102)
-
-
 ### Fixed
 
-- Prevent unbounded stop condition when both *attempts* and *timeout* are falsy.
+- Prevent unbounded stop condition when both *attempts* and *timeout* are non-`None` falsy values.
   [#102](https://github.com/hynek/stamina/pull/102)
 
 

@@ -637,7 +637,7 @@ def _make_before_sleep(
     return before_sleep
 
 
-def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_any:
+def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
     """
     Combine *attempts* and *timeout* into one stop condition.
     """
@@ -650,8 +650,7 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_any:
         stops.append(_t.stop_after_delay(timeout))
 
     if not stops:
-        unbounded_stop_condition = "Unbounded stop condition, use `timeout=float('inf')` to intentionally retry forever"
-        raise ValueError(unbounded_stop_condition)
+        return _t.stop_never
 
     return _t.stop_any(*stops)
 
@@ -726,9 +725,6 @@ def retry(
     .. versionadded:: 23.3.0 `Trio <https://trio.readthedocs.io/>`_ support.
 
     .. versionadded:: 24.3.0 *on* can be a callable now.
-
-    .. versionchanged:: 25.2.0
-       Stop condition required, either *attempts* or *timeout* must be specified.
 
     """
     retry_ctx = _RetryContextIterator.from_params(
