@@ -526,7 +526,7 @@ class TestGeneratorFunctionDecoration:
 
 def test_compute_backoff_uses_logarithm():
     """
-    _compute_backoff that short circuits to using log.
+    _compute_backoff short-circuits by using logarithm due to smaller max_backoff.
     """
     assert not stamina.is_testing()
 
@@ -537,7 +537,7 @@ def test_compute_backoff_uses_logarithm():
 
 def test_compute_backoff_no_uses_logarithm():
     """
-    _compute_backoff that doesn't short circuit to using log.
+    _compute_backoff short-circuits by using logarithm due to larger max_backoff.
     """
     assert not stamina.is_testing()
 
@@ -547,6 +547,8 @@ def test_compute_backoff_no_uses_logarithm():
 
 
 def test_compute_backoff_zero_initial():
-    """Test _compute_backoff with a zero for initial."""
+    """
+    _compute_backoff does not have a divide by zero error and short-circuits to return jitter.
+    """
     assert not stamina.is_testing()
     assert _compute_backoff(5, 60.0, 0.0, 2.0, 0.0) == 0.0

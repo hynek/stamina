@@ -580,11 +580,15 @@ def _compute_backoff(
     """
     if CONFIG.testing is not None:
         return 0.0
+
+    jitter = random.uniform(0, max_jitter) if max_jitter else 0  # noqa: S311
+    # Short-circuit to prevent division by zero in next if
     if not initial:
-        return 0.0
+        return jitter
+    # If max_backoff is smaller than what we would get from exponentiating, short-circuit
     if max_backoff and math.log(max_backoff / initial, exp_base) < num - 1:
         return max_backoff
-    jitter = random.uniform(0, max_jitter) if max_jitter else 0  # noqa: S311
+
     return min(max_backoff, initial * (exp_base ** (num - 1)) + jitter)
 
 
