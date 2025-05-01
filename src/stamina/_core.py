@@ -688,6 +688,10 @@ def retry(
 
     All float-based time parameters are in seconds.
 
+    .. warning::
+       It is possible to get unbounded retries by passing `None` for *attempts*
+       (= infinite attempts) and *timeout* (= no timeout).
+
     Args:
         on:
             An Exception or a tuple of Exceptions on which the decorated
@@ -706,10 +710,11 @@ def retry(
 
         attempts:
             Maximum total number of attempts. Can be combined with *timeout*.
+            `None` means *no* limit to attempts.
 
         timeout:
             Maximum total time for all retries. Can be combined with
-            *attempts*.
+            *attempts*. `None` means *no* timeout.
 
         wait_initial: Minimum backoff before the *first* retry.
 
