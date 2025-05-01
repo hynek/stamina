@@ -39,6 +39,8 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ${{ fromJson(needs.build-package.outputs.python-versions) }}
+    env:
+      PYTHON: ${{ matrix.python-version }}
 
     steps:
       - name: Download pre-built packages
@@ -50,11 +52,13 @@ jobs:
         run: |
           tar xf dist/*.tar.gz --strip-components=1
           rm -rf src
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       - uses: hynek/setup-cached-uv@v2
 
       - name: Prepare & run Nox
-        env:
-          PYTHON: ${{ matrix.python-version }}
 
         run: >
           uvx
@@ -82,6 +86,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version-default
+          allow-prereleases: true
       - uses: hynek/setup-cached-uv@v2
 
       - uses: actions/download-artifact@v4
@@ -127,6 +135,10 @@ jobs:
           name: Packages
           path: dist
       - run: tar xf dist/*.tar.gz --strip-components=1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       - uses: hynek/setup-cached-uv@v2
 
       - name: Check using Mypy
@@ -177,6 +189,9 @@ jobs:
           name: Packages
           path: dist
       - run: tar xf dist/*.tar.gz --strip-components=1
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version-default
       - uses: hynek/setup-cached-uv@v2
 
       - name: Prepare & run Nox
