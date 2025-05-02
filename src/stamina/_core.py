@@ -586,6 +586,11 @@ def _compute_backoff(
     if not initial:
         return jitter
     # If max_backoff is smaller than what we would get from exponentiating, short-circuit
+    # Why this works can be seen algebraically:
+    #   max_backoff < initial * (exp_base ** (num - 1))                                       # noqa: ERA001
+    #   max_backoff / initial < exp_base ** (num - 1)                                         # noqa: ERA001
+    #   log(max_backoff / initial, exp_base) < log(exp_base, exp_base) * (num - 1) = 1 * (num - 1) = num - 1
+    #   log(max_backoff / initial, exp_base) < num - 1                                        # noqa: ERA001
     if max_backoff and math.log(max_backoff / initial, exp_base) < num - 1:
         return max_backoff
 
