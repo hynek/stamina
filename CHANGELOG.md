@@ -18,7 +18,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 ### Fixed
 
 - Prevent unbounded stop condition when both *attempts* and *timeout* are non-`None` falsy values.
-  [#102](https://github.com/hynek/stamina/pull/102)
+  [#109](https://github.com/hynek/stamina/pull/109)
 
 
 ## [25.1.0](https://github.com/hynek/stamina/compare/24.3.0...25.1.0) - 2025-03-12
