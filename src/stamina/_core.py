@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import contextlib
 import datetime as dt
+import math
 import random
 import sys
 
@@ -588,6 +589,17 @@ def _compute_backoff(
         return 0.0
 
     jitter = random.uniform(0, max_jitter) if max_jitter else 0  # noqa: S311
+    # Short-circuit to prevent division by zero in next if
+    if not initial:
+        return jitter
+    # If max_backoff is smaller than what we would get from exponentiating, short-circuit
+    # Why this works can be seen algebraically:
+    #   max_backoff < initial * (exp_base ** (num - 1))                                       # noqa: ERA001
+    #   max_backoff / initial < exp_base ** (num - 1)                                         # noqa: ERA001
+    #   log(max_backoff / initial, exp_base) < log(exp_base, exp_base) * (num - 1) = 1 * (num - 1) = num - 1
+    #   log(max_backoff / initial, exp_base) < num - 1                                        # noqa: ERA001
+    if max_backoff and math.log(max_backoff / initial, exp_base) < num - 1:
+        return max_backoff
 
     return min(max_backoff, initial * (exp_base ** (num - 1)) + jitter)
 
