@@ -56,21 +56,23 @@ def pre_commit(session: nox.Session) -> None:
 
 @nox.session(python=ALL_SUPPORTED)
 def mypy_api(session: nox.Session) -> None:
-    session.install(".[typing]", "structlog", "prometheus-client")
+    session.install(".", "--group", "typing", "structlog", "prometheus-client")
 
     session.run("mypy", "tests/typing")
 
 
 @nox.session(python=ALL_SUPPORTED)
 def pyright_api(session: nox.Session) -> None:
-    session.install(".[typing]", "pyright", "structlog", "prometheus-client")
+    session.install(
+        ".", "--group", "typing", "pyright", "structlog", "prometheus-client"
+    )
 
     session.run("pyright", "tests/typing")
 
 
 @nox.session
 def mypy_pkg(session: nox.Session) -> None:
-    session.install(".[typing]", "structlog", "prometheus-client")
+    session.install(".", "--group", "typing", "structlog", "prometheus-client")
 
     session.run("mypy", "src", "tests/typing", "noxfile.py")
 
@@ -88,7 +90,7 @@ def _get_pkg(posargs: list[str]) -> tuple[str, list[str]]:
     except ValueError:
         pkg = "."
 
-    return pkg + "[tests]", posargs
+    return pkg, posargs
 
 
 @nox.session(python=ALL_SUPPORTED)
@@ -98,7 +100,7 @@ def _get_pkg(posargs: list[str]) -> tuple[str, list[str]]:
 def tests(session: nox.Session, opt_deps: list[str]) -> None:
     pkg, posargs = _get_pkg(session.posargs)
 
-    session.install(pkg, "coverage[toml]", *opt_deps)
+    session.install(pkg, "coverage[toml]", "--group", "tests", *opt_deps)
 
     session.run("coverage", "run", "-m", "pytest", *posargs)
 
@@ -119,7 +121,7 @@ def docs(session: nox.Session) -> None:
     shutil.rmtree("docs/_build", ignore_errors=True)
 
     if session.posargs and session.posargs[0] == "watch":
-        session.install("-e", ".[docs]", "watchfiles")
+        session.install("-e", ".", "--group", "docs", "watchfiles")
         session.run(
             "watchfiles",
             "--ignore-paths",
@@ -136,7 +138,7 @@ def docs(session: nox.Session) -> None:
         )
         return
 
-    session.install(".[docs]")
+    session.install(".", "--group", "docs")
     cmds = session.posargs or ["html", "doctest"]
 
     dest = os.environ.get("READTHEDOCS_OUTPUT", "docs/_build/")
