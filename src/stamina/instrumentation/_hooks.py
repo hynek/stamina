@@ -66,7 +66,7 @@ def set_on_retry_hooks(
     """
     from .._config import CONFIG
 
-    CONFIG.on_retry = tuple(hooks) if hooks is not None else hooks  # type: ignore[assignment,arg-type]
+    CONFIG.on_retry = tuple(hooks) if hooks is not None else hooks
 
 
 def get_on_retry_hooks() -> tuple[RetryHook, ...]:

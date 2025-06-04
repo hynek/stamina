@@ -27,9 +27,9 @@ classifiers = [
 ]
 dependencies = ["tenacity", "typing-extensions; python_version < '3.10'"]
 
-[project.optional-dependencies]
+[dependency-groups]
 tests = ["pytest", "anyio", "dirty-equals"]
-typing = ["mypy >= 1.4"]
+typing = ["mypy >= 1.16"]
 docs = [
   "sphinx >= 7.2.2",
   "furo",
@@ -40,7 +40,8 @@ docs = [
   "prometheus-client",
 ]
 dev = [
-  "stamina[tests,typing]",
+  { include-group = "tests" },
+  { include-group = "typing" },
   # First version with uv support.
   "nox >= 2024.3.2",
   "tomli; python_version < '3.11'",
