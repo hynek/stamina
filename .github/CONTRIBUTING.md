@@ -55,7 +55,7 @@ layout python python$(cat .python-version-default)
 or, if you like [*uv*](https://github.com/astral-sh/uv):
 
 ```bash
-test -d .venv || uv venv --python python$(cat .python-version-default)
+test -d .venv || (uv venv --python $(cat .python-version-default) && uv pip install -e . --group dev)
 . .venv/bin/activate
 ```
 
@@ -68,7 +68,7 @@ test -d .venv || uv venv --python python$(cat .python-version-default)
 Change into the newly created directory and after activating a virtual environment, install an editable version of this project along with its tests requirements:
 
 ```console
-$ pip install -e .[dev]  # or `uv pip install -e .[dev]`
+$ pip install -e . --group dev  # or `uv pip install -e . --group dev`
 ```
 
 This will also install Nox for you.
