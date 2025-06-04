@@ -1,0 +1,10 @@
+---
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # We trust GitHub, the PyPA, and ourselves.
+        "actions/*": ref-pin
+        "github/*": ref-pin
+        "pypa/*": ref-pin
+        "hynek/*": ref-pin
