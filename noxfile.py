@@ -90,7 +90,7 @@ def _get_pkg(posargs: list[str]) -> tuple[str, list[str]]:
     except ValueError:
         pkg = "."
 
-    return pkg + "[tests]", posargs
+    return pkg, posargs
 
 
 @nox.session(python=ALL_SUPPORTED)
@@ -100,7 +100,7 @@ def _get_pkg(posargs: list[str]) -> tuple[str, list[str]]:
 def tests(session: nox.Session, opt_deps: list[str]) -> None:
     pkg, posargs = _get_pkg(session.posargs)
 
-    session.install(pkg, "coverage[toml]", *opt_deps)
+    session.install(pkg, "coverage[toml]", "--group", "tests", *opt_deps)
 
     session.run("coverage", "run", "-m", "pytest", *posargs)
 
