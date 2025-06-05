@@ -643,19 +643,16 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
     """
     stops = []
 
-    if attempts:
+    if attempts is not None:
         stops.append(_t.stop_after_attempt(attempts))
 
-    if timeout:
+    if timeout is not None:
         stops.append(_t.stop_after_delay(timeout))
-
-    if len(stops) > 1:
-        return _t.stop_any(*stops)
 
     if not stops:
         return _t.stop_never
 
-    return stops[0]
+    return _t.stop_any(*stops)
 
 
 def retry(
@@ -733,6 +730,7 @@ def retry(
     .. versionadded:: 23.3.0 `Trio <https://trio.readthedocs.io/>`_ support.
 
     .. versionadded:: 24.3.0 *on* can be a callable now.
+
     """
     retry_ctx = _RetryContextIterator.from_params(
         on=on,
