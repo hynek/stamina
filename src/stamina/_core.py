@@ -752,21 +752,17 @@ def retry(
 
         if not iscoroutinefunction(wrapped):
 
-            @wraps(wrapped)
+            @wraps(wrapped)  # noqa: RET503
             def sync_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[return]
-                for attempt in retry_ctx.with_name(  # noqa: RET503
-                    name, args, kw
-                ):
+                for attempt in retry_ctx.with_name(name, args, kw):
                     with attempt:
                         return wrapped(*args, **kw)
 
             return sync_inner
 
-        @wraps(wrapped)
+        @wraps(wrapped)  # noqa: RET503
         async def async_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[return]
-            async for attempt in retry_ctx.with_name(  # noqa: RET503
-                name, args, kw
-            ):
+            async for attempt in retry_ctx.with_name(name, args, kw):
                 with attempt:
                     return await wrapped(*args, **kw)  # type: ignore[no-any-return]
 
