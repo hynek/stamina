@@ -5,13 +5,14 @@
 import datetime as dt
 
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 import tenacity
 
 import stamina
 
-from stamina._core import _make_stop
+from stamina._core import _compute_backoff, _make_stop
 
 
 @pytest.mark.parametrize("attempts", [None, 1])
@@ -311,3 +312,33 @@ def test_testing_mode_context():
         assert 3 == attempt.num
 
     assert not stamina.is_testing()
+
+
+def test_compute_backoff_uses_logarithm():
+    """
+    _compute_backoff short-circuits by using logarithm due to smaller max_backoff than exp calculation.
+    """
+    assert not stamina.is_testing()
+
+    with patch("builtins.min", wraps=min) as mock_min:
+        assert _compute_backoff(6, 60.0, 2.0, 2.0, 0.0) == 60.0
+        assert mock_min.call_count == 0
+
+
+def test_compute_backoff_no_uses_logarithm():
+    """
+    _compute_backoff does not short-circuit due to larger max_backoff than exp calculation.
+    """
+    assert not stamina.is_testing()
+
+    with patch("builtins.min", wraps=min) as mock_min:
+        assert _compute_backoff(5, 60.0, 2.0, 2.0, 0.0) == 32.0
+        assert mock_min.call_count == 1
+
+
+def test_compute_backoff_zero_initial():
+    """
+    _compute_backoff does not have a divide by zero error and short-circuits to return jitter.
+    """
+    assert not stamina.is_testing()
+    assert _compute_backoff(5, 60.0, 0.0, 2.0, 0.0) == 0.0
