@@ -13,6 +13,7 @@ import datetime as dt
 
 from collections.abc import Generator
 from contextlib import contextmanager
+from typing import AsyncGenerator
 
 from stamina import (
     AsyncRetryingCaller,
@@ -41,6 +42,16 @@ def just_exc() -> None: ...
 
 @retry(on=TypeError)
 async def just_exc_async() -> None: ...
+
+
+@retry(on=TypeError)
+def just_exc_with_sync_generator_function() -> Generator[None]:
+    yield
+
+
+@retry(on=TypeError)
+async def just_exc_with_async_generator_function() -> AsyncGenerator[None]:
+    yield
 
 
 @retry(on=TypeError, timeout=13.0)
