@@ -361,8 +361,8 @@ class TestAsyncGeneratorFunctionDecoration:
         async def f():
             yield 42
 
-        assert 42 == await f().__anext__()
-        assert 42 == await C().f().__anext__()
+        assert [42] == [item async for item in f()]
+        assert [42] == [item async for item in C().f()]
 
     @pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
     @pytest.mark.parametrize("duration", [0, dt.timedelta(days=0)])
@@ -387,7 +387,7 @@ class TestAsyncGeneratorFunctionDecoration:
 
             yield 42
 
-        assert 42 == await f().__anext__()
+        assert [42] == [item async for item in f()]
         assert 1 == i
 
     @pytest.mark.parametrize(
@@ -435,7 +435,8 @@ class TestAsyncGeneratorFunctionDecoration:
 
                 yield 42
 
-        assert 42 == await C().f().__anext__()
+        items = [item async for item in C().f()]
+        assert [42] == items
         assert 1 == i
 
     async def test_wrong_exception(self, on):
@@ -487,6 +488,7 @@ class TestAsyncGeneratorFunctionDecoration:
 
         stamina.set_active(False)
 
-        await f().__anext__()
+        items = [item async for item in f()]
+        assert [None] == items
 
         assert 1 == num_called
