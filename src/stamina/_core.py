@@ -7,7 +7,6 @@ from __future__ import annotations
 import contextlib
 import datetime as dt
 import random
-import sys
 
 from contextlib import AbstractContextManager
 from dataclasses import dataclass, replace
@@ -23,6 +22,7 @@ from typing import (
     Awaitable,
     Callable,
     Iterator,
+    ParamSpec,
     Tuple,
     Type,
     TypedDict,
@@ -35,11 +35,6 @@ import tenacity as _t
 from ._config import CONFIG, _Config, _Testing
 from .instrumentation._data import RetryDetails, guess_name
 
-
-if sys.version_info >= (3, 10):
-    from typing import ParamSpec
-else:
-    from typing_extensions import ParamSpec
 
 try:
     from sniffio import current_async_library
