@@ -49,9 +49,9 @@ DOCS_PYTHON = re.search(  # type: ignore[union-attr]
 
 @nox.session
 def pre_commit(session: nox.Session) -> None:
-    session.install("pre-commit-uv")
+    session.install("prek")
 
-    session.run("pre-commit", "run", "--all-files")
+    session.run("prek", "run", "--all-files")
 
 
 @nox.session(python=ALL_SUPPORTED)
