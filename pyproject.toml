@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 dynamic = ["version", "readme"]
 name = "stamina"
 description = "Production-grade retries made easy."
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = "MIT"
 keywords = ["retry", "retries", "reliability"]
 authors = [{ name = "Hynek Schlawack", email = "hs@ox.cx" }]

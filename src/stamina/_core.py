@@ -8,6 +8,7 @@ import contextlib
 import datetime as dt
 import random
 
+from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
 from contextlib import AbstractContextManager
 from dataclasses import dataclass, replace
 from functools import wraps
@@ -18,16 +19,9 @@ from inspect import (
 )
 from types import TracebackType
 from typing import (
-    AsyncIterator,
-    Awaitable,
-    Callable,
-    Iterator,
     ParamSpec,
-    Tuple,
-    Type,
     TypedDict,
     TypeVar,
-    Union,
 )
 
 import tenacity as _t
@@ -63,9 +57,9 @@ async def _smart_sleep(delay: float) -> None:
 T = TypeVar("T")
 P = ParamSpec("P")
 # for backwards compatibility with Python<3.10
-ExcOrPredicate = Union[
-    Type[Exception], Tuple[Type[Exception], ...], Callable[[Exception], bool]
-]
+ExcOrPredicate = (
+    type[Exception] | tuple[type[Exception], ...] | Callable[[Exception], bool]
+)
 
 
 def retry_context(
