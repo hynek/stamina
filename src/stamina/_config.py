@@ -4,9 +4,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from threading import Lock
 from types import TracebackType
-from typing import Callable
 
 from .instrumentation import RetryHookFactory
 from .instrumentation._hooks import get_default_hooks, init_hooks
