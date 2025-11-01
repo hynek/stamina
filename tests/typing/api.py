@@ -11,9 +11,8 @@ from __future__ import annotations
 
 import datetime as dt
 
-from collections.abc import Generator
+from collections.abc import AsyncGenerator, Generator
 from contextlib import contextmanager
-from typing import AsyncGenerator
 
 from stamina import (
     AsyncRetryingCaller,
