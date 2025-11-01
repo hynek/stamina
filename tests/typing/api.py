@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from collections.abc import Generator
+from collections.abc import AsyncGenerator, Generator
 from contextlib import contextmanager
 
 from stamina import (
@@ -41,6 +41,16 @@ def just_exc() -> None: ...
 
 @retry(on=TypeError)
 async def just_exc_async() -> None: ...
+
+
+@retry(on=TypeError)
+def just_exc_with_sync_generator_function() -> Generator[None]:
+    yield
+
+
+@retry(on=TypeError)
+async def just_exc_with_async_generator_function() -> AsyncGenerator[None]:
+    yield
 
 
 @retry(on=TypeError, timeout=13.0)

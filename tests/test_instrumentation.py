@@ -156,6 +156,43 @@ class TestLogging:
             ("stamina", 30, "stamina.retry_scheduled")
         ] == caplog.record_tuples
 
+    def test_sync_generator_function(self, caplog):
+        """
+        Sync generator function retries are logged.
+        """
+
+        @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+        def f():
+            yield
+            raise ValueError
+
+        with pytest.raises(ValueError):
+            for _ in f():
+                pass
+
+        assert [
+            ("stamina", 30, "stamina.retry_scheduled")
+        ] == caplog.record_tuples
+
+    @pytest.mark.anyio
+    async def test_async_generator_function(self, caplog):
+        """
+        Async generator function retries are logged.
+        """
+
+        @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+        async def f():
+            yield
+            raise ValueError
+
+        with pytest.raises(ValueError):
+            async for _ in f():
+                pass
+
+        assert [
+            ("stamina", 30, "stamina.retry_scheduled")
+        ] == caplog.record_tuples
+
 
 class TestSetOnRetryHooks:
     def test_none_is_default(self):
@@ -320,6 +357,145 @@ class TestSetOnRetryHooks:
             [
                 RetryDetails(
                     name="tests.test_instrumentation.TestSetOnRetryHooks.test_context_manager_hooks_async.<locals>.f",
+                    args=(),
+                    kwargs={},
+                    retry_num=1,
+                    wait_for=0.0,
+                    waited_so_far=0.0,
+                    caused_by=IsInstance(ValueError),
+                )
+            ]
+            == cm2.deets
+            == deets
+        )
+
+    def test_context_manager_hooks_with_sync_generator_function(self):
+        """
+        Context manager hooks work with sync generator functions too.
+        """
+        entered = False
+        exited = False
+        deets = []
+
+        @contextmanager
+        def cm1(details):
+            nonlocal entered
+            entered = True
+
+            deets.append(details)
+            yield
+
+            nonlocal exited
+            exited = True
+
+        class CM:
+            def __init__(self):
+                self.entered = False
+                self.exited = False
+                self.deets = []
+
+            def __call__(self, details):
+                self.deets.append(details)
+                return self
+
+            def __enter__(self):
+                self.entered = True
+
+            def __exit__(self, *_):
+                self.exited = True
+
+        cm2 = CM()
+
+        set_on_retry_hooks([cm1, cm2])
+
+        @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+        def f():
+            yield
+            raise ValueError
+
+        with pytest.raises(ValueError):
+            for _ in f():
+                pass
+
+        assert entered
+        assert exited
+        assert cm2.entered
+        assert cm2.exited
+
+        assert (
+            [
+                RetryDetails(
+                    name="tests.test_instrumentation.TestSetOnRetryHooks.test_context_manager_hooks_with_sync_generator_function.<locals>.f",
+                    args=(),
+                    kwargs={},
+                    retry_num=1,
+                    wait_for=0.0,
+                    waited_so_far=0.0,
+                    caused_by=IsInstance(ValueError),
+                )
+            ]
+            == cm2.deets
+            == deets
+        )
+
+    @pytest.mark.anyio
+    async def test_context_manager_hooks_with_async_generator_function(self):
+        """
+        Context manager hooks work with async generator functions too.
+        """
+        entered = False
+        exited = False
+        deets = []
+
+        @contextmanager
+        def cm1(details):
+            nonlocal entered
+            entered = True
+
+            deets.append(details)
+            yield
+
+            nonlocal exited
+            exited = True
+
+        class CM:
+            def __init__(self):
+                self.entered = False
+                self.exited = False
+                self.deets = []
+
+            def __call__(self, details):
+                self.deets.append(details)
+                return self
+
+            def __enter__(self):
+                self.entered = True
+
+            def __exit__(self, *_):
+                self.exited = True
+
+        cm2 = CM()
+
+        set_on_retry_hooks([cm1, cm2])
+
+        @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+        async def f():
+            yield
+            raise ValueError
+
+        with pytest.raises(ValueError):
+            async for _ in f():
+                pass
+
+        assert entered
+        assert exited
+        assert cm2.entered
+        assert cm2.exited
+
+        assert (
+            [
+                RetryDetails(
+                    name="tests.test_instrumentation.TestSetOnRetryHooks.test_context_manager_hooks_with_async_generator_function.<locals>.f",
                     args=(),
                     kwargs={},
                     retry_num=1,

@@ -12,7 +12,11 @@ from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
 from contextlib import AbstractContextManager
 from dataclasses import dataclass, replace
 from functools import wraps
-from inspect import iscoroutinefunction
+from inspect import (
+    isasyncgenfunction,
+    iscoroutinefunction,
+    isgeneratorfunction,
+)
 from types import TracebackType
 from typing import (
     ParamSpec,
@@ -647,7 +651,7 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
     return stops[0]
 
 
-def retry(
+def retry(  # noqa: C901
     *,
     on: ExcOrPredicate,
     attempts: int | None = 10,
@@ -736,8 +740,29 @@ def retry(
         kw={},
     )
 
-    def retry_decorator(wrapped: Callable[P, T]) -> Callable[P, T]:
+    def retry_decorator(wrapped: Callable[P, T]) -> Callable[P, T]:  # noqa: C901
         name = guess_name(wrapped)
+
+        if isgeneratorfunction(wrapped):
+
+            @wraps(wrapped)
+            def sync_gen_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[misc]
+                for attempt in retry_ctx.with_name(name, args, kw):
+                    with attempt:
+                        return (yield from wrapped(*args, **kw))
+
+            return sync_gen_inner
+
+        if isasyncgenfunction(wrapped):
+
+            @wraps(wrapped)
+            async def async_gen_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[misc]
+                async for attempt in retry_ctx.with_name(name, args, kw):
+                    with attempt:
+                        async for item in wrapped(*args, **kw):
+                            yield item
+
+            return async_gen_inner
 
         if not iscoroutinefunction(wrapped):
 
