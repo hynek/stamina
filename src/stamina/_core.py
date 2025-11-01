@@ -759,8 +759,34 @@ def retry(  # noqa: C901
             async def async_gen_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[misc]
                 async for attempt in retry_ctx.with_name(name, args, kw):
                     with attempt:
-                        async for item in wrapped(*args, **kw):
-                            yield item
+                        agen = wrapped(*args, **kw)
+                        try:
+                            try:
+                                item = await agen.__anext__()
+                            except StopAsyncIteration:
+                                return
+
+                            while True:
+                                try:
+                                    to_send = yield item
+                                except GeneratorExit:  # noqa: PERF203
+                                    await agen.aclose()
+                                    raise
+                                except BaseException as thrown:  # noqa: BLE001
+                                    try:
+                                        item = await agen.athrow(thrown)
+                                    except StopAsyncIteration:
+                                        return
+                                else:
+                                    try:
+                                        if to_send is None:
+                                            item = await agen.__anext__()
+                                        else:
+                                            item = await agen.asend(to_send)
+                                    except StopAsyncIteration:
+                                        return
+                        finally:
+                            await agen.aclose()
 
             return async_gen_inner
 

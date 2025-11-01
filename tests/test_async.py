@@ -390,6 +390,86 @@ class TestAsyncGeneratorFunctionDecoration:
         assert [42] == [item async for item in f()]
         assert 1 == i
 
+    async def test_forwards_asend(self):
+        """
+        Values sent via asend() reach the wrapped generator unchanged.
+        """
+        sent_values = []
+
+        @stamina.retry(on=Exception)
+        async def gen():
+            sent = yield "ready"
+            sent_values.append(sent)
+            yield sent
+
+        agen = gen()
+
+        assert "ready" == await anext(agen)
+        assert "sentinel" == await agen.asend("sentinel")
+        assert ["sentinel"] == sent_values
+
+        await agen.aclose()
+
+    async def test_forwards_athrow(self):
+        """
+        Exceptions raised via athrow() reach the wrapped generator unchanged.
+        """
+        received = []
+
+        @stamina.retry(on=Exception)
+        async def gen():
+            try:
+                yield "ready"
+            except RuntimeError as err:
+                received.append(err)
+                raise
+
+        agen = gen()
+
+        assert "ready" == await anext(agen)
+
+        exc = RuntimeError("boom")
+
+        restart_value = await agen.athrow(exc)
+
+        assert "ready" == restart_value
+        assert received == [exc]
+
+        await agen.aclose()
+
+    async def test_stops_when_wrapped_generator_is_empty(self):
+        """
+        Wrapping an empty async generator yields no items and exits cleanly.
+        """
+
+        @stamina.retry(on=Exception)
+        async def gen():
+            if False:
+                yield None
+
+        assert [] == [item async for item in gen()]
+
+    async def test_athrow_that_gets_suppressed(self):
+        """
+        If the wrapped generator swallows an exception and exits, athrow() stops.
+        """
+
+        @stamina.retry(on=Exception)
+        async def gen():
+            try:
+                yield "ready"
+            except RuntimeError:
+                return
+
+        agen = gen()
+
+        assert "ready" == await anext(agen)
+
+        with pytest.raises(StopAsyncIteration):
+            await agen.athrow(RuntimeError("boom"))
+
+        await agen.aclose()
+
     @pytest.mark.parametrize(
         "timeout",
         [None, 1, dt.timedelta(days=1)],
