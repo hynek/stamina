@@ -406,6 +406,49 @@ class TestGeneratorFunctionDecoration:
         assert [42, 42] == list(f())
         assert 1 == i
 
+    def test_forwards_send(self):
+        """
+        Values sent via send() reach the wrapped generator unchanged.
+        """
+        sent_values = []
+
+        @stamina.retry(on=Exception)
+        def gen():
+            sent = yield "ready"
+            sent_values.append(sent)
+            yield sent
+
+        g = gen()
+
+        assert "ready" == next(g)
+        assert "sentinel" == g.send("sentinel")
+        assert ["sentinel"] == sent_values
+
+    def test_forwards_throw(self):
+        """
+        Exceptions raised via throw() reach the wrapped generator unchanged.
+        """
+        received = []
+
+        @stamina.retry(on=Exception)
+        def gen():
+            try:
+                yield "ready"
+            except RuntimeError as err:
+                received.append(err)
+                raise
+
+        g = gen()
+
+        assert "ready" == next(g)
+
+        exc = RuntimeError("boom")
+
+        restart_value = g.throw(exc)
+
+        assert "ready" == restart_value
+        assert received == [exc]
+
     def test_wrong_exception(self, on):
         """
         Exceptions that are not passed as `on` are left through.
