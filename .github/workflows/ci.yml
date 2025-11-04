@@ -109,7 +109,7 @@ jobs:
           path: htmlcov
         if: ${{ failure() }}
 
-  type-check-api:
+  type-check-api-mypy:
     name: Type-check API on ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     needs: build-package
@@ -137,16 +137,8 @@ jobs:
           --python $PYTHON
           --sessions mypy_api
 
-      - name: Check using Pyright
-        run: >
-          uvx
-          --with "tomli; python_version<'3.11'"
-          nox
-          --python $PYTHON
-          --sessions pyright_api
-
-  mypy-pkg:
-    name: Type-check package
+  typing:
+    name: Run type checks
     runs-on: ubuntu-latest
     needs: build-package
 
@@ -159,12 +151,19 @@ jobs:
       - run: tar xf dist/*.tar.gz --strip-components=1
       - uses: hynek/setup-cached-uv@757bedc3f972eb7227a1aa657651f15a8527c817 # v2.3.0
 
-      - name: Prepare & run Nox
+      - name: Check package using Mypy
         run: >
           uvx
           --python $(cat .python-version-default)
           nox
           --sessions mypy_pkg
+
+      - name: Check API
+        run: >
+          uvx
+          --python $(cat .python-version-default)
+          nox
+          --sessions typing_api
 
   docs:
     name: Run doctests
@@ -222,8 +221,8 @@ jobs:
       - coverage
       - install-dev
       - docs
-      - type-check-api
-      - mypy-pkg
+      - type-check-api-mypy
+      - typing
 
     runs-on: ubuntu-latest
 
