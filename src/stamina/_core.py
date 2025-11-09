@@ -132,7 +132,6 @@ class Attempt:
         The number of seconds of backoff before the *next* attempt if *this*
         attempt fails.
 
-
         .. warning::
             This value does **not** include a possible random jitter and is
             therefore just a *lower bound* of the actual value.
