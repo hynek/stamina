@@ -15,8 +15,8 @@ import stamina
 from stamina._core import _compute_backoff, _make_stop
 
 
-@pytest.mark.parametrize("attempts", [None, 1])
-@pytest.mark.parametrize("timeout", [None, 1, dt.timedelta(days=1)])
+@pytest.mark.parametrize("attempts", [None, -1, 0, 1])
+@pytest.mark.parametrize("timeout", [None, -1, 0, 1, dt.timedelta(days=1)])
 @pytest.mark.parametrize("duration", [1, dt.timedelta(days=1)])
 def test_ok(attempts, timeout, duration):
     """

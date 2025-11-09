@@ -28,6 +28,9 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ### Fixed
 
+- Prevent unbounded stop condition when both *attempts* and *timeout* are non-`None` falsy values.
+  [#109](https://github.com/hynek/stamina/pull/109)
+
 - `stamina.retry()` now retries generator functions and async generator functions.
   [#123](https://github.com/hynek/stamina/pull/123)
 
