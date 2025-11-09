@@ -723,7 +723,6 @@ def retry(  # noqa: C901
     .. versionadded:: 23.3.0 `Trio <https://trio.readthedocs.io/>`_ support.
 
     .. versionadded:: 24.3.0 *on* can be a callable now.
-
     """
     retry_ctx = _RetryContextIterator.from_params(
         on=on,
