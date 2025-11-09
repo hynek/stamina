@@ -584,8 +584,10 @@ def _compute_backoff(
     jitter = random.uniform(0, max_jitter) if max_jitter else 0  # noqa: S311
     # Short-circuit to prevent division by zero in next if
     if not initial:
-        return jitter
-    # If max_backoff is smaller than what we would get from exponentiating, short-circuit
+        return min(max_backoff, jitter)
+
+    # If max_backoff is smaller than what we would get from exponentiating,
+    # short-circuit.
     # Why this works can be seen algebraically:
     #   max_backoff < initial * (exp_base ** (num - 1))                                       # noqa: ERA001
     #   max_backoff / initial < exp_base ** (num - 1)                                         # noqa: ERA001
