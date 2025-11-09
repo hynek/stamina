@@ -22,10 +22,13 @@ else:
 nox.options.sessions = [
     "pre_commit",
     "tests",
+    "typing_api",
     "mypy_api",
-    "pyright_api",
     "mypy_pkg",
 ]
+
+# We don't need this for packaging, but Mypy is extremely slow on its first
+# run.
 nox.options.reuse_existing_virtualenvs = True
 nox.options.error_on_external_run = True
 
@@ -54,27 +57,41 @@ def pre_commit(session: nox.Session) -> None:
     session.run("prek", "run", "--all-files")
 
 
-@nox.session(python=ALL_SUPPORTED)
+@nox.session(python=ALL_SUPPORTED, tags=["typing"])
 def mypy_api(session: nox.Session) -> None:
-    session.install(".", "--group", "typing", "structlog", "prometheus-client")
+    session.install(
+        ".", "--group", "typing", "mypy", "structlog", "prometheus-client"
+    )
 
     session.run("mypy", "tests/typing")
 
 
-@nox.session(python=ALL_SUPPORTED)
-def pyright_api(session: nox.Session) -> None:
+@nox.session(tags=["typing"])
+def mypy_pkg(session: nox.Session) -> None:
     session.install(
-        ".", "--group", "typing", "pyright", "structlog", "prometheus-client"
+        ".", "--group", "typing", "mypy", "structlog", "prometheus-client"
     )
 
-    session.run("pyright", "tests/typing")
-
-
-@nox.session
-def mypy_pkg(session: nox.Session) -> None:
-    session.install(".", "--group", "typing", "structlog", "prometheus-client")
-
     session.run("mypy", "src", "tests/typing", "noxfile.py")
+
+
+@nox.session(python=ALL_SUPPORTED[-1], tags=["typing"])
+@nox.parametrize("tool", ["pyright", "pyrefly", "ty"])
+def typing_api(session: nox.Session, tool: str) -> None:
+    """
+    Check type hints using Python version-independent tools.
+    """
+    session.install(
+        ".", "--group", "typing", tool, "structlog", "prometheus-client"
+    )
+
+    cmd_line = {
+        "pyright": ("pyright",),
+        "pyrefly": ("pyrefly", "check"),
+        "ty": ("ty", "check"),
+    }
+
+    session.run(*cmd_line[tool], "tests/typing")
 
 
 def _get_pkg(posargs: list[str]) -> tuple[str, list[str]]:

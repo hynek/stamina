@@ -15,6 +15,12 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/25.1.0...HEAD)
 
+### Added
+
+- The type hints for our public API are now also verified using [Pyrefly](https://pyrefly.org/) and [*ty*](https://docs.astral.sh/ty/).
+  [#124](https://github.com/hynek/stamina/pull/124)
+
+
 ### Removed
 
 - Support for Python 3.8 and 3.9.
