@@ -7,23 +7,21 @@ from __future__ import annotations
 import contextlib
 import datetime as dt
 import random
-import sys
 
+from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
 from contextlib import AbstractContextManager
 from dataclasses import dataclass, replace
 from functools import wraps
-from inspect import iscoroutinefunction
+from inspect import (
+    isasyncgenfunction,
+    iscoroutinefunction,
+    isgeneratorfunction,
+)
 from types import TracebackType
 from typing import (
-    AsyncIterator,
-    Awaitable,
-    Callable,
-    Iterator,
-    Tuple,
-    Type,
+    ParamSpec,
     TypedDict,
     TypeVar,
-    Union,
 )
 
 import tenacity as _t
@@ -31,11 +29,6 @@ import tenacity as _t
 from ._config import CONFIG, _Config, _Testing
 from .instrumentation._data import RetryDetails, guess_name
 
-
-if sys.version_info >= (3, 10):
-    from typing import ParamSpec
-else:
-    from typing_extensions import ParamSpec
 
 try:
     from sniffio import current_async_library
@@ -64,9 +57,9 @@ async def _smart_sleep(delay: float) -> None:
 T = TypeVar("T")
 P = ParamSpec("P")
 # for backwards compatibility with Python<3.10
-ExcOrPredicate = Union[
-    Type[Exception], Tuple[Type[Exception], ...], Callable[[Exception], bool]
-]
+ExcOrPredicate = (
+    type[Exception] | tuple[type[Exception], ...] | Callable[[Exception], bool]
+)
 
 
 def retry_context(
@@ -655,7 +648,7 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
     return _t.stop_any(*stops)
 
 
-def retry(
+def retry(  # noqa: C901
     *,
     on: ExcOrPredicate,
     attempts: int | None = 10,
@@ -745,26 +738,69 @@ def retry(
         kw={},
     )
 
-    def retry_decorator(wrapped: Callable[P, T]) -> Callable[P, T]:
+    def retry_decorator(wrapped: Callable[P, T]) -> Callable[P, T]:  # noqa: C901
         name = guess_name(wrapped)
+
+        if isgeneratorfunction(wrapped):
+
+            @wraps(wrapped)
+            def sync_gen_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[misc]
+                for attempt in retry_ctx.with_name(name, args, kw):
+                    with attempt:
+                        return (yield from wrapped(*args, **kw))
+
+            return sync_gen_inner
+
+        if isasyncgenfunction(wrapped):
+
+            @wraps(wrapped)
+            async def async_gen_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[misc]
+                async for attempt in retry_ctx.with_name(name, args, kw):
+                    with attempt:
+                        agen = wrapped(*args, **kw)
+                        try:
+                            try:
+                                item = await agen.__anext__()
+                            except StopAsyncIteration:
+                                return
+
+                            while True:
+                                try:
+                                    to_send = yield item
+                                except GeneratorExit:  # noqa: PERF203
+                                    await agen.aclose()
+                                    raise
+                                except BaseException as thrown:  # noqa: BLE001
+                                    try:
+                                        item = await agen.athrow(thrown)
+                                    except StopAsyncIteration:
+                                        return
+                                else:
+                                    try:
+                                        if to_send is None:
+                                            item = await agen.__anext__()
+                                        else:
+                                            item = await agen.asend(to_send)
+                                    except StopAsyncIteration:
+                                        return
+                        finally:
+                            await agen.aclose()
+
+            return async_gen_inner
 
         if not iscoroutinefunction(wrapped):
 
-            @wraps(wrapped)
+            @wraps(wrapped)  # noqa: RET503
             def sync_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[return]
-                for attempt in retry_ctx.with_name(  # noqa: RET503
-                    name, args, kw
-                ):
+                for attempt in retry_ctx.with_name(name, args, kw):
                     with attempt:
                         return wrapped(*args, **kw)
 
             return sync_inner
 
-        @wraps(wrapped)
+        @wraps(wrapped)  # noqa: RET503
         async def async_inner(*args: P.args, **kw: P.kwargs) -> T:  # type: ignore[return]
-            async for attempt in retry_ctx.with_name(  # noqa: RET503
-                name, args, kw
-            ):
+            async for attempt in retry_ctx.with_name(name, args, kw):
                 with attempt:
                     return await wrapped(*args, **kw)  # type: ignore[no-any-return]
 

@@ -15,10 +15,24 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/25.1.0...HEAD)
 
+### Added
+
+- The type hints for our public API are now also verified using [Pyrefly](https://pyrefly.org/) and [*ty*](https://docs.astral.sh/ty/).
+  [#124](https://github.com/hynek/stamina/pull/124)
+
+
+### Removed
+
+- Support for Python 3.8 and 3.9.
+
+
 ### Fixed
 
 - Prevent unbounded stop condition when both *attempts* and *timeout* are non-`None` falsy values.
   [#109](https://github.com/hynek/stamina/pull/109)
+  
+- `stamina.retry()` now retries generator functions and async generator functions.
+  [#123](https://github.com/hynek/stamina/pull/123)
 
 
 ## [25.1.0](https://github.com/hynek/stamina/compare/24.3.0...25.1.0) - 2025-03-12

@@ -22,10 +22,13 @@ else:
 nox.options.sessions = [
     "pre_commit",
     "tests",
+    "typing_api",
     "mypy_api",
-    "pyright_api",
     "mypy_pkg",
 ]
+
+# We don't need this for packaging, but Mypy is extremely slow on its first
+# run.
 nox.options.reuse_existing_virtualenvs = True
 nox.options.error_on_external_run = True
 
@@ -49,30 +52,46 @@ DOCS_PYTHON = re.search(  # type: ignore[union-attr]
 
 @nox.session
 def pre_commit(session: nox.Session) -> None:
-    session.install("pre-commit-uv")
+    session.install("prek")
 
-    session.run("pre-commit", "run", "--all-files")
+    session.run("prek", "run", "--all-files")
 
 
-@nox.session(python=ALL_SUPPORTED)
+@nox.session(python=ALL_SUPPORTED, tags=["typing"])
 def mypy_api(session: nox.Session) -> None:
-    session.install(".[typing]", "structlog", "prometheus-client")
+    session.install(
+        ".", "--group", "typing", "mypy", "structlog", "prometheus-client"
+    )
 
     session.run("mypy", "tests/typing")
 
 
-@nox.session(python=ALL_SUPPORTED)
-def pyright_api(session: nox.Session) -> None:
-    session.install(".[typing]", "pyright", "structlog", "prometheus-client")
-
-    session.run("pyright", "tests/typing")
-
-
-@nox.session
+@nox.session(tags=["typing"])
 def mypy_pkg(session: nox.Session) -> None:
-    session.install(".[typing]", "structlog", "prometheus-client")
+    session.install(
+        ".", "--group", "typing", "mypy", "structlog", "prometheus-client"
+    )
 
     session.run("mypy", "src", "tests/typing", "noxfile.py")
+
+
+@nox.session(python=ALL_SUPPORTED[-1], tags=["typing"])
+@nox.parametrize("tool", ["pyright", "pyrefly", "ty"])
+def typing_api(session: nox.Session, tool: str) -> None:
+    """
+    Check type hints using Python version-independent tools.
+    """
+    session.install(
+        ".", "--group", "typing", tool, "structlog", "prometheus-client"
+    )
+
+    cmd_line = {
+        "pyright": ("pyright",),
+        "pyrefly": ("pyrefly", "check"),
+        "ty": ("ty", "check"),
+    }
+
+    session.run(*cmd_line[tool], "tests/typing")
 
 
 def _get_pkg(posargs: list[str]) -> tuple[str, list[str]]:
@@ -88,7 +107,7 @@ def _get_pkg(posargs: list[str]) -> tuple[str, list[str]]:
     except ValueError:
         pkg = "."
 
-    return pkg + "[tests]", posargs
+    return pkg, posargs
 
 
 @nox.session(python=ALL_SUPPORTED)
@@ -98,7 +117,7 @@ def _get_pkg(posargs: list[str]) -> tuple[str, list[str]]:
 def tests(session: nox.Session, opt_deps: list[str]) -> None:
     pkg, posargs = _get_pkg(session.posargs)
 
-    session.install(pkg, "coverage[toml]", *opt_deps)
+    session.install(pkg, "coverage[toml]", "--group", "tests", *opt_deps)
 
     session.run("coverage", "run", "-m", "pytest", *posargs)
 
@@ -119,7 +138,7 @@ def docs(session: nox.Session) -> None:
     shutil.rmtree("docs/_build", ignore_errors=True)
 
     if session.posargs and session.posargs[0] == "watch":
-        session.install("-e", ".[docs]", "watchfiles")
+        session.install("-e", ".", "--group", "docs", "watchfiles")
         session.run(
             "watchfiles",
             "--ignore-paths",
@@ -136,7 +155,7 @@ def docs(session: nox.Session) -> None:
         )
         return
 
-    session.install(".[docs]")
+    session.install(".", "--group", "docs")
     cmds = session.posargs or ["html", "doctest"]
 
     dest = os.environ.get("READTHEDOCS_OUTPUT", "docs/_build/")

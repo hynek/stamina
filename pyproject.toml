@@ -7,28 +7,27 @@ build-backend = "hatchling.build"
 dynamic = ["version", "readme"]
 name = "stamina"
 description = "Production-grade retries made easy."
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = "MIT"
 keywords = ["retry", "retries", "reliability"]
 authors = [{ name = "Hynek Schlawack", email = "hs@ox.cx" }]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "License :: OSI Approved :: MIT License",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Typing :: Typed",
   "Framework :: AsyncIO",
   "Framework :: Trio",
 ]
 dependencies = ["tenacity", "typing-extensions; python_version < '3.10'"]
 
-[project.optional-dependencies]
-tests = ["pytest", "anyio", "dirty-equals"]
-typing = ["mypy >= 1.4"]
+[dependency-groups]
+tests = ["pytest>=9", "anyio", "dirty-equals"]
+typing = []
 docs = [
   "sphinx >= 7.2.2",
   "furo",
@@ -39,14 +38,15 @@ docs = [
   "prometheus-client",
 ]
 dev = [
-  "stamina[tests,typing]",
+  { include-group = "tests" },
+  { include-group = "typing" },
+  "mypy",
   # First version with uv support.
   "nox >= 2024.3.2",
-  "tomli; python_version < '3.11'",
-  "structlog",
   "prometheus-client",
+  "structlog",
+  "tomli; python_version < '3.11'",
   "trio",
-  "uv",
 ]
 
 [project.urls]
@@ -103,9 +103,9 @@ start-at = "## Credits"
 
 
 [tool.pytest.ini_options]
-addopts = ["-ra", "--strict-markers", "--strict-config"]
+minversion = "9.0"
+addopts = ["-ra", "--strict", "--import-mode=importlib"]
 testpaths = "tests"
-xfail_strict = true
 filterwarnings = ["once::Warning"]
 
 
@@ -179,6 +179,7 @@ ignore = [
   "FIX",     # Yes, we want XXX as a marker.
   "INP001",  # sometimes we want Python files outside of packages
   "ISC001",  # conflicts with formatter
+  "PLC0415", # we do lazy imports
   "PLR0913", # yes, many arguments, but most have defaults
   "PLR2004", # numbers are sometimes fine
   "SLF001",  # private members are accessed by friendly functions
