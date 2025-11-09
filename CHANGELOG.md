@@ -34,6 +34,9 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 - `stamina.retry()` now retries generator functions and async generator functions.
   [#123](https://github.com/hynek/stamina/pull/123)
 
+- Default `wait_exp_base` parameter is now an integer to prevent an `OverflowError` after the 1023th retry.
+  [#104](https://github.com/hynek/stamina/pull/104)
+
 
 ## [25.1.0](https://github.com/hynek/stamina/compare/24.3.0...25.1.0) - 2025-03-12
 
