@@ -524,31 +524,40 @@ class TestGeneratorFunctionDecoration:
         assert "Polizei" == exc_info.value.value
 
 
-def test_compute_backoff_uses_logarithm():
-    """
-    _compute_backoff short-circuits by using logarithm due to smaller max_backoff than exp calculation.
-    """
-    assert not stamina.is_testing()
+class TestComputeBackoff:
+    def test_compute_backoff_uses_logarithm(self):
+        """
+        It short-circuits by using logarithm due to smaller max_backoff than
+        exp calculation.
+        """
+        assert not stamina.is_testing()
 
-    with patch("builtins.min", wraps=min) as mock_min:
-        assert _compute_backoff(6, 60.0, 2.0, 2.0, 0.0) == 60.0
-        assert mock_min.call_count == 0
+        with patch("builtins.min", wraps=min) as mock_min:
+            assert _compute_backoff(6, 60.0, 2.0, 2.0, 0.0) == 60.0
+            assert mock_min.call_count == 0
 
+    def test_compute_backoff_no_uses_logarithm(self):
+        """
+        It does not short-circuit due to larger max_backoff than exp
+        calculation.
+        """
+        assert not stamina.is_testing()
 
-def test_compute_backoff_no_uses_logarithm():
-    """
-    _compute_backoff does not short-circuit due to larger max_backoff than exp calculation.
-    """
-    assert not stamina.is_testing()
+        with patch("builtins.min", wraps=min) as mock_min:
+            assert _compute_backoff(5, 60.0, 2.0, 2.0, 0.0) == 32.0
+            assert mock_min.call_count == 1
 
-    with patch("builtins.min", wraps=min) as mock_min:
-        assert _compute_backoff(5, 60.0, 2.0, 2.0, 0.0) == 32.0
-        assert mock_min.call_count == 1
+    def test_compute_backoff_zero_initial(self):
+        """
+        It does not have a divide by zero error and short-circuits to return
+        jitter.
+        """
+        assert not stamina.is_testing()
+        assert _compute_backoff(5, 60.0, 0.0, 2.0, 0.0) == 0.0
 
-
-def test_compute_backoff_zero_initial():
-    """
-    _compute_backoff does not have a divide by zero error and short-circuits to return jitter.
-    """
-    assert not stamina.is_testing()
-    assert _compute_backoff(5, 60.0, 0.0, 2.0, 0.0) == 0.0
+    def test_max_backoff_zero(self):
+        """
+        Backoff never exceeds max_backoff.
+        """
+        assert not stamina.is_testing()
+        assert 0 == _compute_backoff(1, 0, 0, 2, max_jitter=1000)
