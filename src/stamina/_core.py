@@ -137,9 +137,13 @@ class Attempt:
             therefore just a *lower bound* of the actual value.
 
         .. versionadded:: 24.3.0
+        .. versionchanged:: 25.2.0
+           Fixed off-by-one error when passing the attempt number to the
+           next_wait_fn.
         """
         return (
-            self._next_wait_fn(self._t_attempt.retry_state.attempt_number + 1)
+            # The next wait time is computed based on the current attempt number.
+            self._next_wait_fn(self._t_attempt.retry_state.attempt_number)
             if self._next_wait_fn
             else 0.0
         )

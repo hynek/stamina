@@ -5,13 +5,14 @@
 import datetime as dt
 
 from types import SimpleNamespace
+from unittest.mock import Mock
 
 import pytest
 import tenacity
 
 import stamina
 
-from stamina._core import _make_stop
+from stamina._core import Attempt, _make_stop
 
 
 @pytest.mark.parametrize("attempts", [None, -1, 0, 1])
@@ -521,3 +522,20 @@ class TestGeneratorFunctionDecoration:
             next(gen)
 
         assert "Polizei" == exc_info.value.value
+
+
+def test_attempt_next_wait():
+    """
+    next_wait reflects the attempt number. The next wait is computed based on
+    the current attempt number.
+    """
+    am = Mock(retry_state=Mock())
+
+    def next_wait_fn(attempt_num: int) -> float:
+        return attempt_num
+
+    for i in range(1, 3):
+        am.retry_state.attempt_number = i
+        attempt = Attempt(am, next_wait_fn)
+
+        assert i == attempt.next_wait
