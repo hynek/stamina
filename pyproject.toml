@@ -26,7 +26,7 @@ classifiers = [
 dependencies = ["tenacity", "typing-extensions; python_version < '3.10'"]
 
 [dependency-groups]
-tests = ["pytest", "anyio", "dirty-equals"]
+tests = ["pytest>=9", "anyio", "dirty-equals"]
 typing = []
 docs = [
   "sphinx >= 7.2.2",
@@ -103,9 +103,9 @@ start-at = "## Credits"
 
 
 [tool.pytest.ini_options]
-addopts = ["-ra", "--strict-markers", "--strict-config"]
+minversion = "9.0"
+addopts = ["-ra", "--strict", "--import-mode=importlib"]
 testpaths = "tests"
-xfail_strict = true
 filterwarnings = ["once::Warning"]
 
 
