@@ -26,6 +26,12 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 - Support for Python 3.8 and 3.9.
 
 
+### Fixed
+
+- `stamina.retry()` now retries generator functions and async generator functions.
+  [#123](https://github.com/hynek/stamina/pull/123)
+
+
 ## [25.1.0](https://github.com/hynek/stamina/compare/24.3.0...25.1.0) - 2025-03-12
 
 ### Added
