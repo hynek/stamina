@@ -596,7 +596,11 @@ def _compute_backoff(
     #   max_backoff / initial < exp_base ** (num - 1)
     #   log(max_backoff / initial, exp_base) < log(exp_base, exp_base) * (num - 1) = 1 * (num - 1) = num - 1
     #   log(max_backoff / initial, exp_base) < num - 1
-    if max_backoff and math.log(max_backoff / initial, exp_base) < num - 1:
+    if (
+        max_backoff
+        and exp_base > 1
+        and math.log(max_backoff / initial, exp_base) < num - 1
+    ):
         return max_backoff
 
     return min(max_backoff, initial * (exp_base ** (num - 1)) + jitter)

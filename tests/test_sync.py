@@ -562,6 +562,13 @@ class TestComputeBackoff:
         assert not stamina.is_testing()
         assert 0 == _compute_backoff(1, 0, 0, 2, max_jitter=1000)
 
+    def test_exp_base_one(self):
+        """
+        It does not crash when *exp_base* is 1.
+        """
+        assert not stamina.is_testing()
+        assert _compute_backoff(5, 60, 1, 1, 1000)
+
 
 def test_attempt_next_wait():
     """
