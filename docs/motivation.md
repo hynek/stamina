@@ -54,7 +54,7 @@ Or, more formally:
 
 % keep in-sync with stamina.retry's docstring
 ```{math}
-min(5.0, 0.1 * 2.0^{attempt - 1} + random(0, 1.0))
+min(5.0, 0.1 * 2^{attempt - 1} + random(0, 1.0))
 ```
 
 That means that, by default, the first backoff is no longer than 1.1 seconds, and the last is no longer than 5 seconds.

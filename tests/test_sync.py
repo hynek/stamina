@@ -5,14 +5,14 @@
 import datetime as dt
 
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 import tenacity
 
 import stamina
 
-from stamina._core import _compute_backoff, _make_stop
+from stamina._core import Attempt, _compute_backoff, _make_stop
 
 
 @pytest.mark.parametrize("attempts", [None, -1, 0, 1])
@@ -561,3 +561,20 @@ class TestComputeBackoff:
         """
         assert not stamina.is_testing()
         assert 0 == _compute_backoff(1, 0, 0, 2, max_jitter=1000)
+
+
+def test_attempt_next_wait():
+    """
+    next_wait reflects the attempt number. The next wait is computed based on
+    the current attempt number.
+    """
+    am = Mock(retry_state=Mock())
+
+    def next_wait_fn(attempt_num: int) -> float:
+        return attempt_num
+
+    for i in range(1, 3):
+        am.retry_state.attempt_number = i
+        attempt = Attempt(am, next_wait_fn)
+
+        assert i == attempt.next_wait

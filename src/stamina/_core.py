@@ -70,7 +70,7 @@ def retry_context(
     wait_initial: float | dt.timedelta = 0.1,
     wait_max: float | dt.timedelta = 5.0,
     wait_jitter: float | dt.timedelta = 1.0,
-    wait_exp_base: float = 2.0,
+    wait_exp_base: float = 2,
 ) -> _RetryContextIterator:
     """
     Iterator that yields context managers that can be used to retry code
@@ -133,15 +133,18 @@ class Attempt:
         The number of seconds of backoff before the *next* attempt if *this*
         attempt fails.
 
-
         .. warning::
             This value does **not** include a possible random jitter and is
             therefore just a *lower bound* of the actual value.
 
         .. versionadded:: 24.3.0
+        .. versionchanged:: 25.2.0
+           Fixed off-by-one error when passing the attempt number to the
+           next_wait_fn.
         """
         return (
-            self._next_wait_fn(self._t_attempt.retry_state.attempt_number + 1)
+            # The next wait time is computed based on the current attempt number.
+            self._next_wait_fn(self._t_attempt.retry_state.attempt_number)
             if self._next_wait_fn
             else 0.0
         )
@@ -186,7 +189,7 @@ class BaseRetryingCaller:
         wait_initial: float | dt.timedelta = 0.1,
         wait_max: float | dt.timedelta = 5.0,
         wait_jitter: float | dt.timedelta = 1.0,
-        wait_exp_base: float = 2.0,
+        wait_exp_base: float = 2,
     ):
         self._context_kws = {
             "attempts": attempts,
@@ -670,7 +673,7 @@ def retry(  # noqa: C901
     wait_initial: float | dt.timedelta = 0.1,
     wait_max: float | dt.timedelta = 5.0,
     wait_jitter: float | dt.timedelta = 1.0,
-    wait_exp_base: float = 2.0,
+    wait_exp_base: float = 2,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     r"""
     Retry if one of configured exceptions are raised.
