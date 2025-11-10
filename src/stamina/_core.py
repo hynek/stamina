@@ -20,6 +20,7 @@ from inspect import (
 from types import TracebackType
 from typing import (
     ParamSpec,
+    TypeAlias,
     TypedDict,
     TypeVar,
 )
@@ -56,7 +57,7 @@ async def _smart_sleep(delay: float) -> None:
 
 T = TypeVar("T")
 P = ParamSpec("P")
-ExcOrPredicate = (
+ExcOrPredicate: TypeAlias = (
     type[Exception] | tuple[type[Exception], ...] | Callable[[Exception], bool]
 )
 
