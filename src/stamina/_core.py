@@ -56,7 +56,6 @@ async def _smart_sleep(delay: float) -> None:
 
 T = TypeVar("T")
 P = ParamSpec("P")
-# for backwards compatibility with Python<3.10
 ExcOrPredicate = (
     type[Exception] | tuple[type[Exception], ...] | Callable[[Exception], bool]
 )
