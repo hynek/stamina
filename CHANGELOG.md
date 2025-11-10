@@ -31,7 +31,10 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 - Prevent unbounded stop condition when both *attempts* and *timeout* are non-`None` falsy values.
   [#109](https://github.com/hynek/stamina/pull/109)
 
-- `stamina.retry()` now retries generator functions and async generator functions.
+- `stamina.retry()` now retries wrapped generator functions and async generator functions.
+
+  **Warning**: Being able to `asend` and `athrow` into wrapped async generators introduced nontrivial complexity in the implementation and is therefore **provisional**.
+  If supporting these features causes problems, they may be removed again in a future version.
   [#123](https://github.com/hynek/stamina/pull/123)
 
 - Default `wait_exp_base` parameter is now an integer to prevent an `OverflowError` after the 1023th retry.

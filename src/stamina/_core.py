@@ -671,7 +671,8 @@ def retry(  # noqa: C901
     .. keep in-sync with docs/motivation.md
     .. math::
 
-       min(wait\_max, wait\_initial * wait\_exp\_base^{attempt - 1} + random(0, wait\_jitter))
+       min(wait\_max, wait\_initial * wait\_exp\_base^{attempt - 1} + random(0,
+       wait\_jitter))
 
     Since :math:`x^0` is always 1, the first backoff is within the interval
     :math:`[wait\_initial,wait\_initial+wait\_jitter]`. Thus, with default
@@ -680,6 +681,14 @@ def retry(  # noqa: C901
     If all retries fail, the *last* exception is let through.
 
     All float-based time parameters are in seconds.
+
+    Generators are restarted from the beginning on each retry.
+
+    .. note::
+       Being able to :meth:`~agen.asend` and :meth:`~agen.athrow` into wrapped
+       async generators introduced nontrivial complexity in the implementation
+       and is therefore **provisional**. If supporting these features causes
+       problems, they may be removed again in a future version.
 
     .. warning::
        It is possible to get unbounded retries by passing `None` for *attempts*
@@ -726,6 +735,9 @@ def retry(  # noqa: C901
     .. versionadded:: 23.3.0 `Trio <https://trio.readthedocs.io/>`_ support.
 
     .. versionadded:: 24.3.0 *on* can be a callable now.
+
+    .. versionadded:: 25.2.0
+       Generator functions and async generator functions are now retried, too.
     """
     retry_ctx = _RetryContextIterator.from_params(
         on=on,
