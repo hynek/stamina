@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 import datetime as dt
+import time
 
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -539,3 +540,127 @@ def test_attempt_next_wait():
         attempt = Attempt(am, next_wait_fn)
 
         assert i == attempt.next_wait
+
+
+class CustomBackoffError(Exception):
+    def __init__(self, backoff: float):
+        self.backoff = backoff
+        super().__init__(f"Retry after {backoff}s")
+
+
+class TestPredicateBackoffSync:
+    def test_predicate_backoff_in_test_mode_returns_zero(self):
+        """
+        In test mode, custom backoffs are ignored.
+        """
+        attempts = 0
+
+        with stamina.set_testing(True, attempts=3):
+
+            @stamina.retry(on=lambda exc: 10.0, attempts=3)
+            def f():
+                nonlocal attempts
+                attempts += 1
+                if attempts < 3:
+                    raise ValueError("retry")
+                return 42
+
+            start = time.perf_counter()
+            result = f()
+            duration = time.perf_counter() - start
+
+        assert 42 == result
+        assert 3 == attempts
+        assert duration < 0.1
+
+    def test_predicate_returns_float(self):
+        """
+        Predicates returning a float use that as the backoff duration.
+        """
+        attempts = 0
+
+        @stamina.retry(on=lambda exc: 0.0, wait_initial=5, attempts=3)
+        def f():
+            nonlocal attempts
+            attempts += 1
+            if attempts < 3:
+                raise ValueError("retry")
+            return 42
+
+        started_at = time.perf_counter()
+        result = f()
+        duration = time.perf_counter() - started_at
+
+        assert 42 == result
+        assert 3 == attempts
+        assert duration < 5
+
+    def test_predicate_custom_backoff_from_exception(self):
+        """
+        Predicates can extract backoff from exception attributes.
+        """
+        attempts = 0
+
+        def predicate(exc):
+            if isinstance(exc, CustomBackoffError):
+                return exc.backoff
+            return False
+
+        @stamina.retry(on=predicate, attempts=3, wait_initial=5)
+        def f():
+            nonlocal attempts
+            attempts += 1
+            if attempts < 2:
+                raise CustomBackoffError(0)
+
+            return 42
+
+        started_at = time.perf_counter()
+        result = f()
+        duration = time.perf_counter() - started_at
+
+        assert 42 == result
+        assert 2 == attempts
+        assert duration < 5
+
+    def test_predicate_backoff_respects_wait_max(self):
+        """
+        Custom backoff values are clamped to wait_max.
+        """
+        attempts = 0
+
+        @stamina.retry(on=lambda exc: 100.0, attempts=3, wait_max=0)
+        def f():
+            nonlocal attempts
+            attempts += 1
+            if attempts < 2:
+                raise ValueError("retry")
+            return 42
+
+        started_at = time.perf_counter()
+        result = f()
+        duration = time.perf_counter() - started_at
+
+        assert 42 == result
+        assert 2 == attempts
+        assert duration < 1
+
+    def test_predicate_with_retry_context(self):
+        """
+        Predicate backoffs work with retry_context.
+        """
+        attempts = 0
+
+        started_at = time.perf_counter()
+        for attempt in stamina.retry_context(
+            on=lambda exc: 0.0, wait_initial=5, attempts=3
+        ):
+            with attempt:
+                attempts += 1
+                if attempts < 2:
+                    raise ValueError("retry")
+
+        duration = time.perf_counter() - started_at
+
+        assert 2 == attempts
+        assert duration < 5

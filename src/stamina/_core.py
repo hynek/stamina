@@ -23,6 +23,7 @@ from typing import (
     TypeAlias,
     TypedDict,
     TypeVar,
+    cast,
 )
 
 import tenacity as _t
@@ -57,9 +58,40 @@ async def _smart_sleep(delay: float) -> None:
 
 T = TypeVar("T")
 P = ParamSpec("P")
+Predicate: TypeAlias = Callable[[Exception], bool | float]
 ExcOrPredicate: TypeAlias = (
-    type[Exception] | tuple[type[Exception], ...] | Callable[[Exception], bool]
+    type[Exception] | tuple[type[Exception], ...] | Predicate
 )
+
+# Key used to store custom backoff in RetryCallState
+_CUSTOM_BACKOFF_KEY = "_stamina_custom_backoff"
+
+
+class _PredicateRetry:
+    """
+    Custom Tenacity retry predicate that supports predicates returning a custom
+    backoff value.
+    """
+
+    __slots__ = ("_predicate",)
+
+    def __init__(self, predicate: Predicate):
+        self._predicate = predicate
+
+    def __call__(self, retry_state: _t.RetryCallState) -> bool:
+        """
+        Evaluate the predicate and store custom backoff if one is returned.
+        """
+        if (exc := retry_state.outcome.exception()) is None:
+            return False
+
+        result = self._predicate(exc)
+
+        if isinstance(result, bool):
+            return result
+
+        setattr(retry_state, _CUSTOM_BACKOFF_KEY, result)
+        return True
 
 
 def retry_context(
@@ -441,7 +473,7 @@ class _RetryContextIterator:
         ) or isinstance(on, tuple):
             _retry = _t.retry_if_exception_type(on)
         else:
-            _retry = _t.retry_if_exception(on)
+            _retry = _PredicateRetry(cast(Predicate, on))
 
         if isinstance(wait_initial, dt.timedelta):
             wait_initial = wait_initial.total_seconds()
@@ -559,7 +591,20 @@ class _RetryContextIterator:
     def _jittered_backoff_for_rcs(self, rcs: _t.RetryCallState) -> float:
         """
         Compute the backoff for *rcs*.
+
+        If a custom backoff was provided by a predicate, use it (clamped to
+        *wait_max*). Otherwise, use exponential backoff.
         """
+        if (
+            custom_backoff := getattr(rcs, _CUSTOM_BACKOFF_KEY, None)
+        ) is not None:
+            delattr(rcs, _CUSTOM_BACKOFF_KEY)
+
+            if CONFIG.testing is not None:
+                return 0.0
+
+            return min(self._wait_max, cast(float, custom_backoff))
+
         return _compute_backoff(
             rcs.attempt_number,
             self._wait_max,
@@ -708,7 +753,12 @@ def retry(  # noqa: C901
             indicate server errors, but not those in the 400s which indicate a
             client error.
 
-            There is no default -- you *must* pass this explicitly.
+            For even more control, the predicate may return a float to specify
+            a custom backoff that overrides the default backoff. This is useful
+            when the error carries information like an ``Retry-After`` header.
+            This custom backoff is clamped to *wait_max*.
+
+            There is no default -- you *must* pass *on* explicitly.
 
         attempts:
             Maximum total number of attempts. Can be combined with *timeout*.
@@ -738,6 +788,10 @@ def retry(  # noqa: C901
 
     .. versionadded:: 25.2.0
        Generator functions and async generator functions are now retried, too.
+
+    .. versionadded:: 25.2.0
+       An *on* predicate can now return a float to specify a custom backoff
+       that overrides the default backoff.
     """
     retry_ctx = _RetryContextIterator.from_params(
         on=on,

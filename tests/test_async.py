@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 import datetime as dt
+import time
 
 import pytest
 
@@ -573,3 +574,51 @@ class TestAsyncGeneratorFunctionDecoration:
         assert [None] == items
 
         assert 1 == num_called
+
+
+class TestPredicateBackoffAsync:
+    @pytest.mark.anyio
+    @pytest.mark.usefixtures("anyio_backend")
+    async def test_predicate_returns_float_async(self):
+        """
+        Predicates returning float work with async functions.
+        """
+        attempts = 0
+
+        @stamina.retry(on=lambda exc: 0.0, wait_initial=5, attempts=3)
+        async def f():
+            nonlocal attempts
+            attempts += 1
+            if attempts < 3:
+                raise ValueError("retry")
+            return 42
+
+        started_at = time.perf_counter()
+        result = await f()
+        duration = time.perf_counter() - started_at
+
+        assert 42 == result
+        assert 3 == attempts
+        assert duration < 5
+
+    @pytest.mark.anyio
+    @pytest.mark.usefixtures("anyio_backend")
+    async def test_predicate_with_async_retry_context(self):
+        """
+        Predicate backoffs work with async retry_context.
+        """
+        attempts = 0
+
+        started_at = time.perf_counter()
+        async for attempt in stamina.retry_context(
+            on=lambda exc: 0.0, wait_initial=5, attempts=3
+        ):
+            with attempt:
+                attempts += 1
+                if attempts < 2:
+                    raise ValueError("retry")
+
+        duration = time.perf_counter() - started_at
+
+        assert 2 == attempts
+        assert duration < 5
