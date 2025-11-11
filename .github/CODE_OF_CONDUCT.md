@@ -9,7 +9,7 @@ In general, this means that everyone is expected to be **open**, **considerate**
 
 We take Code of Conduct violations seriously, and will act to ensure our spaces are welcoming, inclusive, and professional environments to communicate in.
 
-If you need to raise a Code of Conduct report, you may do so privately by email to <mailto:hs@ox.cx>.
+If you need to raise a Code of Conduct report, you may do so privately by email to [Hynek Schlawack](mailto:hs@ox.cx).
 
 Reports will be treated confidentially.
 
