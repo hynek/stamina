@@ -86,7 +86,8 @@ autodoc_typehints_description_target = "documented"
 html_theme = "furo"
 html_theme_options = {
     "light_css_variables": {
-        "font-stack": "Inter,sans-serif",
+        "font-stack": "system-ui, sans-serif",
+        "font-stack--headings": "Bahnschrift, 'DIN Alternate', 'Franklin Gothic Medium', 'Nimbus Sans Narrow', sans-serif-condensed, sans-serif",
         "font-stack--monospace": "BerkeleyMono, MonoLisa, ui-monospace, "
         "SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace",
     },
