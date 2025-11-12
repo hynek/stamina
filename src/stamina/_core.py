@@ -612,8 +612,8 @@ class _RetryContextIterator:
         """
         Compute the backoff for *rcs*.
 
-        If a custom backoff was provided by a predicate, use it. Otherwise, use
-        exponential backoff.
+        If a custom backoff was provided by a backoff hook, use it. Otherwise,
+        use exponential backoff.
         """
         if (
             custom_backoff := getattr(rcs, _CUSTOM_BACKOFF_ATTR, None)
