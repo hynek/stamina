@@ -752,7 +752,7 @@ def retry(  # noqa: C901
             An Exception or a tuple of Exceptions on which the decorated
             callable will be retried.
 
-            You can also pass a *predicate* in the form of a callable that
+            You can also pass a *backoff hook* in the form of a callable that
             takes an exception and returns a bool which decides whether the
             exception should be retried -- True meaning yes.
 
@@ -761,10 +761,12 @@ def retry(  # noqa: C901
             indicate server errors, but not those in the 400s which indicate a
             client error.
 
-            For even more control, the predicate may return a float or a
+            For even more control, the hook may return a float or a
             `datetime.timedelta` to specify a custom backoff that overrides the
             default backoff. This is useful when the error carries information
-            like a ``Retry-After`` header.
+            like a ``Retry-After`` header. A custom backoff is not part of the
+            exponential backoff machinery so none of the other backoff
+            parameters apply to it.
 
             There is no default -- you *must* pass *on* explicitly.
 

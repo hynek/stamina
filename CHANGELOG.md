@@ -31,7 +31,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   If supporting these features causes problems, they may be removed again in a future version.
   [#123](https://github.com/hynek/stamina/pull/123)
 
-- An *on* predicate can now return a float or a `datetime.timedelta` to specify a custom backoff that overrides the default backoff.
+- An *on* hook can now return a float or a `datetime.timedelta` to specify a custom backoff that overrides the default backoff.
   [#103](https://github.com/hynek/stamina/discussions/103)
 
 
