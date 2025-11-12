@@ -58,7 +58,7 @@ async def _smart_sleep(delay: float) -> None:
 
 T = TypeVar("T")
 P = ParamSpec("P")
-Predicate: TypeAlias = Callable[[Exception], bool | float]
+Predicate: TypeAlias = Callable[[Exception], bool | float | dt.timedelta]
 ExcOrPredicate: TypeAlias = (
     type[Exception] | tuple[type[Exception], ...] | Predicate
 )
@@ -89,6 +89,9 @@ class _PredicateRetry:
 
         if isinstance(result, bool):
             return result
+
+        if isinstance(result, dt.timedelta):
+            result = result.total_seconds()
 
         setattr(retry_state, _CUSTOM_BACKOFF_KEY, result)
         return True
@@ -753,9 +756,10 @@ def retry(  # noqa: C901
             indicate server errors, but not those in the 400s which indicate a
             client error.
 
-            For even more control, the predicate may return a float to specify
-            a custom backoff that overrides the default backoff. This is useful
-            when the error carries information like an ``Retry-After`` header.
+            For even more control, the predicate may return a float or a
+            `datetime.timedelta` to specify a custom backoff that overrides the
+            default backoff. This is useful when the error carries information
+            like an ``Retry-After`` header.
 
             There is no default -- you *must* pass *on* explicitly.
 

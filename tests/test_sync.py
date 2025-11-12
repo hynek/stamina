@@ -595,6 +595,30 @@ class TestPredicateBackoffSync:
         assert 3 == attempts
         assert duration < 5
 
+    def test_predicate_returns_timedelta(self):
+        """
+        Predicates returning a timedelta use that as the backoff duration.
+        """
+        attempts = 0
+
+        @stamina.retry(
+            on=lambda exc: dt.timedelta(seconds=0), wait_initial=5, attempts=3
+        )
+        def f():
+            nonlocal attempts
+            attempts += 1
+            if attempts < 2:
+                raise ValueError("retry")
+            return 42
+
+        started_at = time.perf_counter()
+        result = f()
+        duration = time.perf_counter() - started_at
+
+        assert 42 == result
+        assert 2 == attempts
+        assert duration < 1
+
     def test_predicate_custom_backoff_from_exception(self):
         """
         Predicates can extract backoff from exception attributes.
