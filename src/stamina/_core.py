@@ -97,7 +97,9 @@ class _TenacityBackoffCallbackAdapter:
                     "Backoff hooks must return a bool or a float or a timedelta. "
                     "This will be an error in a future version."
                 ),
-                stacklevel=2,
+                # Since we get called from Tenacity and not from user code, the
+                # stack is meaningless.
+                stacklevel=1,
             )
             return False
 
