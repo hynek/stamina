@@ -761,7 +761,6 @@ def retry(  # noqa: C901
             indicate server errors, but not those in the 400s which indicate a
             client error.
 
-
             For even more control, the hook may return a float or a
             :class:`datetime.timedelta` to specify a custom backoff that
             overrides the default backoff. This is useful when the error
@@ -770,10 +769,8 @@ def retry(  # noqa: C901
             header. A custom backoff is not part of the exponential backoff
             machinery so none of the other backoff parameters apply to it.
 
-
             There is no default for the *on* parameter -- you *must* pass *on*
             explicitly.
-
 
         attempts:
             Maximum total number of attempts. Can be combined with *timeout*.
