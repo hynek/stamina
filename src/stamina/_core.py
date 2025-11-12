@@ -759,7 +759,7 @@ def retry(  # noqa: C901
             For even more control, the predicate may return a float or a
             `datetime.timedelta` to specify a custom backoff that overrides the
             default backoff. This is useful when the error carries information
-            like an ``Retry-After`` header.
+            like a ``Retry-After`` header.
 
             There is no default -- you *must* pass *on* explicitly.
 
