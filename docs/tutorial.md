@@ -35,8 +35,8 @@ Sometimes, an exception is too broad, though.
 For example, *httpx* raises [`httpx.HTTPStatusError`](https://www.python-httpx.org/exceptions/) on all HTTP errors.
 But some errors, like 404 (Not Found) or 403 (Forbidden), usually shouldn't be retried!
 
-To solve problems like this, you can pass a *predicate* to `on`.
-A predicate is a callable that's called with the exception that was raised and whose return value will be used to decide whether to retry or not.
+To solve problems like this, you can pass a *backoff hook* to `on`.
+A backoff hook is a callable that's called with the exception that was raised and whose return value will be used to decide whether to retry or not.
 
 So, calling the following `do_it` function will only retry if <https://httpbin.org> returns a 5xx status code:
 
@@ -56,6 +56,10 @@ def do_it(code: int) -> httpx.Response:
 
     return resp
 ```
+
+If you need more control, you can return a {class}`float` of seconds or a {class}`datetime.timedelta` to specify a custom backoff that overrides the default backoff instead of a boolean.
+This is useful when the error carries information like a [`Retry-After`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After) header.
+A custom backoff is **not** part of the exponential backoff machinery so none of the other backoff parameters apply to it.
 
 ---
 

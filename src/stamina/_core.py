@@ -7,6 +7,7 @@ from __future__ import annotations
 import contextlib
 import datetime as dt
 import random
+import warnings
 
 from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
 from contextlib import AbstractContextManager
@@ -23,6 +24,7 @@ from typing import (
     TypeAlias,
     TypedDict,
     TypeVar,
+    cast,
 )
 
 import tenacity as _t
@@ -57,13 +59,65 @@ async def _smart_sleep(delay: float) -> None:
 
 T = TypeVar("T")
 P = ParamSpec("P")
-ExcOrPredicate: TypeAlias = (
-    type[Exception] | tuple[type[Exception], ...] | Callable[[Exception], bool]
+BackoffHook: TypeAlias = Callable[[Exception], bool | float | dt.timedelta]
+ExcOrBackoffHook: TypeAlias = (
+    type[Exception] | tuple[type[Exception], ...] | BackoffHook
 )
+
+# Attribute used to store custom backoff in RetryCallState
+_CUSTOM_BACKOFF_ATTR = "_stamina_custom_backoff"
+
+
+class _TenacityBackoffCallbackAdapter:
+    """
+    Custom Tenacity retry "predicate" that uses a hook to decide whether to
+    retry and additionally allows storing custom backoff values by
+    piggy-backing on top of Tenacity's RetryCallState.
+    """
+
+    __slots__ = ("_backoff_hook",)
+
+    def __init__(self, backoff_hook: BackoffHook):
+        self._backoff_hook = backoff_hook
+
+    def __call__(self, retry_state: _t.RetryCallState) -> bool:
+        """
+        Evaluate the backoff hook and store the custom backoff if one is
+        returned.
+        """
+        if (exc := retry_state.outcome.exception()) is None:
+            return False
+
+        result = self._backoff_hook(exc)
+
+        if result is None:
+            warnings.warn(
+                (
+                    f"Backoff hook {self._backoff_hook!r} returned None. "
+                    "Backoff hooks must return a bool or a float or a timedelta. "
+                    "This will be an error in a future version."
+                ),
+                # Since we get called from Tenacity and not from user code, the
+                # stack is meaningless.
+                stacklevel=1,
+            )
+            return False
+
+        if isinstance(result, bool):
+            return result
+
+        if isinstance(result, dt.timedelta):
+            result = result.total_seconds()
+
+        # Naughty but better than global state. This gets picked up when
+        # deciding the next backoff.
+        setattr(retry_state, _CUSTOM_BACKOFF_ATTR, result)
+
+        return True
 
 
 def retry_context(
-    on: ExcOrPredicate,
+    on: ExcOrBackoffHook,
     attempts: int | None = 10,
     timeout: float | dt.timedelta | None = 45.0,
     wait_initial: float | dt.timedelta = 0.1,
@@ -223,7 +277,7 @@ class RetryingCaller(BaseRetryingCaller):
 
     def __call__(
         self,
-        on: ExcOrPredicate,
+        on: ExcOrBackoffHook,
         callable_: Callable[P, T],
         /,
         *args: P.args,
@@ -247,7 +301,7 @@ class RetryingCaller(BaseRetryingCaller):
 
         raise SystemError("unreachable")  # noqa: EM101
 
-    def on(self, on: ExcOrPredicate, /) -> BoundRetryingCaller:
+    def on(self, on: ExcOrBackoffHook, /) -> BoundRetryingCaller:
         """
         Create a new instance of :class:`BoundRetryingCaller` with the same
         parameters, but bound to a specific exception type.
@@ -274,12 +328,12 @@ class BoundRetryingCaller:
     __slots__ = ("_caller", "_on")
 
     _caller: RetryingCaller
-    _on: ExcOrPredicate
+    _on: ExcOrBackoffHook
 
     def __init__(
         self,
         caller: RetryingCaller,
-        on: ExcOrPredicate,
+        on: ExcOrBackoffHook,
     ):
         self._caller = caller
         self._on = on
@@ -308,7 +362,7 @@ class AsyncRetryingCaller(BaseRetryingCaller):
 
     async def __call__(
         self,
-        on: ExcOrPredicate,
+        on: ExcOrBackoffHook,
         callable_: Callable[P, Awaitable[T]],
         /,
         *args: P.args,
@@ -323,7 +377,7 @@ class AsyncRetryingCaller(BaseRetryingCaller):
 
         raise SystemError("unreachable")  # noqa: EM101
 
-    def on(self, on: ExcOrPredicate, /) -> BoundAsyncRetryingCaller:
+    def on(self, on: ExcOrBackoffHook, /) -> BoundAsyncRetryingCaller:
         """
         Create a new instance of :class:`BoundAsyncRetryingCaller` with the
         same parameters, but bound to a specific exception type.
@@ -347,12 +401,12 @@ class BoundAsyncRetryingCaller:
     __slots__ = ("_caller", "_on")
 
     _caller: AsyncRetryingCaller
-    _on: ExcOrPredicate
+    _on: ExcOrBackoffHook
 
     def __init__(
         self,
         caller: AsyncRetryingCaller,
-        on: ExcOrPredicate,
+        on: ExcOrBackoffHook,
     ):
         self._caller = caller
         self._on = on
@@ -425,7 +479,7 @@ class _RetryContextIterator:
     @classmethod
     def from_params(
         cls,
-        on: ExcOrPredicate,
+        on: ExcOrBackoffHook,
         attempts: int | None,
         timeout: float | dt.timedelta | None,
         wait_initial: float | dt.timedelta,
@@ -441,7 +495,7 @@ class _RetryContextIterator:
         ) or isinstance(on, tuple):
             _retry = _t.retry_if_exception_type(on)
         else:
-            _retry = _t.retry_if_exception(on)
+            _retry = _TenacityBackoffCallbackAdapter(cast(BackoffHook, on))
 
         if isinstance(wait_initial, dt.timedelta):
             wait_initial = wait_initial.total_seconds()
@@ -559,7 +613,20 @@ class _RetryContextIterator:
     def _jittered_backoff_for_rcs(self, rcs: _t.RetryCallState) -> float:
         """
         Compute the backoff for *rcs*.
+
+        If a custom backoff was provided by a backoff hook, use it. Otherwise,
+        use exponential backoff.
         """
+        if (
+            custom_backoff := getattr(rcs, _CUSTOM_BACKOFF_ATTR, None)
+        ) is not None:
+            delattr(rcs, _CUSTOM_BACKOFF_ATTR)
+
+            if CONFIG.testing is not None:
+                return 0.0
+
+            return cast(float, custom_backoff)
+
         return _compute_backoff(
             rcs.attempt_number,
             self._wait_max,
@@ -653,7 +720,7 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
 
 def retry(  # noqa: C901
     *,
-    on: ExcOrPredicate,
+    on: ExcOrBackoffHook,
     attempts: int | None = 10,
     timeout: float | dt.timedelta | None = 45.0,
     wait_initial: float | dt.timedelta = 0.1,
@@ -699,7 +766,7 @@ def retry(  # noqa: C901
             An Exception or a tuple of Exceptions on which the decorated
             callable will be retried.
 
-            You can also pass a *predicate* in the form of a callable that
+            You can also pass a *backoff hook* in the form of a callable that
             takes an exception and returns a bool which decides whether the
             exception should be retried -- True meaning yes.
 
@@ -708,7 +775,16 @@ def retry(  # noqa: C901
             indicate server errors, but not those in the 400s which indicate a
             client error.
 
-            There is no default -- you *must* pass this explicitly.
+            For even more control, the hook may return a float or a
+            :class:`datetime.timedelta` to specify a custom backoff that
+            overrides the default backoff. This is useful when the error
+            carries information like a `Retry-After
+            <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After>`_
+            header. A custom backoff is not part of the exponential backoff
+            machinery so none of the other backoff parameters apply to it.
+
+            There is no default for the *on* parameter -- you *must* pass *on*
+            explicitly.
 
         attempts:
             Maximum total number of attempts. Can be combined with *timeout*.
@@ -738,6 +814,11 @@ def retry(  # noqa: C901
 
     .. versionadded:: 25.2.0
        Generator functions and async generator functions are now retried, too.
+
+    .. versionadded:: 25.2.0
+       An *on* backoff hook can now return a float or a `datetime.timedelta` to
+       specify a custom backoff that overrides the default backoff.
+
     """
     retry_ctx = _RetryContextIterator.from_params(
         on=on,

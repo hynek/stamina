@@ -17,7 +17,7 @@ But bad retries can make things *much worse*.
 Our goal is to be as **ergonomic** as possible, while doing the **right thing by default**, and minimizing the potential for **misuse**.
 It is the result of years of copy-pasting the same configuration over and over again:
 
-- Retry only on certain exceptions – or even a subset of them by introspecting them first using a predicate.
+- Retry only on certain exceptions – or even a subset of them by introspecting them first using a backoff hook.
 - Exponential **backoff** with **jitter** between retries.
 - Limit the number of retries **and** total time.
 - Automatic **async** support – including [Trio](https://trio.readthedocs.io/).
