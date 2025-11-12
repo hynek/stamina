@@ -33,6 +33,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 - An *on* hook can now return a float or a `datetime.timedelta` to specify a custom backoff that overrides the default backoff.
   [#103](https://github.com/hynek/stamina/discussions/103)
+  [#125](https://github.com/hynek/stamina/pull/125)
 
 
 ### Fixed
