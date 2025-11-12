@@ -63,8 +63,8 @@ ExcOrPredicate: TypeAlias = (
     type[Exception] | tuple[type[Exception], ...] | Predicate
 )
 
-# Key used to store custom backoff in RetryCallState
-_CUSTOM_BACKOFF_KEY = "_stamina_custom_backoff"
+# Attribute used to store custom backoff in RetryCallState
+_CUSTOM_BACKOFF_ATTR = "_stamina_custom_backoff"
 
 
 class _PredicateRetry:
@@ -93,7 +93,7 @@ class _PredicateRetry:
         if isinstance(result, dt.timedelta):
             result = result.total_seconds()
 
-        setattr(retry_state, _CUSTOM_BACKOFF_KEY, result)
+        setattr(retry_state, _CUSTOM_BACKOFF_ATTR, result)
         return True
 
 
@@ -599,9 +599,9 @@ class _RetryContextIterator:
         exponential backoff.
         """
         if (
-            custom_backoff := getattr(rcs, _CUSTOM_BACKOFF_KEY, None)
+            custom_backoff := getattr(rcs, _CUSTOM_BACKOFF_ATTR, None)
         ) is not None:
-            delattr(rcs, _CUSTOM_BACKOFF_KEY)
+            delattr(rcs, _CUSTOM_BACKOFF_ATTR)
 
             if CONFIG.testing is not None:
                 return 0.0
