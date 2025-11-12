@@ -431,7 +431,7 @@ class TestGeneratorFunctionDecoration:
         """
         received = []
 
-        @stamina.retry(on=Exception)
+        @stamina.retry(on=Exception, wait_max=0)
         def gen():
             try:
                 yield "ready"

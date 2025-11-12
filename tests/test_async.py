@@ -416,7 +416,7 @@ class TestAsyncGeneratorFunctionDecoration:
         """
         received = []
 
-        @stamina.retry(on=Exception)
+        @stamina.retry(on=Exception, wait_max=0)
         async def gen():
             try:
                 yield "ready"
@@ -451,7 +451,8 @@ class TestAsyncGeneratorFunctionDecoration:
 
     async def test_athrow_that_gets_suppressed(self):
         """
-        If the wrapped generator swallows an exception and exits, athrow() stops.
+        If the wrapped generator swallows an exception and exits, athrow()
+        stops.
         """
 
         @stamina.retry(on=Exception)
