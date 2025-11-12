@@ -57,7 +57,7 @@ def do_it(code: int) -> httpx.Response:
     return resp
 ```
 
-If you need more control, you can return a float or a {class}`datetime.timedelta` to specify a custom backoff that overrides the default backoff instead of a boolean.
+If you need more control, you can return a {class}`float` of seconds or a {class}`datetime.timedelta` to specify a custom backoff that overrides the default backoff instead of a boolean.
 This is useful when the error carries information like a [`Retry-After`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After) header.
 A custom backoff is **not** part of the exponential backoff machinery so none of the other backoff parameters apply to it.
 
