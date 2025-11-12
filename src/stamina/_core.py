@@ -58,9 +58,9 @@ async def _smart_sleep(delay: float) -> None:
 
 T = TypeVar("T")
 P = ParamSpec("P")
-Predicate: TypeAlias = Callable[[Exception], bool | float | dt.timedelta]
-ExcOrPredicate: TypeAlias = (
-    type[Exception] | tuple[type[Exception], ...] | Predicate
+BackoffCallback: TypeAlias = Callable[[Exception], bool | float | dt.timedelta]
+ExcOrBackoffCallback: TypeAlias = (
+    type[Exception] | tuple[type[Exception], ...] | BackoffCallback
 )
 
 # Attribute used to store custom backoff in RetryCallState
@@ -69,23 +69,24 @@ _CUSTOM_BACKOFF_ATTR = "_stamina_custom_backoff"
 
 class _PredicateRetry:
     """
-    Custom Tenacity retry predicate that supports predicates returning a custom
-    backoff value.
+    Custom Tenacity retry "predicate" that allows storing custom backoff values
+    by piggy-backing on top of Tenacity's RetryCallState.
     """
 
-    __slots__ = ("_predicate",)
+    __slots__ = ("_backoff_callback",)
 
-    def __init__(self, predicate: Predicate):
-        self._predicate = predicate
+    def __init__(self, backoff_callback: BackoffCallback):
+        self._backoff_callback = backoff_callback
 
     def __call__(self, retry_state: _t.RetryCallState) -> bool:
         """
-        Evaluate the predicate and store custom backoff if one is returned.
+        Evaluate the backoff callback and store the custom backoff if one is
+        returned.
         """
         if (exc := retry_state.outcome.exception()) is None:
             return False
 
-        result = self._predicate(exc)
+        result = self._backoff_callback(exc)
 
         if isinstance(result, bool):
             return result
@@ -93,12 +94,14 @@ class _PredicateRetry:
         if isinstance(result, dt.timedelta):
             result = result.total_seconds()
 
+        # Naughty but better than global state.
         setattr(retry_state, _CUSTOM_BACKOFF_ATTR, result)
+
         return True
 
 
 def retry_context(
-    on: ExcOrPredicate,
+    on: ExcOrBackoffCallback,
     attempts: int | None = 10,
     timeout: float | dt.timedelta | None = 45.0,
     wait_initial: float | dt.timedelta = 0.1,
@@ -258,7 +261,7 @@ class RetryingCaller(BaseRetryingCaller):
 
     def __call__(
         self,
-        on: ExcOrPredicate,
+        on: ExcOrBackoffCallback,
         callable_: Callable[P, T],
         /,
         *args: P.args,
@@ -282,7 +285,7 @@ class RetryingCaller(BaseRetryingCaller):
 
         raise SystemError("unreachable")  # noqa: EM101
 
-    def on(self, on: ExcOrPredicate, /) -> BoundRetryingCaller:
+    def on(self, on: ExcOrBackoffCallback, /) -> BoundRetryingCaller:
         """
         Create a new instance of :class:`BoundRetryingCaller` with the same
         parameters, but bound to a specific exception type.
@@ -309,12 +312,12 @@ class BoundRetryingCaller:
     __slots__ = ("_caller", "_on")
 
     _caller: RetryingCaller
-    _on: ExcOrPredicate
+    _on: ExcOrBackoffCallback
 
     def __init__(
         self,
         caller: RetryingCaller,
-        on: ExcOrPredicate,
+        on: ExcOrBackoffCallback,
     ):
         self._caller = caller
         self._on = on
@@ -343,7 +346,7 @@ class AsyncRetryingCaller(BaseRetryingCaller):
 
     async def __call__(
         self,
-        on: ExcOrPredicate,
+        on: ExcOrBackoffCallback,
         callable_: Callable[P, Awaitable[T]],
         /,
         *args: P.args,
@@ -358,7 +361,7 @@ class AsyncRetryingCaller(BaseRetryingCaller):
 
         raise SystemError("unreachable")  # noqa: EM101
 
-    def on(self, on: ExcOrPredicate, /) -> BoundAsyncRetryingCaller:
+    def on(self, on: ExcOrBackoffCallback, /) -> BoundAsyncRetryingCaller:
         """
         Create a new instance of :class:`BoundAsyncRetryingCaller` with the
         same parameters, but bound to a specific exception type.
@@ -382,12 +385,12 @@ class BoundAsyncRetryingCaller:
     __slots__ = ("_caller", "_on")
 
     _caller: AsyncRetryingCaller
-    _on: ExcOrPredicate
+    _on: ExcOrBackoffCallback
 
     def __init__(
         self,
         caller: AsyncRetryingCaller,
-        on: ExcOrPredicate,
+        on: ExcOrBackoffCallback,
     ):
         self._caller = caller
         self._on = on
@@ -460,7 +463,7 @@ class _RetryContextIterator:
     @classmethod
     def from_params(
         cls,
-        on: ExcOrPredicate,
+        on: ExcOrBackoffCallback,
         attempts: int | None,
         timeout: float | dt.timedelta | None,
         wait_initial: float | dt.timedelta,
@@ -476,7 +479,7 @@ class _RetryContextIterator:
         ) or isinstance(on, tuple):
             _retry = _t.retry_if_exception_type(on)
         else:
-            _retry = _PredicateRetry(cast(Predicate, on))
+            _retry = _PredicateRetry(cast(BackoffCallback, on))
 
         if isinstance(wait_initial, dt.timedelta):
             wait_initial = wait_initial.total_seconds()
@@ -701,7 +704,7 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
 
 def retry(  # noqa: C901
     *,
-    on: ExcOrPredicate,
+    on: ExcOrBackoffCallback,
     attempts: int | None = 10,
     timeout: float | dt.timedelta | None = 45.0,
     wait_initial: float | dt.timedelta = 0.1,
