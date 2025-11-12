@@ -761,14 +761,19 @@ def retry(  # noqa: C901
             indicate server errors, but not those in the 400s which indicate a
             client error.
 
-            For even more control, the hook may return a float or a
-            `datetime.timedelta` to specify a custom backoff that overrides the
-            default backoff. This is useful when the error carries information
-            like a ``Retry-After`` header. A custom backoff is not part of the
-            exponential backoff machinery so none of the other backoff
-            parameters apply to it.
 
-            There is no default -- you *must* pass *on* explicitly.
+            For even more control, the hook may return a float or a
+            :class:`datetime.timedelta` to specify a custom backoff that
+            overrides the default backoff. This is useful when the error
+            carries information like a `Retry-After
+            <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After>`_
+            header. A custom backoff is not part of the exponential backoff
+            machinery so none of the other backoff parameters apply to it.
+
+
+            There is no default for the *on* parameter -- you *must* pass *on*
+            explicitly.
+
 
         attempts:
             Maximum total number of attempts. Can be combined with *timeout*.
@@ -800,8 +805,9 @@ def retry(  # noqa: C901
        Generator functions and async generator functions are now retried, too.
 
     .. versionadded:: 25.2.0
-       An *on* predicate can now return a float to specify a custom backoff
-       that overrides the default backoff.
+       An *on* backoff hook can now return a float or a `datetime.timedelta` to
+       specify a custom backoff that overrides the default backoff.
+
     """
     retry_ctx = _RetryContextIterator.from_params(
         on=on,

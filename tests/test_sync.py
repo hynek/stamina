@@ -548,8 +548,8 @@ class CustomBackoffError(Exception):
         super().__init__(f"Retry after {backoff}s")
 
 
-class TestPredicateBackoffSync:
-    def test_predicate_backoff_in_test_mode_returns_zero(self):
+class TestBackoffHookSync:
+    def test_backoff_hook_in_test_mode_returns_zero(self):
         """
         In test mode, custom backoffs are ignored.
         """
@@ -573,9 +573,9 @@ class TestPredicateBackoffSync:
         assert 3 == attempts
         assert duration < 0.1
 
-    def test_predicate_returns_float(self):
+    def test_backoff_hook_returns_float(self):
         """
-        Predicates returning a float use that as the backoff duration.
+        If a backoff hook returns a float, it is used as the backoff duration.
         """
         attempts = 0
 
@@ -595,9 +595,9 @@ class TestPredicateBackoffSync:
         assert 3 == attempts
         assert duration < 5
 
-    def test_predicate_returns_timedelta(self):
+    def test_backoff_hook_returns_timedelta(self):
         """
-        Predicates returning a timedelta use that as the backoff duration.
+        If a backoff hook returns a timedelta, it is used as the backoff duration.
         """
         attempts = 0
 
@@ -619,18 +619,18 @@ class TestPredicateBackoffSync:
         assert 2 == attempts
         assert duration < 1
 
-    def test_predicate_custom_backoff_from_exception(self):
+    def test_backoff_hook_custom_backoff_from_exception(self):
         """
-        Predicates can extract backoff from exception attributes.
+        A backoff hook can extract a custombackoff from exception attributes.
         """
         attempts = 0
 
-        def predicate(exc):
+        def hook(exc):
             if isinstance(exc, CustomBackoffError):
                 return exc.backoff
             return False
 
-        @stamina.retry(on=predicate, attempts=3, wait_initial=5)
+        @stamina.retry(on=hook, attempts=3, wait_initial=5)
         def f():
             nonlocal attempts
             attempts += 1
@@ -647,9 +647,9 @@ class TestPredicateBackoffSync:
         assert 2 == attempts
         assert duration < 5
 
-    def test_predicate_with_retry_context(self):
+    def test_backoff_hook_with_retry_context(self):
         """
-        Predicate backoffs work with retry_context.
+        Backoff hooks work with retry_context.
         """
         attempts = 0
 

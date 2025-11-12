@@ -576,12 +576,12 @@ class TestAsyncGeneratorFunctionDecoration:
         assert 1 == num_called
 
 
-class TestPredicateBackoffAsync:
+class TestBackoffHookAsync:
     @pytest.mark.anyio
     @pytest.mark.usefixtures("anyio_backend")
-    async def test_predicate_returns_float_async(self):
+    async def test_backoff_hook_returns_float_async(self):
         """
-        Predicates returning float work with async functions.
+        If a backoff hook returns a float, it is used as the backoff duration.
         """
         attempts = 0
 
@@ -603,9 +603,9 @@ class TestPredicateBackoffAsync:
 
     @pytest.mark.anyio
     @pytest.mark.usefixtures("anyio_backend")
-    async def test_predicate_with_async_retry_context(self):
+    async def test_backoff_hook_with_async_retry_context(self):
         """
-        Predicate backoffs work with async retry_context.
+        Backoff hooks work with async retry_context.
         """
         attempts = 0
 
