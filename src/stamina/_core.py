@@ -58,35 +58,36 @@ async def _smart_sleep(delay: float) -> None:
 
 T = TypeVar("T")
 P = ParamSpec("P")
-BackoffCallback: TypeAlias = Callable[[Exception], bool | float | dt.timedelta]
-ExcOrBackoffCallback: TypeAlias = (
-    type[Exception] | tuple[type[Exception], ...] | BackoffCallback
+BackoffHook: TypeAlias = Callable[[Exception], bool | float | dt.timedelta]
+ExcOrBackoffHook: TypeAlias = (
+    type[Exception] | tuple[type[Exception], ...] | BackoffHook
 )
 
 # Attribute used to store custom backoff in RetryCallState
 _CUSTOM_BACKOFF_ATTR = "_stamina_custom_backoff"
 
 
-class _PredicateRetry:
+class _TenacityBackoffCallbackAdapter:
     """
-    Custom Tenacity retry "predicate" that allows storing custom backoff values
-    by piggy-backing on top of Tenacity's RetryCallState.
+    Custom Tenacity retry "predicate" that uses a hook to decide whether to
+    retry and additionally allows storing custom backoff values by
+    piggy-backing on top of Tenacity's RetryCallState.
     """
 
-    __slots__ = ("_backoff_callback",)
+    __slots__ = ("_backoff_hook",)
 
-    def __init__(self, backoff_callback: BackoffCallback):
-        self._backoff_callback = backoff_callback
+    def __init__(self, backoff_hook: BackoffHook):
+        self._backoff_hook = backoff_hook
 
     def __call__(self, retry_state: _t.RetryCallState) -> bool:
         """
-        Evaluate the backoff callback and store the custom backoff if one is
+        Evaluate the backoff hook and store the custom backoff if one is
         returned.
         """
         if (exc := retry_state.outcome.exception()) is None:
             return False
 
-        result = self._backoff_callback(exc)
+        result = self._backoff_hook(exc)
 
         if isinstance(result, bool):
             return result
@@ -94,14 +95,15 @@ class _PredicateRetry:
         if isinstance(result, dt.timedelta):
             result = result.total_seconds()
 
-        # Naughty but better than global state.
+        # Naughty but better than global state. This gets picked up when
+        # deciding the next backoff.
         setattr(retry_state, _CUSTOM_BACKOFF_ATTR, result)
 
         return True
 
 
 def retry_context(
-    on: ExcOrBackoffCallback,
+    on: ExcOrBackoffHook,
     attempts: int | None = 10,
     timeout: float | dt.timedelta | None = 45.0,
     wait_initial: float | dt.timedelta = 0.1,
@@ -261,7 +263,7 @@ class RetryingCaller(BaseRetryingCaller):
 
     def __call__(
         self,
-        on: ExcOrBackoffCallback,
+        on: ExcOrBackoffHook,
         callable_: Callable[P, T],
         /,
         *args: P.args,
@@ -285,7 +287,7 @@ class RetryingCaller(BaseRetryingCaller):
 
         raise SystemError("unreachable")  # noqa: EM101
 
-    def on(self, on: ExcOrBackoffCallback, /) -> BoundRetryingCaller:
+    def on(self, on: ExcOrBackoffHook, /) -> BoundRetryingCaller:
         """
         Create a new instance of :class:`BoundRetryingCaller` with the same
         parameters, but bound to a specific exception type.
@@ -312,12 +314,12 @@ class BoundRetryingCaller:
     __slots__ = ("_caller", "_on")
 
     _caller: RetryingCaller
-    _on: ExcOrBackoffCallback
+    _on: ExcOrBackoffHook
 
     def __init__(
         self,
         caller: RetryingCaller,
-        on: ExcOrBackoffCallback,
+        on: ExcOrBackoffHook,
     ):
         self._caller = caller
         self._on = on
@@ -346,7 +348,7 @@ class AsyncRetryingCaller(BaseRetryingCaller):
 
     async def __call__(
         self,
-        on: ExcOrBackoffCallback,
+        on: ExcOrBackoffHook,
         callable_: Callable[P, Awaitable[T]],
         /,
         *args: P.args,
@@ -361,7 +363,7 @@ class AsyncRetryingCaller(BaseRetryingCaller):
 
         raise SystemError("unreachable")  # noqa: EM101
 
-    def on(self, on: ExcOrBackoffCallback, /) -> BoundAsyncRetryingCaller:
+    def on(self, on: ExcOrBackoffHook, /) -> BoundAsyncRetryingCaller:
         """
         Create a new instance of :class:`BoundAsyncRetryingCaller` with the
         same parameters, but bound to a specific exception type.
@@ -385,12 +387,12 @@ class BoundAsyncRetryingCaller:
     __slots__ = ("_caller", "_on")
 
     _caller: AsyncRetryingCaller
-    _on: ExcOrBackoffCallback
+    _on: ExcOrBackoffHook
 
     def __init__(
         self,
         caller: AsyncRetryingCaller,
-        on: ExcOrBackoffCallback,
+        on: ExcOrBackoffHook,
     ):
         self._caller = caller
         self._on = on
@@ -463,7 +465,7 @@ class _RetryContextIterator:
     @classmethod
     def from_params(
         cls,
-        on: ExcOrBackoffCallback,
+        on: ExcOrBackoffHook,
         attempts: int | None,
         timeout: float | dt.timedelta | None,
         wait_initial: float | dt.timedelta,
@@ -479,7 +481,7 @@ class _RetryContextIterator:
         ) or isinstance(on, tuple):
             _retry = _t.retry_if_exception_type(on)
         else:
-            _retry = _PredicateRetry(cast(BackoffCallback, on))
+            _retry = _TenacityBackoffCallbackAdapter(cast(BackoffHook, on))
 
         if isinstance(wait_initial, dt.timedelta):
             wait_initial = wait_initial.total_seconds()
@@ -704,7 +706,7 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
 
 def retry(  # noqa: C901
     *,
-    on: ExcOrBackoffCallback,
+    on: ExcOrBackoffHook,
     attempts: int | None = 10,
     timeout: float | dt.timedelta | None = 45.0,
     wait_initial: float | dt.timedelta = 0.1,
