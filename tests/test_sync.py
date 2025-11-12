@@ -666,3 +666,21 @@ class TestBackoffHookSync:
 
         assert 2 == attempts
         assert duration < 5
+
+    def test_backoff_hook_returns_none(self):
+        """
+        If a backoff hook returns None, it is treated as False and a warning is
+        raised.
+        """
+
+        @stamina.retry(on=lambda exc: None, attempts=3)
+        def f():
+            raise ValueError("retry")
+
+        with pytest.raises(ValueError), pytest.warns() as ws:
+            f()
+
+        msg = ws.pop().message.args[0]
+
+        assert "Backoff hook" in msg
+        assert "lambda" in msg

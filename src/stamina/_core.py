@@ -7,6 +7,7 @@ from __future__ import annotations
 import contextlib
 import datetime as dt
 import random
+import warnings
 
 from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
 from contextlib import AbstractContextManager
@@ -88,6 +89,17 @@ class _TenacityBackoffCallbackAdapter:
             return False
 
         result = self._backoff_hook(exc)
+
+        if result is None:
+            warnings.warn(
+                (
+                    f"Backoff hook {self._backoff_hook!r} returned None. "
+                    "Backoff hooks must return a bool or a float or a timedelta. "
+                    "This will be an error in a future version."
+                ),
+                stacklevel=2,
+            )
+            return False
 
         if isinstance(result, bool):
             return result
