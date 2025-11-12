@@ -592,8 +592,8 @@ class _RetryContextIterator:
         """
         Compute the backoff for *rcs*.
 
-        If a custom backoff was provided by a predicate, use it (clamped to
-        *wait_max*). Otherwise, use exponential backoff.
+        If a custom backoff was provided by a predicate, use it. Otherwise, use
+        exponential backoff.
         """
         if (
             custom_backoff := getattr(rcs, _CUSTOM_BACKOFF_KEY, None)
@@ -603,7 +603,7 @@ class _RetryContextIterator:
             if CONFIG.testing is not None:
                 return 0.0
 
-            return min(self._wait_max, cast(float, custom_backoff))
+            return cast(float, custom_backoff)
 
         return _compute_backoff(
             rcs.attempt_number,
@@ -756,7 +756,6 @@ def retry(  # noqa: C901
             For even more control, the predicate may return a float to specify
             a custom backoff that overrides the default backoff. This is useful
             when the error carries information like an ``Retry-After`` header.
-            This custom backoff is clamped to *wait_max*.
 
             There is no default -- you *must* pass *on* explicitly.
 

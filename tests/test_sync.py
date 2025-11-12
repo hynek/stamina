@@ -623,28 +623,6 @@ class TestPredicateBackoffSync:
         assert 2 == attempts
         assert duration < 5
 
-    def test_predicate_backoff_respects_wait_max(self):
-        """
-        Custom backoff values are clamped to wait_max.
-        """
-        attempts = 0
-
-        @stamina.retry(on=lambda exc: 100.0, attempts=3, wait_max=0)
-        def f():
-            nonlocal attempts
-            attempts += 1
-            if attempts < 2:
-                raise ValueError("retry")
-            return 42
-
-        started_at = time.perf_counter()
-        result = f()
-        duration = time.perf_counter() - started_at
-
-        assert 42 == result
-        assert 2 == attempts
-        assert duration < 1
-
     def test_predicate_with_retry_context(self):
         """
         Predicate backoffs work with retry_context.
