@@ -175,6 +175,7 @@ ignore = [
   "COM",     # Formatter takes care of our commas
   "D",       # We prefer our own docstring style.
   "E501",    # leave line-length enforcement to formatter
+  "ERA001",  # equations sometimes look like code
   "FBT",     # we have one function that takes one bool; c'mon!
   "FIX",     # Yes, we want XXX as a marker.
   "INP001",  # sometimes we want Python files outside of packages
