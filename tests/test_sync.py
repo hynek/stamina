@@ -6,14 +6,14 @@ import datetime as dt
 import time
 
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 import tenacity
 
 import stamina
 
-from stamina._core import Attempt, _make_stop
+from stamina._core import Attempt, _compute_backoff, _make_stop
 
 
 @pytest.mark.parametrize("attempts", [None, -1, 0, 1])
@@ -523,6 +523,52 @@ class TestGeneratorFunctionDecoration:
             next(gen)
 
         assert "Polizei" == exc_info.value.value
+
+
+class TestComputeBackoff:
+    def test_compute_backoff_uses_logarithm(self):
+        """
+        It short-circuits by using logarithm due to smaller max_backoff than
+        exp calculation.
+        """
+        assert not stamina.is_testing()
+
+        with patch("builtins.min", wraps=min) as mock_min:
+            assert _compute_backoff(6, 60.0, 2.0, 2.0, 0.0) == 60.0
+            assert mock_min.call_count == 0
+
+    def test_compute_backoff_no_uses_logarithm(self):
+        """
+        It does not short-circuit due to larger max_backoff than exp
+        calculation.
+        """
+        assert not stamina.is_testing()
+
+        with patch("builtins.min", wraps=min) as mock_min:
+            assert _compute_backoff(5, 60.0, 2.0, 2.0, 0.0) == 32.0
+            assert mock_min.call_count == 1
+
+    def test_compute_backoff_zero_initial(self):
+        """
+        It does not have a divide by zero error and short-circuits to return
+        jitter.
+        """
+        assert not stamina.is_testing()
+        assert _compute_backoff(5, 60.0, 0.0, 2.0, 0.0) == 0.0
+
+    def test_max_backoff_zero(self):
+        """
+        Backoff never exceeds max_backoff.
+        """
+        assert not stamina.is_testing()
+        assert 0 == _compute_backoff(1, 0, 0, 2, max_jitter=1000)
+
+    def test_exp_base_one(self):
+        """
+        It does not crash when *exp_base* is 1.
+        """
+        assert not stamina.is_testing()
+        assert _compute_backoff(5, 60, 1, 1, 1000)
 
 
 def test_attempt_next_wait():
