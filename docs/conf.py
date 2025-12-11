@@ -112,9 +112,11 @@ rst_epilog = f"""\
     :twitter:creator: @hynek
 """
 
-# GitHub has rate limits
 linkcheck_ignore = [
+    # GitHub has rate limits
     r"https://github.com/.*/(issues|pull|compare)/\d+",
+    # Wikipedia has strict rate limits
+    r"https://en.wikipedia.org/",
 ]
 
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
