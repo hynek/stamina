@@ -51,6 +51,15 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   [#115](https://github.com/hynek/stamina/pull/115)
 
 
+### Changed
+
+- Default `wait_exp_base` parameter is now an integer to increase threshold of buffer overflow.
+  [#105](https://github.com/hynek/stamina/pull/105)
+
+- Prevent unnecessary calculations of retry wait time in presence of a lesser wait_max.
+  [#105](https://github.com/hynek/stamina/pull/105)
+
+
 ## [25.1.0](https://github.com/hynek/stamina/compare/24.3.0...25.1.0) - 2025-03-12
 
 ### Added
