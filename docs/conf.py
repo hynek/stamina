@@ -117,6 +117,8 @@ linkcheck_ignore = [
     r"https://github.com/.*/(issues|pull|compare)/\d+",
     # Wikipedia has strict rate limits
     r"https://en.wikipedia.org/",
+    # Flaky
+    r"https://httpbin.org",
 ]
 
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
