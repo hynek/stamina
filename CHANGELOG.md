@@ -13,6 +13,9 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 <!-- changelog follows -->
 
 
+## [Unreleased](https://github.com/hynek/stamina/compare/25.2.0...HEAD)
+
+
 ## [25.2.0](https://github.com/hynek/stamina/compare/25.1.0...25.2.0) - 2025-12-11
 
 ### Removed
