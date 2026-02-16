@@ -506,6 +506,16 @@ class _RetryContextIterator:
         if isinstance(wait_jitter, dt.timedelta):
             wait_jitter = wait_jitter.total_seconds()
 
+        if isinstance(timeout, dt.timedelta):
+            timeout = timeout.total_seconds()
+
+        if timeout == 0:
+            warnings.warn(
+                "timeout=0 means no retries will be attempted. "
+                "Use timeout=None to deactivate the timeout.",
+                stacklevel=3,
+            )
+
         inst = cls(
             _name=name,
             _args=args,
@@ -519,11 +529,7 @@ class _RetryContextIterator:
                 "retry": _retry,
                 "stop": _make_stop(
                     attempts=attempts,
-                    timeout=(
-                        timeout.total_seconds()
-                        if isinstance(timeout, dt.timedelta)
-                        else timeout
-                    ),
+                    timeout=timeout,
                 ),
                 "reraise": True,
             },

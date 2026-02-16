@@ -17,7 +17,7 @@ from stamina._core import Attempt, _make_stop
 
 
 @pytest.mark.parametrize("attempts", [None, -1, 0, 1])
-@pytest.mark.parametrize("timeout", [None, -1, 0, 1, dt.timedelta(days=1)])
+@pytest.mark.parametrize("timeout", [None, -1, 1, dt.timedelta(days=1)])
 @pytest.mark.parametrize("duration", [1, dt.timedelta(days=1)])
 def test_ok(attempts, timeout, duration):
     """
@@ -36,6 +36,33 @@ def test_ok(attempts, timeout, duration):
         return 42
 
     assert 42 == f()
+
+
+@pytest.mark.parametrize(
+    "timeout", [0, 0.0, dt.timedelta(0)], ids=["int", "float", "timedelta"]
+)
+def test_timeout_zero_warns(timeout):
+    """
+    timeout=0 raises a helpful warning with the correct code location.
+    """
+    with pytest.warns(
+        UserWarning,
+        match="timeout=0 means no retries will be attempted",
+    ) as wi:
+        stamina.retry_context(on=Exception, timeout=timeout)
+
+    assert wi.pop().filename.endswith("test_sync.py")
+
+    with pytest.warns(
+        UserWarning,
+        match="timeout=0 means no retries will be attempted",
+    ) as wi:
+
+        @stamina.retry(on=ValueError, timeout=timeout)
+        def func():
+            pass
+
+    assert wi.pop().filename.endswith("test_sync.py")
 
 
 @pytest.mark.parametrize(

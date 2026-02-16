@@ -15,6 +15,11 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/25.2.0...HEAD)
 
+### Changed
+
+- Passing `timeout=0` now raises a warning since it counterintuitively disables all retries.
+  If you explicitly want to disable the timeout, use `timeout=None`.
+
 
 ## [25.2.0](https://github.com/hynek/stamina/compare/25.1.0...25.2.0) - 2025-12-11
 
