@@ -121,7 +121,7 @@ source = ["src", ".nox/tests*/**/site-packages"]
 show_missing = true
 skip_covered = true
 exclude_also = [
-  'raise SystemError\("unreachable"\)',
+  'raise AssertionError\("unreachable"\)',
   # Typing-related
   "if TYPE_CHECKING:",
   ': \.\.\.$',

@@ -299,7 +299,7 @@ class RetryingCaller(BaseRetryingCaller):
             with attempt:
                 return callable_(*args, **kwargs)
 
-        raise SystemError("unreachable")  # noqa: EM101
+        raise AssertionError("unreachable")  # noqa: EM101
 
     def on(self, on: ExcOrBackoffHook, /) -> BoundRetryingCaller:
         """
@@ -375,7 +375,7 @@ class AsyncRetryingCaller(BaseRetryingCaller):
             with attempt:
                 return await callable_(*args, **kwargs)
 
-        raise SystemError("unreachable")  # noqa: EM101
+        raise AssertionError("unreachable")  # noqa: EM101
 
     def on(self, on: ExcOrBackoffHook, /) -> BoundAsyncRetryingCaller:
         """
