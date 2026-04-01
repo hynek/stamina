@@ -23,7 +23,7 @@ classifiers = [
   "Framework :: AsyncIO",
   "Framework :: Trio",
 ]
-dependencies = ["tenacity", "typing-extensions; python_version < '3.10'"]
+dependencies = ["tenacity"]
 
 [dependency-groups]
 tests = ["pytest>=9", "anyio", "dirty-equals"]
