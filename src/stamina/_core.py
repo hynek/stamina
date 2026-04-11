@@ -659,9 +659,7 @@ def _compute_backoff(
     jitter = random.uniform(0, max_jitter) if max_jitter else 0  # noqa: S311
 
     try:
-        return min(
-            max_backoff, initial * (exp_base ** (num - 1)) + jitter
-        )
+        return min(max_backoff, initial * (exp_base ** (num - 1)) + jitter)
     except OverflowError:
         return max_backoff
 
