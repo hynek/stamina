@@ -15,6 +15,13 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/25.2.0...HEAD)
 
+### Fixed
+
+- `_compute_backoff()` no longer raises `OverflowError` when the attempt number exceeds 1024 with a float *wait_exp_base*.
+  The exponential result is now clamped to *wait_max* on overflow.
+  [#104](https://github.com/hynek/stamina/issues/104)
+
+
 ### Changed
 
 - Passing `timeout=0` now raises a warning since it counterintuitively disables all retries.

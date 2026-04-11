@@ -228,6 +228,29 @@ def test_backoff_computation_clamps():
         assert jittered <= 0.42
 
 
+def test_backoff_no_overflow_on_high_attempt_numbers():
+    """
+    Exponential backoff with a float base does not raise OverflowError when
+    the attempt number exceeds 1024.
+
+    Regression test for https://github.com/hynek/stamina/issues/104.
+    """
+    rci = stamina.retry_context(
+        on=ValueError, wait_max=5.0, attempts=None, timeout=None
+    )
+
+    for num in (1025, 2000, 10_000):
+        backoff = rci._backoff_for_attempt_number(num)
+
+        assert 5.0 == backoff
+
+        jittered = rci._jittered_backoff_for_rcs(
+            SimpleNamespace(attempt_number=num)
+        )
+
+        assert jittered <= 5.0
+
+
 def test_testing_mode():
     """
     Testing mode can be set and reset.
