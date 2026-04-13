@@ -1,8 +1,10 @@
 # How To Contribute
 
 > [!IMPORTANT]
-> This document is mainly to help you to get started by codifying tribal knowledge and expectations and make it more accessible to everyone.
-> But don't be afraid to open half-finished PRs and ask questions if something is unclear!
+> - This document is mainly to help you to get started by codifying tribal knowledge and expectations and make it more accessible to everyone.
+>   But don't be afraid to open half-finished PRs and ask questions if something is unclear!
+>
+> - If you use LLM / "AI" tools for your contributions, please read and follow our [_Generative AI / LLM Policy_][llm].
 
 
 ## Workflow
@@ -16,18 +18,27 @@ It's people like *you* who make this project such a great tool for everyone.
 - No contribution is too small!
   Please submit as many fixes for typos and grammar bloopers as you can!
 
-- Try to limit each pull request to *one* change only.
+- **Only contribute code that you fully understand.**
+  See also our [AI policy][llm].
+
+- Very relatedly, our pull request check list is our mandatory [Van Halen test](https://en.wikipedia.org/wiki/Van_Halen_test).
+  Sadly, the current state of the world has forced us into being stricter about policies -- sorry fellow humans!
+
+- Try to limit each pull request to *one* change only (except for typos -- please group those).
 
 - Since we squash on merge, it's up to you how you handle updates to the `main` branch.
   Whether you prefer to rebase on `main` or merge `main` into your branch, do whatever is more comfortable for you.
 
+  Just remember to [not use your own `main` branch for the pull request](https://hynek.me/articles/pull-requests-branch/).
+
 - *Always* add tests and docs for your code.
   This is a hard rule; patches with missing tests or documentation won't be merged.
 
-- Consider updating [`CHANGELOG.md`](../CHANGELOG.md) to reflect the changes as observed by people using this library.
+- Consider updating [`CHANGELOG.md`](../CHANGELOG.md) to reflect the changes as observed by people *using* this library.
 
 - Make sure your changes pass our [CI](https://github.com/hynek/stamina/actions).
   You won't get any feedback until it's green unless you ask for it.
+
   For the CI to pass, the coverage must be 100%.
   If you have problems to test something, open anyway and ask for advice.
   In some situations, we may agree to add an `# pragma: no cover`.
@@ -37,11 +48,15 @@ It's people like *you* who make this project such a great tool for everyone.
 - Don't break [backwards-compatibility](SECURITY.md).
 
 
-## Local Development Environment
+## Local development environment
 
-First, **fork** the repository on GitHub and **clone** it using one of the alternatives that you can copy-paste by pressing the big green button labeled `<> Code`.
+First, **fork** the repository on GitHub.
+Make sure to **uncheck** the `Copy the main branch only` radio button on the `Create a new fork` page.
+If you don't, our test suite will fail because we use Git tags for packaging.
 
-You can (and should) run our test suite using [Nox](https://nox.thea.codes/).
+Finally, **clone** it using one of the alternatives that you can copy-paste by pressing the big green button labeled `<> Code`.
+
+You can (and should) run our test suite using [*tox*](https://tox.wiki/) (and keep in mind that `tox run-parallel` is about 5x faster than `tox run`).
 However, you'll probably want a more traditional environment as well.
 
 We recommend using the Python version from the `.python-version-default` file in the project's root directory, because that's the one that is used in the CI by default, too.
@@ -218,7 +233,7 @@ If your change is interesting to end-users, there needs to be an entry in our `C
   ```
 
 
-## See You on GitHub!
+## See you on GitHub!
 
 Again, this whole file is mainly to help you to get started by codifying tribal knowledge and expectations to save you time and turnarounds.
 It is **not** meant to be a barrier to entry, so don't be afraid to open half-finished PRs and ask questions if something is unclear!
@@ -229,3 +244,4 @@ Please report any harm to [Hynek Schlawack](https://hynek.me/about/) in any way 
 
 
 [semantic newlines]: https://rhodesmill.org/brandon/2012/one-sentence-per-line/
+[llm]: AI_POLICY.md
