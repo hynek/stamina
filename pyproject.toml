@@ -102,10 +102,10 @@ path = "README.md"
 start-at = "## Credits"
 
 
-[tool.pytest.ini_options]
-minversion = "9.0"
-addopts = ["-ra", "--strict", "--import-mode=importlib"]
-testpaths = "tests"
+[tool.pytest]
+strict = true
+addopts = ["-ra", "--import-mode=importlib"]
+testpaths = ["tests"]
 filterwarnings = ["once::Warning"]
 
 

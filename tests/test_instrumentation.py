@@ -56,12 +56,32 @@ class TestGuessName:
     @pytest.mark.parametrize(
         ("obj", "name"),
         [
-            (function, "test_instrumentation.function"),
-            (async_function, "test_instrumentation.async_function"),
-            (foo.method, "test_instrumentation.Foo.method"),
-            (foo.async_method, "test_instrumentation.Foo.async_method"),
-            (Foo.method, "test_instrumentation.Foo.method"),
-            (Foo.async_method, "test_instrumentation.Foo.async_method"),
+            pytest.param(
+                function, "test_instrumentation.function", id="function"
+            ),
+            pytest.param(
+                async_function,
+                "test_instrumentation.async_function",
+                id="async-function",
+            ),
+            pytest.param(
+                foo.method,
+                "test_instrumentation.Foo.method",
+                id="instance-method",
+            ),
+            pytest.param(
+                foo.async_method,
+                "test_instrumentation.Foo.async_method",
+                id="async-instance-method",
+            ),
+            pytest.param(
+                Foo.method, "test_instrumentation.Foo.method", id="method"
+            ),
+            pytest.param(
+                Foo.async_method,
+                "test_instrumentation.Foo.async_method",
+                id="async-method",
+            ),
         ],
     )
     def test_module_scope(self, obj, name):
