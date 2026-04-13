@@ -3,6 +3,7 @@
 [![Documentation at ReadTheDocs](https://img.shields.io/badge/Docs-Read%20The%20Docs-black)](https://stamina.hynek.me)
 [![License: MIT](https://img.shields.io/badge/license-MIT-C06524)](https://github.com/hynek/stamina/blob/main/LICENSE)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7550/badge)](https://bestpractices.coreinfrastructure.org/projects/7550)
+[![No AI slop inside.](https://img.shields.io/badge/no-slop-purple)](https://github.com/hynek/structlog/blob/main/.github/AI_POLICY.md)
 [![PyPI - Version](https://img.shields.io/pypi/v/stamina.svg)](https://pypi.org/project/stamina)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/stamina.svg)](https://pypi.org/project/stamina)
 [![Downloads](https://static.pepy.tech/badge/stamina/month)](https://pepy.tech/project/stamina)
