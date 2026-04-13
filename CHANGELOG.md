@@ -19,7 +19,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 - `_compute_backoff()` no longer raises `OverflowError` when the attempt number exceeds 1024 with a float *wait_exp_base*.
   The exponential result is now clamped to *wait_max* on overflow.
-  [#104](https://github.com/hynek/stamina/issues/104)
+  [#104](https://github.com/hynek/stamina/issues/137)
 
 
 ### Changed
