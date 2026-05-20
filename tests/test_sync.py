@@ -108,6 +108,42 @@ def test_wrong_exception(on):
         f()
 
 
+def test_wrong_exception_no_retry_decorator():
+    """
+    A non-retryable exception on the first attempt propagates immediately
+    and the callable is only invoked once.
+    """
+    num_called = 0
+
+    @stamina.retry(on=ValueError)
+    def f():
+        nonlocal num_called
+        num_called += 1
+        raise TypeError("not retryable")
+
+    with pytest.raises(TypeError, match="not retryable"):
+        f()
+
+    assert 1 == num_called
+
+
+def test_wrong_exception_no_retry_context():
+    """
+    A non-retryable exception on the first attempt propagates immediately
+    and the attempt counter stays at 1.
+    """
+    num_called = 0
+
+    with pytest.raises(TypeError, match="not retryable"):  # noqa: PT012
+        for attempt in stamina.retry_context(on=ValueError):
+            with attempt:
+                num_called += 1
+                raise TypeError("not retryable")
+
+    assert 1 == num_called
+    assert 1 == attempt.num
+
+
 def test_retry_inactive():
     """
     If inactive, don't retry.
