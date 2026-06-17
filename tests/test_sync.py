@@ -97,15 +97,37 @@ def test_retries(duration, timeout, on):
 
 def test_wrong_exception(on):
     """
-    Exceptions that are not passed as `on` are left through.
+    Exceptions that are not passed as `on` are left through without retrying.
     """
+    num_called = 0
 
     @stamina.retry(on=on)
     def f():
+        nonlocal num_called
+        num_called += 1
         raise TypeError("passed")
 
     with pytest.raises(TypeError, match="passed"):
         f()
+
+    assert 1 == num_called
+
+
+def test_wrong_exception_context(on):
+    """
+    Exceptions that are not passed as `on` leave a retry_context block without
+    retrying.
+    """
+    num_called = 0
+
+    with pytest.raises(TypeError, match="passed"):  # noqa: PT012
+        for attempt in stamina.retry_context(on=on):
+            with attempt:
+                num_called += 1
+                raise TypeError("passed")
+
+    assert 1 == num_called
+    assert 1 == attempt.num
 
 
 def test_retry_inactive():
