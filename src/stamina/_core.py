@@ -295,7 +295,13 @@ class RetryingCaller(BaseRetryingCaller):
 
             kw: Keyword arguments to pass to *callable_*.
         """
-        for attempt in retry_context(on, **self._context_kws):
+        for attempt in _RetryContextIterator.from_params(
+            on=on,
+            name=guess_name(callable_),
+            args=args,
+            kw=kwargs,
+            **self._context_kws,
+        ):
             with attempt:
                 return callable_(*args, **kwargs)
 
@@ -371,7 +377,13 @@ class AsyncRetryingCaller(BaseRetryingCaller):
         """
         Same as :meth:`RetryingCaller.__call__`, but *callable_* is awaited.
         """
-        async for attempt in retry_context(on, **self._context_kws):
+        async for attempt in _RetryContextIterator.from_params(
+            on=on,
+            name=guess_name(callable_),
+            args=args,
+            kw=kwargs,
+            **self._context_kws,
+        ):
             with attempt:
                 return await callable_(*args, **kwargs)
 
