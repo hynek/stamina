@@ -11,6 +11,7 @@ The easiest way is to turn off retries using {func}`stamina.set_active`:
 import pytest
 import stamina
 
+
 @pytest.fixture(autouse=True, scope="session")
 def deactivate_retries():
     stamina.set_active(False)

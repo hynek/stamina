@@ -22,6 +22,7 @@ def do_it(code: int) -> httpx2.Response:
 
     return resp
 
+
 # reveal_type(do_it)
 # note: Revealed type is "def (code: builtins.int) -> httpx2._models.Response"
 ```
@@ -48,6 +49,7 @@ def retry_only_on_real_errors(exc: Exception) -> bool:
 
     # Otherwise retry on all httpx2 errors.
     return isinstance(exc, httpx2.HTTPError)
+
 
 @stamina.retry(on=retry_only_on_real_errors, attempts=3)
 def do_it(code: int) -> httpx2.Response:
@@ -91,9 +93,15 @@ def do_something_with_url(url, some_kw):
     resp.raise_for_status()
     ...
 
+
 rc = stamina.RetryingCaller(attempts=5)
 
-rc(httpx2.HTTPError, do_something_with_url, f"https://httpbin.org/status/404", some_kw=42)
+rc(
+    httpx2.HTTPError,
+    do_something_with_url,
+    f"https://httpbin.org/status/404",
+    some_kw=42,
+)
 
 # You can also create a caller with a pre-bound exception type:
 bound_rc = rc.on(httpx2.HTTPError)
@@ -130,11 +138,15 @@ async def do_it_async(code: int) -> httpx2.Response:
 
     return resp
 
+
 # reveal_type(do_it_async)
 # note: Revealed type is "def (code: builtins.int) -> typing.Coroutine[Any, Any, httpx2._models.Response]"
 
+
 async def with_block(code: int) -> httpx2.Response:
-    async for attempt in stamina.retry_context(on=httpx2.HTTPError, attempts=3):
+    async for attempt in stamina.retry_context(
+        on=httpx2.HTTPError, attempts=3
+    ):
         with attempt:
             async with httpx2.AsyncClient() as client:
                 resp = await client.get(f"https://httpbin.org/status/{code}")

@@ -85,7 +85,7 @@ class RetryHook(Protocol):
 
     def __call__(
         self, details: RetryDetails
-    ) -> None | AbstractContextManager[None]: ...
+    ) -> AbstractContextManager[None] | None: ...
 
 
 @dataclass(frozen=True)

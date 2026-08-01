@@ -173,6 +173,7 @@ ignore = [
   "ANN",     # Mypy is better at this
   "ARG001",  # unused arguments are normal when implementing interfaces
   "COM",     # Formatter takes care of our commas
+  "CPY",     # they expect a very specific shape of a copyright notice
   "D",       # We prefer our own docstring style.
   "E501",    # leave line-length enforcement to formatter
   "FBT",     # we have one function that takes one bool; c'mon!
@@ -181,6 +182,8 @@ ignore = [
   "ISC001",  # conflicts with formatter
   "PLC0415", # we do lazy imports
   "PLR0913", # yes, many arguments, but most have defaults
+  "PLR0915", # leave complexity to me
+  "PLR0917", # leave complexity to me
   "PLR2004", # numbers are sometimes fine
   "SLF001",  # private members are accessed by friendly functions
   "TC",      # TYPE_CHECKING blocks break autodocs
