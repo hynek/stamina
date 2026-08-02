@@ -63,7 +63,7 @@ def mypy_api(session: nox.Session) -> None:
         ".", "--group", "typing", "mypy", "structlog", "prometheus-client"
     )
 
-    session.run("mypy", "tests/typing")
+    session.run("mypy", "typing_tests")
 
 
 @nox.session(tags=["typing"])
@@ -72,7 +72,7 @@ def mypy_pkg(session: nox.Session) -> None:
         ".", "--group", "typing", "mypy", "structlog", "prometheus-client"
     )
 
-    session.run("mypy", "src", "tests/typing", "noxfile.py")
+    session.run("mypy", "src", "typing_tests", "noxfile.py")
 
 
 @nox.session(python=ALL_SUPPORTED[-1], tags=["typing"])
@@ -91,7 +91,7 @@ def typing_api(session: nox.Session, tool: str) -> None:
         "ty": ("ty", "check"),
     }
 
-    session.run(*cmd_line[tool], "tests/typing")
+    session.run(*cmd_line[tool], "typing_tests")
 
 
 def _get_pkg(posargs: list[str]) -> tuple[str, list[str]]:

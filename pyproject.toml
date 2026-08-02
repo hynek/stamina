@@ -149,16 +149,21 @@ module = "tests.*"
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-module = "tests.typing.*"
-ignore_errors = false
-
-[[tool.mypy.overrides]]
 module = "tenacity.*"
 follow_imports = "skip"
 
 [[tool.mypy.overrides]]
 module = "noxfile"
 disallow_untyped_decorators = false
+
+
+[[tool.ty.overrides]]
+rules.all = "ignore"
+include = ["conftest.py", "docs", "tests"]
+
+
+[tool.pyrefly]
+project-includes = ["src", "typing_tests"]
 
 
 [tool.ruff]
@@ -200,6 +205,13 @@ ignore = [
   "S101",     # assert
   "SIM300",   # Yoda rocks in asserts
   "TRY002",   # stock exceptions are fine in tests
+]
+
+"typing_tests/*" = [
+  "F841",   # unused variables are fine in type checks
+  "F842",   # unused variables are fine in type checks
+  "RUF059", # unused variables are fine in type checks
+  "SLOT",   # we don't care about slots in type checks
 ]
 
 
