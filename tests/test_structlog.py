@@ -120,3 +120,38 @@ async def test_context_async(log_output):
             "log_level": "warning",
         }
     ] == log_output
+
+
+def test_args_logged_as_original_objects(log_output):
+    """
+    retry args and kwargs are logged as their original Python objects, not
+    repr() strings.  Processors like censoring or JSON serialization need the
+    real objects, not opaque strings like "'secret'".
+
+    Regression test for https://github.com/hynek/stamina/issues/151.
+    """
+
+    class _Sentinel:
+        """Unique object to verify identity, not just equality."""
+
+    sentinel = _Sentinel()
+
+    @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+    def f(pos_arg, kw_arg=None):
+        raise ValueError
+
+    with pytest.raises(ValueError):
+        f(sentinel, kw_arg=sentinel)
+
+    assert len(log_output) == 1
+    entry = log_output[0]
+    # args should be the original objects, NOT repr strings like "'<...>'"
+    assert entry["args"] == (sentinel,), (
+        f"Expected original object in args, got {entry['args']!r}"
+    )
+    assert entry["kwargs"] == {"kw_arg": sentinel}, (
+        f"Expected original object in kwargs, got {entry['kwargs']!r}"
+    )
+    # Confirm they are the exact same objects (not copies)
+    assert entry["args"][0] is sentinel
+    assert entry["kwargs"]["kw_arg"] is sentinel
