@@ -516,6 +516,17 @@ class _RetryContextIterator:
                 stacklevel=3,
             )
 
+        # Reject negative wait values at construction. Otherwise tenacity
+        # eventually raises a cryptic "sleep length must be non-negative"
+        # from time.sleep / asyncio.sleep mid-retry.
+        for label, value in (
+            ("wait_initial", wait_initial),
+            ("wait_max", wait_max),
+            ("wait_jitter", wait_jitter),
+        ):
+            if value < 0:
+                raise ValueError(f"{label} must be >= 0, got {value!r}")
+
         inst = cls(
             _name=name,
             _args=args,
