@@ -4,7 +4,7 @@ version: 2
 build:
   os: ubuntu-lts-latest
   tools:
-    python: "3.13"
+    python: "3.14"
   jobs:
     create_environment:
       # Need the tags to calculate the version (sometimes).
