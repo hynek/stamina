@@ -39,6 +39,20 @@ def test_ok(attempts, timeout, duration):
 
 
 @pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+        ({"wait_initial": -1}, "wait_initial"),
+        ({"wait_max": -0.5}, "wait_max"),
+        ({"wait_jitter": -1}, "wait_jitter"),
+    ],
+)
+def test_negative_wait_params_rejected(kwargs, match):
+    """Negative wait_* values fail at construction, not mid-sleep."""
+    with pytest.raises(ValueError, match=match):
+        stamina.retry_context(on=ValueError, **kwargs)
+
+
+@pytest.mark.parametrize(
     "timeout", [0, 0.0, dt.timedelta(0)], ids=["int", "float", "timedelta"]
 )
 def test_timeout_zero_warns(timeout):
