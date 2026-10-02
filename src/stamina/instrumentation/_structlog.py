@@ -21,8 +21,8 @@ def init_structlog() -> RetryHook:
         logger.warning(
             "stamina.retry_scheduled",
             callable=details.name,
-            args=tuple(repr(a) for a in details.args),
-            kwargs=dict(details.kwargs.items()),
+            args=details.args,
+            kwargs=dict(details.kwargs),
             retry_num=details.retry_num,
             caused_by=repr(details.caused_by),
             wait_for=round(details.wait_for, 2),
