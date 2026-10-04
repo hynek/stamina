@@ -15,6 +15,12 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/26.1.0...HEAD)
 
+### Changed
+
+- The type hints of *on* now accept subclasses of `BaseException`, and backoff hooks are typed to receive a `BaseException`.
+  This matches what *stamina* always did at runtime; we've only imposed our opinion via type hints which isn't always useful.
+  If you annotated the argument of a backoff hook with `Exception`, your type checker now wants `BaseException`.
+
 
 ## [26.1.0](https://github.com/hynek/stamina/compare/25.2.0...26.1.0) - 2026-04-13
 
