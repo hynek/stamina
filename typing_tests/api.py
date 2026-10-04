@@ -14,6 +14,8 @@ import datetime as dt
 from collections.abc import AsyncGenerator, Generator
 from contextlib import contextmanager
 
+from typing_extensions import assert_type
+
 from stamina import (
     AsyncRetryingCaller,
     BoundAsyncRetryingCaller,
@@ -100,6 +102,26 @@ one_sec = dt.timedelta(seconds=1.0)
     wait_jitter=one_sec,
 )
 def exc_tune_waiting_timedelta() -> None: ...
+
+
+@retry(on=KeyboardInterrupt)
+def base_exc() -> None: ...
+
+
+@retry(on=(ValueError, KeyboardInterrupt))
+def exc_tuple_with_base_exc() -> None: ...
+
+
+def backoff_hook(exc: BaseException) -> bool | float | dt.timedelta:
+    return dt.timedelta(seconds=1)
+
+
+@retry(on=backoff_hook)
+def exc_backoff_hook() -> None: ...
+
+
+@retry(on=lambda exc: isinstance(assert_type(exc, BaseException), OSError))
+def exc_backoff_hook_lambda() -> None: ...
 
 
 set_active(False)

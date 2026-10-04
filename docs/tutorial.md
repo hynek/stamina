@@ -42,7 +42,7 @@ A backoff hook is a callable that's called with the exception that was raised an
 So, calling the following `do_it` function will only retry if <https://httpbin.org> returns a 5xx status code:
 
 ```python
-def retry_only_on_real_errors(exc: Exception) -> bool:
+def retry_only_on_real_errors(exc: BaseException) -> bool:
     # If the error is an HTTP status error, only retry on 5xx errors.
     if isinstance(exc, httpx2.HTTPStatusError):
         return exc.response.status_code >= 500

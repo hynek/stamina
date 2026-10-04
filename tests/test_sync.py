@@ -95,6 +95,38 @@ def test_retries(duration, timeout, on):
     assert 1 == i
 
 
+class CustomBaseError(BaseException):
+    pass
+
+
+@pytest.mark.parametrize(
+    "on",
+    [
+        CustomBaseError,
+        (ValueError, CustomBaseError),
+        lambda exc: isinstance(exc, CustomBaseError),
+    ],
+)
+def test_retries_base_exceptions(on):
+    """
+    If on matches a BaseException, it is retried. Some libraries, like gevent
+    with its Timeout, derive their exceptions from BaseException on purpose.
+    """
+    i = 0
+
+    @stamina.retry(on=on, wait_max=0)
+    def f():
+        nonlocal i
+        if i < 1:
+            i += 1
+            raise CustomBaseError
+
+        return 42
+
+    assert 42 == f()
+    assert 1 == i
+
+
 def test_wrong_exception(on):
     """
     Exceptions that are not passed as `on` are left through without retrying.

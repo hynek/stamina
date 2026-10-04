@@ -59,9 +59,9 @@ async def _smart_sleep(delay: float) -> None:
 
 T = TypeVar("T")
 P = ParamSpec("P")
-BackoffHook: TypeAlias = Callable[[Exception], bool | float | dt.timedelta]
+BackoffHook: TypeAlias = Callable[[BaseException], bool | float | dt.timedelta]
 ExcOrBackoffHook: TypeAlias = (
-    type[Exception] | tuple[type[Exception], ...] | BackoffHook
+    type[BaseException] | tuple[type[BaseException], ...] | BackoffHook
 )
 
 # Attribute used to store custom backoff in RetryCallState
@@ -827,6 +827,11 @@ def retry(  # noqa: C901
     .. versionadded:: 25.2.0
        An *on* backoff hook can now return a float or a `datetime.timedelta` to
        specify a custom backoff that overrides the default backoff.
+
+    .. versionchanged:: 26.2.0
+       The type hints of *on* now accept subclasses of :class:`BaseException`,
+       and backoff hooks are typed to receive a :class:`BaseException`. This
+       matches the runtime behavior.
 
     """
     retry_ctx = _RetryContextIterator.from_params(
