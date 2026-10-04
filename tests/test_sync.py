@@ -109,8 +109,7 @@ class CustomBaseError(BaseException):
 )
 def test_retries_base_exceptions(on):
     """
-    If on matches a BaseException, it is retried. Some libraries, like gevent
-    with its Timeout, derive their exceptions from BaseException on purpose.
+    If on matches a BaseException, it is retried.
     """
     i = 0
 
