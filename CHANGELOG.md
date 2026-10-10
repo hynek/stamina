@@ -22,6 +22,11 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   If you annotated the argument of a backoff hook with `Exception`, your type checker now wants `BaseException`.
 
 
+### Fixed
+
+- Context managers returned by `stamina.instrumentation.RetryHook`s are now exited only once.
+
+
 ## [26.1.0](https://github.com/hynek/stamina/compare/25.2.0...26.1.0) - 2026-04-13
 
 ### Changed

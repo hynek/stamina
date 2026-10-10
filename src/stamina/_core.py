@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-import contextlib
 import datetime as dt
 import random
 import warnings
@@ -452,7 +451,6 @@ class _RetryContextIterator:
     __slots__ = (
         "_args",
         "_attempts",
-        "_cms_to_exit",
         "_kw",
         "_name",
         "_t_a_retrying",
@@ -473,8 +471,6 @@ class _RetryContextIterator:
     _wait_initial: float
     _wait_max: float
     _wait_exp_base: float
-
-    _cms_to_exit: list[AbstractContextManager[None]]
 
     @classmethod
     def from_params(
@@ -534,7 +530,6 @@ class _RetryContextIterator:
                 "reraise": True,
             },
             _t_a_retrying=_LAZY_NO_ASYNC_RETRY,
-            _cms_to_exit=[],
         )
 
         inst._t_kw["wait"] = inst._jittered_backoff_for_rcs
@@ -563,10 +558,6 @@ class _RetryContextIterator:
 
         return t_kw
 
-    def _exit_cms(self, _: _t.RetryCallState | None) -> None:
-        for cm in reversed(self._cms_to_exit):
-            cm.__exit__(None, None, None)
-
     def __iter__(self) -> Iterator[Attempt]:
         if not CONFIG.is_active:
             for r in _t.Retrying(reraise=True, stop=_STOP_NO_RETRY):
@@ -574,12 +565,12 @@ class _RetryContextIterator:
 
             return
 
-        before_sleep = _make_before_sleep(
-            self._name, CONFIG, self._args, self._kw, self._cms_to_exit
+        before_attempt, before_sleep = _make_hook_callbacks(
+            self._name, CONFIG, self._args, self._kw
         )
 
         for r in _t.Retrying(
-            before=self._exit_cms,
+            before=before_attempt,
             before_sleep=before_sleep,
             **self._apply_maybe_test_mode_to_tenacity_kw(CONFIG.testing),
         ):
@@ -587,12 +578,13 @@ class _RetryContextIterator:
 
     def __aiter__(self) -> AsyncIterator[Attempt]:
         if CONFIG.is_active:
+            before_attempt, before_sleep = _make_hook_callbacks(
+                self._name, CONFIG, self._args, self._kw
+            )
             self._t_a_retrying = _t.AsyncRetrying(
                 sleep=_smart_sleep,
-                before=self._exit_cms,
-                before_sleep=_make_before_sleep(
-                    self._name, CONFIG, self._args, self._kw, self._cms_to_exit
-                ),
+                before=before_attempt,
+                before_sleep=before_sleep,
                 **self._apply_maybe_test_mode_to_tenacity_kw(CONFIG.testing),
             )
 
@@ -664,23 +656,29 @@ def _compute_backoff(
         return max_backoff
 
 
-def _make_before_sleep(
+def _make_hook_callbacks(
     name: str,
     config: _Config,
     args: tuple[object, ...],
     kw: dict[str, object],
-    hook_cms: list[contextlib.AbstractContextManager[None]],
-) -> Callable[[_t.RetryCallState], None]:
+) -> tuple[
+    Callable[[_t.RetryCallState], None], Callable[[_t.RetryCallState], None]
+]:
     """
-    Create a `before_sleep` callback function that runs our `RetryHook`s with
-    the necessary arguments.
+    Create the `before_attempt` and `before_sleep` callbacks for one retry run.
+    `before_sleep` runs our `RetryHook`s with the necessary arguments.
 
-    If a hook returns a context manager, it's entered before retries start and
-    exited after they finish by keeping track of the context managers in
-    *hook_cms*.
+    If a hook returns a context manager, `before_sleep` enters it when the
+    retry is scheduled and `before_attempt` exits it right before the retry is
+    attempted.
     """
 
+    hook_cms: list[AbstractContextManager[None]] = []
     last_idle_for = 0.0
+
+    def before_attempt(_: _t.RetryCallState) -> None:
+        while hook_cms:
+            hook_cms.pop().__exit__(None, None, None)
 
     def before_sleep(rcs: _t.RetryCallState) -> None:
         nonlocal last_idle_for
@@ -706,7 +704,7 @@ def _make_before_sleep(
 
         last_idle_for = rcs.idle_for
 
-    return before_sleep
+    return before_attempt, before_sleep
 
 
 def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:

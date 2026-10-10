@@ -527,3 +527,64 @@ class TestSetOnRetryHooks:
             == cm2.deets
             == deets
         )
+
+    def test_context_manager_hooks_exited_once(self):
+        """
+        Each context manager that a hook returns is exited exactly once, across
+        several retries and several calls of the same function.
+        """
+        cms = []
+
+        class CM:
+            def __init__(self, _details):
+                self.exits = 0
+                cms.append(self)
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                self.exits += 1
+
+        set_on_retry_hooks([CM])
+
+        @stamina.retry(on=ValueError, wait_max=0, attempts=4)
+        def f():
+            raise ValueError
+
+        for _ in range(2):
+            with pytest.raises(ValueError):
+                f()
+
+        assert [1] * 6 == [cm.exits for cm in cms]
+
+    @pytest.mark.anyio
+    async def test_context_manager_hooks_exited_once_async(self):
+        """
+        Each context manager that a hook returns is exited exactly once with
+        async functions, too.
+        """
+        cms = []
+
+        class CM:
+            def __init__(self, _details):
+                self.exits = 0
+                cms.append(self)
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                self.exits += 1
+
+        set_on_retry_hooks([CM])
+
+        @stamina.retry(on=ValueError, wait_max=0, attempts=4)
+        async def f():
+            raise ValueError
+
+        for _ in range(2):
+            with pytest.raises(ValueError):
+                await f()
+
+        assert [1] * 6 == [cm.exits for cm in cms]
