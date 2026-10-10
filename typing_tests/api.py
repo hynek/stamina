@@ -144,6 +144,21 @@ def hook(details: RetryDetails) -> None:
     return None
 
 
+def caused_by_hook(details: RetryDetails) -> None:
+    assert_type(details.caused_by, BaseException)
+
+
+RetryDetails(
+    name="f",
+    args=(),
+    kwargs={},
+    retry_num=1,
+    wait_for=0.0,
+    waited_so_far=0.0,
+    caused_by=KeyboardInterrupt(),
+)
+
+
 @contextmanager
 def cm_hook(details: RetryDetails) -> Generator[None]:
     yield

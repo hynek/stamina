@@ -63,7 +63,7 @@ class RetryDetails:
     retry_num: int
     wait_for: float
     waited_so_far: float
-    caused_by: Exception
+    caused_by: BaseException
 
 
 class RetryHook(Protocol):
