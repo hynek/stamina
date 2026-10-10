@@ -25,6 +25,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 ### Fixed
 
 - Context managers returned by `stamina.instrumentation.RetryHook`s are now exited only once.
+  [#157](https://github.com/hynek/stamina/issues/157)
 
 
 ## [26.1.0](https://github.com/hynek/stamina/compare/25.2.0...26.1.0) - 2026-04-13
