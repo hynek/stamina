@@ -22,6 +22,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   Raise `stamina.exceptions.TryAgain` instead.
 
   Generally speaking, we do [**not** support](https://github.com/hynek/stamina/blob/main/.github/SECURITY.md) "hybrid" usage of Tenacity features via *stamina* and will break such cases *without warning* in the future.
+  [#158](https://github.com/hynek/stamina/issues/158)
 
 
 ### Added
@@ -31,6 +32,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   Without one, your caller gets the `TryAgain`.
 
   Pass *after* to wait *at least* a number of seconds, a `datetime.timedelta`, or until a timezone-aware `datetime.datetime` before the next attempt.
+  [#158](https://github.com/hynek/stamina/issues/158)
 
 
 ### Changed
@@ -38,12 +40,15 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 - The type hints of *on* now accept subclasses of `BaseException`, backoff hooks are typed to receive a `BaseException`, and `stamina.instrumentation.RetryDetails.caused_by` is typed as a `BaseException`.
   This matches what *stamina* always did at runtime; we've only imposed our opinion via type hints which isn't always useful.
   If you annotated the argument of a backoff hook with `Exception`, your type checker now wants `BaseException`.
+  [#155](https://github.com/hynek/stamina/issues/155)
 
 - If a backoff would end after *timeout*, *stamina* now gives up right away.
   Before, it waited past *timeout* and attempted once more.
   This also applies to custom backoffs from backoff hooks.
+  [#158](https://github.com/hynek/stamina/issues/158)
 
 - On Python 3.15 and later, *stamina* now uses [lazy imports](https://peps.python.org/pep-0810/).
+  [#159](https://github.com/hynek/stamina/issues/159)
 
 
 ### Fixed
