@@ -165,6 +165,7 @@ include = ["conftest.py", "docs", "tests"]
 
 [tool.pyrefly]
 project-includes = ["src", "typing_tests"]
+replace-imports-with-any = ["tenacity.*"]
 
 
 [tool.ruff]
