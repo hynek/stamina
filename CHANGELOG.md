@@ -43,6 +43,8 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   Before, it waited past *timeout* and attempted once more.
   This also applies to custom backoffs from backoff hooks.
 
+- On Python 3.15 and later, *stamina* now uses [lazy imports](https://peps.python.org/pep-0810/).
+
 
 ### Fixed
 
