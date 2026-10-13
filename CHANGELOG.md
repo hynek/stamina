@@ -15,11 +15,33 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/26.1.0...HEAD)
 
+### Deprecated
+
+- Raising `tenacity.TryAgain` in code that *stamina* retries now emits a `DeprecationWarning`.
+  It only ever worked because *stamina* uses Tenacity internally.
+  Raise `stamina.exceptions.TryAgain` instead.
+
+  Generally speaking, we do [**not** support](https://github.com/hynek/stamina/blob/main/.github/SECURITY.md) "hybrid" usage of Tenacity features via *stamina* and will break such cases *without warning* in the future.
+
+
+### Added
+
+- `stamina.exceptions.TryAgain` that you can raise to force a retry, whatever *on* says.
+  If *stamina* runs out of attempts, it raises the exception that you raised `TryAgain` from.
+  Without one, your caller gets the `TryAgain`.
+
+  Pass *after* to wait *at least* a number of seconds, a `datetime.timedelta`, or until a timezone-aware `datetime.datetime` before the next attempt.
+
+
 ### Changed
 
 - The type hints of *on* now accept subclasses of `BaseException`, backoff hooks are typed to receive a `BaseException`, and `stamina.instrumentation.RetryDetails.caused_by` is typed as a `BaseException`.
   This matches what *stamina* always did at runtime; we've only imposed our opinion via type hints which isn't always useful.
   If you annotated the argument of a backoff hook with `Exception`, your type checker now wants `BaseException`.
+
+- If a backoff would end after *timeout*, *stamina* now gives up right away.
+  Before, it waited past *timeout* and attempted once more.
+  This also applies to custom backoffs from backoff hooks.
 
 
 ### Fixed

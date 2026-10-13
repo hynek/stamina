@@ -28,6 +28,7 @@ from stamina import (
     set_active,
     set_testing,
 )
+from stamina.exceptions import TryAgain
 from stamina.instrumentation import (
     RetryDetails,
     RetryHook,
@@ -122,6 +123,18 @@ def exc_backoff_hook() -> None: ...
 
 @retry(on=lambda exc: isinstance(assert_type(exc, BaseException), OSError))
 def exc_backoff_hook_lambda() -> None: ...
+
+
+@retry(on=ValueError)
+def try_again() -> None:
+    raise TryAgain
+
+
+TryAgain("message")
+TryAgain(after=1)
+TryAgain(after=1.0)
+TryAgain(after=one_sec)
+TryAgain(after=dt.datetime.now(dt.timezone.utc))
 
 
 set_active(False)

@@ -29,6 +29,7 @@ from typing import (
 import tenacity as _t
 
 from ._config import CONFIG, _Config, _Testing
+from .exceptions import TryAgain
 from .instrumentation._data import RetryDetails, guess_name
 
 
@@ -210,9 +211,34 @@ class Attempt:
         exc_value: BaseException | None,
         traceback: TracebackType | None,
     ) -> bool | None:
+        if isinstance(exc_value, _t.TryAgain) and traceback is not None:
+            _warn_tenacity_try_again(traceback)
+
         return self._t_attempt.__exit__(  # type: ignore[no-any-return]
             exc_type, exc_value, traceback
         )
+
+
+def _warn_tenacity_try_again(tb: TracebackType) -> None:
+    """
+    Warn that raising Tenacity's TryAgain is deprecated.
+    """
+    # Apply best effort to get the actual line number that raised it.
+    while tb.tb_next is not None:
+        tb = tb.tb_next
+
+    module_globals = tb.tb_frame.f_globals
+
+    warnings.warn_explicit(
+        "Raising tenacity.TryAgain to force a retry is deprecated and will "
+        "stop working in a future version. Raise "
+        "stamina.exceptions.TryAgain instead.",
+        DeprecationWarning,
+        filename=tb.tb_frame.f_code.co_filename,
+        lineno=tb.tb_lineno,
+        module=module_globals.get("__name__"),
+        registry=module_globals.setdefault("__warningregistry__", {}),
+    )
 
 
 class RetryKWs(TypedDict):
@@ -428,6 +454,7 @@ class BoundAsyncRetryingCaller:
 
 
 _STOP_NO_RETRY = _t.stop_after_attempt(1)
+_RETRY_ON_TRY_AGAIN = _t.retry_if_exception_type(TryAgain)
 
 
 class _LazyNoAsyncRetry:
@@ -522,7 +549,8 @@ class _RetryContextIterator:
             _wait_max=wait_max,
             _wait_exp_base=wait_exp_base,
             _t_kw={
-                "retry": _retry,
+                # TryAgain forces a retry, whatever *on* says.
+                "retry": _t.retry_any(_RETRY_ON_TRY_AGAIN, _retry),
                 "stop": _make_stop(
                     attempts=attempts,
                     timeout=timeout,
@@ -559,6 +587,22 @@ class _RetryContextIterator:
         return t_kw
 
     def __iter__(self) -> Iterator[Attempt]:
+        try:
+            yield from self._iter_attempts()
+        except TryAgain as e:
+            if e.__cause__ is None:
+                raise
+
+            cause = e.__cause__
+        else:
+            return
+
+        # Out of attempts: raise what TryAgain was raised from. We do it
+        # outside of the except block, so Python doesn't make TryAgain its
+        # context.
+        raise cause
+
+    def _iter_attempts(self) -> Iterator[Attempt]:
         if not CONFIG.is_active:
             for r in _t.Retrying(reraise=True, stop=_STOP_NO_RETRY):
                 yield Attempt(r, None)
@@ -593,10 +637,18 @@ class _RetryContextIterator:
         return self
 
     async def __anext__(self) -> Attempt:
-        return Attempt(
-            await self._t_a_retrying.__anext__(),
-            self._backoff_for_attempt_number,
-        )
+        try:
+            t_attempt = await self._t_a_retrying.__anext__()
+        except TryAgain as e:
+            if e.__cause__ is None:
+                raise
+
+            cause = e.__cause__
+        else:
+            return Attempt(t_attempt, self._backoff_for_attempt_number)
+
+        # Same as in __iter__.
+        raise cause
 
     def _backoff_for_attempt_number(self, num: int) -> float:
         """
@@ -613,7 +665,8 @@ class _RetryContextIterator:
         Compute the backoff for *rcs*.
 
         If a custom backoff was provided by a backoff hook, use it. Otherwise,
-        use exponential backoff.
+        use exponential backoff, or the jittered *after* of a TryAgain if
+        that's longer.
         """
         if (
             custom_backoff := getattr(rcs, _CUSTOM_BACKOFF_ATTR, None)
@@ -625,13 +678,46 @@ class _RetryContextIterator:
 
             return cast(float, custom_backoff)
 
-        return _compute_backoff(
+        backoff = _compute_backoff(
             rcs.attempt_number,
             self._wait_max,
             self._wait_initial,
             self._wait_exp_base,
             self._wait_jitter,
         )
+
+        exc = rcs.outcome.exception()
+        if (
+            CONFIG.testing is None
+            and isinstance(exc, TryAgain)
+            and exc.after is not None
+        ):
+            return max(
+                backoff,
+                _seconds_until(exc.after) + _jitter(self._wait_jitter),
+            )
+
+        return backoff
+
+
+def _seconds_until(after: float | dt.timedelta | dt.datetime) -> float:
+    """
+    Convert *after* of a TryAgain into seconds from now.
+    """
+    if isinstance(after, dt.datetime):
+        return (after - dt.datetime.now(dt.timezone.utc)).total_seconds()
+
+    if isinstance(after, dt.timedelta):
+        return after.total_seconds()
+
+    return after
+
+
+def _jitter(max_jitter: float) -> float:
+    """
+    Return a random jitter between 0 and *max_jitter*.
+    """
+    return random.uniform(0, max_jitter) if max_jitter else 0  # noqa: S311
 
 
 def _compute_backoff(
@@ -648,10 +734,11 @@ def _compute_backoff(
     if CONFIG.testing is not None:
         return 0.0
 
-    jitter = random.uniform(0, max_jitter) if max_jitter else 0  # noqa: S311
-
     try:
-        return min(max_backoff, initial * (exp_base ** (num - 1)) + jitter)
+        return min(
+            max_backoff,
+            initial * (exp_base ** (num - 1)) + _jitter(max_jitter),
+        )
     except OverflowError:
         return max_backoff
 
@@ -710,6 +797,8 @@ def _make_hook_callbacks(
 def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
     """
     Combine *attempts* and *timeout* into one stop condition.
+
+    *timeout* also stops if the upcoming backoff would end after it.
     """
     stops = []
 
@@ -717,7 +806,7 @@ def _make_stop(*, attempts: int | None, timeout: float | None) -> _t.stop_base:
         stops.append(_t.stop_after_attempt(attempts))
 
     if timeout is not None:
-        stops.append(_t.stop_after_delay(timeout))
+        stops.append(_t.stop_before_delay(timeout))
 
     if not stops:
         return _t.stop_never
@@ -798,8 +887,9 @@ def retry(  # noqa: C901
             `None` means *no* limit to attempts.
 
         timeout:
-            Maximum total time for all retries. Can be combined with
-            *attempts*. `None` means *no* timeout.
+            Maximum total time for all retries. If a backoff would end after
+            it, *stamina* gives up right away instead of waiting. Can be
+            combined with *attempts*. `None` means *no* timeout.
 
         wait_initial: Minimum backoff before the *first* retry.
 
@@ -830,6 +920,10 @@ def retry(  # noqa: C901
        The type hints of *on* now accept subclasses of :class:`BaseException`,
        and backoff hooks are typed to receive a :class:`BaseException`. This
        matches the runtime behavior.
+
+    .. versionchanged:: 26.2.0
+       If a backoff would end after *timeout*, *stamina* gives up right away.
+       Before, it waited past *timeout* and attempted once more.
 
     """
     retry_ctx = _RetryContextIterator.from_params(

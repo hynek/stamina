@@ -137,3 +137,12 @@
    .. versionadded:: 23.2.0
 .. autofunction:: get_prometheus_counter
 ```
+
+
+## Exceptions
+
+```{eval-rst}
+.. module:: stamina.exceptions
+
+.. autoclass:: TryAgain
+```
