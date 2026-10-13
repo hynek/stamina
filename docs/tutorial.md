@@ -223,3 +223,5 @@ Check out {doc}`testing` to learn more!
 ## Observability
 
 To give you observability of your application's retrying, *stamina* will count the retries using [*prometheus-client*](https://github.com/prometheus/client_python) in the `stamina_retries_total` counter (if installed) and log them out using [*structlog*](https://www.structlog.org/) with a fallback to {mod}`logging`.
+
+{doc}`instrumentation` has more details.
