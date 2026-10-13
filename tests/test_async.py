@@ -9,6 +9,8 @@ import pytest
 
 import stamina
 
+from stamina.exceptions import TryAgain
+
 
 pytestmark = pytest.mark.anyio
 
@@ -73,6 +75,89 @@ async def test_retries(duration, timeout, on):
 
     assert 42 == await f()
     assert 1 == i
+
+
+async def test_try_again(on):
+    """
+    Raising TryAgain forces a retry, whatever on is.
+    """
+    i = 0
+
+    @stamina.retry(on=on, wait_max=0)
+    async def f():
+        nonlocal i
+        if i < 1:
+            i += 1
+            raise TryAgain
+
+        return 42
+
+    assert 42 == await f()
+    assert 1 == i
+
+
+async def test_try_again_respects_attempts():
+    """
+    TryAgain doesn't add attempts. If the last attempt raises it, the caller
+    gets it.
+    """
+    num_called = 0
+
+    @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+    async def f():
+        nonlocal num_called
+        num_called += 1
+        raise TryAgain
+
+    with pytest.raises(TryAgain):
+        await f()
+
+    assert 2 == num_called
+
+
+async def test_try_again_raises_cause():
+    """
+    If TryAgain was raised from another exception, the caller gets that
+    exception when stamina runs out of attempts.
+    """
+    num_called = 0
+
+    @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+    async def f():
+        nonlocal num_called
+        num_called += 1
+        raise TryAgain from KeyError("cause")
+
+    with pytest.raises(KeyError, match="cause"):
+        await f()
+
+    assert 2 == num_called
+
+
+async def test_try_again_after():
+    """
+    TryAgain(after=...) makes stamina sleep that long before the next attempt.
+    """
+    waits = []
+    stamina.instrumentation.set_on_retry_hooks(
+        [lambda details: waits.append(details.wait_for)]
+    )
+    num_called = 0
+
+    @stamina.retry(on=ValueError, wait_initial=0, wait_jitter=0)
+    async def f():
+        nonlocal num_called
+        num_called += 1
+        if num_called == 1:
+            raise TryAgain(after=0.001)
+
+        return 42
+
+    start = time.perf_counter()
+
+    assert 42 == await f()
+    assert [0.001] == waits
+    assert time.perf_counter() - start >= 0.001
 
 
 async def test_retries_method(on):

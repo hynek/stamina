@@ -30,43 +30,6 @@ def do_it(code: int) -> httpx2.Response:
 This will retry the function up to 3 times if it raises an {class}`httpx2.HTTPError` (or any subclass thereof).
 Since retrying on {class}`Exception` is an [attractive nuisance](https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html), *stamina* doesn't do it by default and forces you to be explicit.
 
----
-
-Sometimes, an exception is too broad, though.
-For example, *httpx2* raises {class}`httpx2.HTTPStatusError` on all HTTP errors.
-But some errors, like 404 (Not Found) or 403 (Forbidden), usually shouldn't be retried!
-
-To solve problems like this, you can pass a *backoff hook* to `on`.
-A backoff hook is a callable that's called with the exception that was raised and whose return value will be used to decide whether to retry or not.
-
-So, calling the following `do_it` function will only retry if <https://httpbin.org> returns a 5xx status code:
-
-```python
-def retry_only_on_real_errors(exc: BaseException) -> bool:
-    # If the error is an HTTP status error, only retry on 5xx errors.
-    if isinstance(exc, httpx2.HTTPStatusError):
-        return exc.response.status_code >= 500
-
-    # Otherwise retry on all httpx2 errors.
-    return isinstance(exc, httpx2.HTTPError)
-
-
-@stamina.retry(on=retry_only_on_real_errors, attempts=3)
-def do_it(code: int) -> httpx2.Response:
-    resp = httpx2.get(f"https://httpbin.org/status/{code}")
-    resp.raise_for_status()
-
-    return resp
-```
-
-If you need more control, you can return a {class}`float` of seconds or a {class}`datetime.timedelta` to specify a custom backoff that overrides the default backoff instead of a boolean.
-This is useful when the error carries information like a [`Retry-After`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After) header.
-A custom backoff is **not** part of the exponential backoff machinery so none of the other backoff parameters apply to it.
-
----
-
-To give you observability of your application's retrying, *stamina* will count the retries using [*prometheus-client*](https://github.com/prometheus/client_python) in the `stamina_retries_total` counter (if installed) and log them out using [*structlog*](https://www.structlog.org/) with a fallback to {mod}`logging`.
-
 
 ## Arbitrary code blocks
 
@@ -119,6 +82,96 @@ and retry on {class}`httpx2.HTTPError` and as before, the type hints are preserv
 It's up to you whether you want to share only the retry configuration or the exception type to retry on, too.
 
 
+## Backoff hooks
+
+Sometimes, an exception is too broad, though.
+For example, *httpx2* raises {class}`httpx2.HTTPStatusError` on all HTTP errors.
+But some errors, like 404 (Not Found) or 403 (Forbidden), usually shouldn't be retried!
+
+To solve problems like this, you can pass a *backoff hook* to `on`.
+A backoff hook is a callable that's called with the exception that was raised and whose return value will be used to decide whether to retry or not.
+
+So, calling the following `do_it` function will only retry if <https://httpbin.org> returns a 5xx status code:
+
+```python
+def retry_only_on_real_errors(exc: BaseException) -> bool:
+    # If the error is an HTTP status error, only retry on 5xx errors.
+    if isinstance(exc, httpx2.HTTPStatusError):
+        return exc.response.status_code >= 500
+
+    # Otherwise retry on all httpx2 errors.
+    return isinstance(exc, httpx2.HTTPError)
+
+
+@stamina.retry(on=retry_only_on_real_errors, attempts=3)
+def do_it(code: int) -> httpx2.Response:
+    resp = httpx2.get(f"https://httpbin.org/status/{code}")
+    resp.raise_for_status()
+
+    return resp
+```
+
+If you need more control, you can return a {class}`float` of seconds or a {class}`datetime.timedelta` to specify a custom backoff that overrides the default backoff instead of a boolean.
+This is useful when the error carries information like a [`Retry-After`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After) header.
+A custom backoff is **not** part of the exponential backoff machinery so none of the other backoff parameters apply to it.
+
+
+## Manually trying again
+
+Sometimes, the reason to retry isn't an exception at all.
+For example, an API might answer with a *200 OK* and tell you that your job is still pending.
+In that case, raise {class}`stamina.exceptions.TryAgain` to force a retry, whatever *on* says:
+
+```python
+from stamina.exceptions import TryAgain
+
+
+class JobPending(Exception):
+    pass
+
+
+@stamina.retry(on=httpx2.HTTPError, attempts=10)
+def wait_for_job(job_id: str) -> dict:
+    resp = httpx2.get(f"https://api.example.com/jobs/{job_id}")
+    resp.raise_for_status()
+
+    job = resp.json()
+    if job["status"] == "pending":
+        raise TryAgain from JobPending(job_id)
+
+    return job
+```
+
+If *stamina* runs out of attempts, it raises the exception that you raised `TryAgain` from (here, `JobPending`).
+That way, `TryAgain` doesn't leak into your API.
+
+---
+
+You can also tell *stamina* how long to wait at least before the next attempt by passing *after*.
+It takes a number of seconds, a {class}`datetime.timedelta`, or a timezone-aware {class}`datetime.datetime`.
+That's the easiest way to honor a `Retry-After` header:
+
+```python
+@stamina.retry(on=httpx2.HTTPError, attempts=3)
+def do_it(code: int) -> httpx2.Response:
+    resp = httpx2.get(f"https://httpbin.org/status/{code}")
+    try:
+        resp.raise_for_status()
+    except httpx2.HTTPStatusError as e:
+        if (retry_after := resp.headers.get("Retry-After")) is not None:
+            raise TryAgain(after=float(retry_after)) from e
+
+        raise
+
+    return resp
+```
+
+A `Retry-After` header can also contain an HTTP date.
+{func}`email.utils.parsedate_to_datetime` turns it into a datetime that you can pass as *after*, too.
+
+*stamina* waits for *after* plus some jitter, or for its regular backoff if that's longer.
+
+
 ## Async
 
 Async works with the same functions and arguments for both [`asyncio`](https://docs.python.org/3/library/asyncio.html) and [Trio](https://trio.readthedocs.io/).
@@ -165,3 +218,10 @@ Testing software with retries can be tricky, so *stamina* comes with dedicated t
 You can *globally* turn them off altogether, remove backoff, and limit the number of retries.
 
 Check out {doc}`testing` to learn more!
+
+
+## Observability
+
+To give you observability of your application's retrying, *stamina* will count the retries using [*prometheus-client*](https://github.com/prometheus/client_python) in the `stamina_retries_total` counter (if installed) and log them out using [*structlog*](https://www.structlog.org/) with a fallback to {mod}`logging`.
+
+{doc}`instrumentation` has more details.

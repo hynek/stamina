@@ -24,7 +24,7 @@ classifiers = [
   "Framework :: AsyncIO",
   "Framework :: Trio",
 ]
-dependencies = ["tenacity"]
+dependencies = ["tenacity>=8.3.0"]
 
 [dependency-groups]
 tests = ["pytest>=9", "anyio", "dirty-equals"]

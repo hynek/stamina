@@ -3,17 +3,23 @@
 # SPDX-License-Identifier: MIT
 
 import datetime as dt
+import subprocess
+import sys
 import time
 
+from textwrap import dedent
 from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
 import tenacity
 
+from dirty_equals import IsFloat
+
 import stamina
 
 from stamina._core import Attempt, _make_stop
+from stamina.exceptions import TryAgain
 
 
 @pytest.mark.parametrize("attempts", [None, -1, 0, 1])
@@ -63,6 +69,36 @@ def test_timeout_zero_warns(timeout):
             pass
 
     assert wi.pop().filename.endswith("test_sync.py")
+
+
+@pytest.mark.parametrize(
+    ("kw", "make_exc"),
+    [
+        ({"on": ValueError, "wait_initial": 2, "wait_max": 2}, ValueError),
+        ({"on": lambda _: 2.0}, ValueError),
+        ({"on": ValueError}, lambda: TryAgain(after=2)),
+    ],
+    ids=["backoff", "backoff-hook", "try-again-after"],
+)
+def test_gives_up_if_backoff_exceeds_timeout(kw, make_exc):
+    """
+    If the next backoff would end after timeout, stamina gives up right away,
+    instead of sleeping past the deadline only to give up afterwards.
+    """
+    raised = []
+
+    @stamina.retry(timeout=1, wait_jitter=0, **kw)
+    def f():
+        raised.append(make_exc())
+        raise raised[-1]
+
+    start = time.monotonic()
+
+    with pytest.raises(Exception) as ei:
+        f()
+
+    assert [ei.value] == raised
+    assert time.monotonic() - start < 1
 
 
 @pytest.mark.parametrize(
@@ -124,6 +160,278 @@ def test_retries_base_exceptions(on):
 
     assert 42 == f()
     assert 1 == i
+
+
+def test_try_again(on):
+    """
+    Raising TryAgain forces a retry, whatever on is.
+    """
+    i = 0
+
+    @stamina.retry(on=on, wait_max=0)
+    def f():
+        nonlocal i
+        if i < 1:
+            i += 1
+            raise TryAgain
+
+        return 42
+
+    assert 42 == f()
+    assert 1 == i
+
+
+def test_try_again_respects_attempts():
+    """
+    TryAgain doesn't add attempts. If the last attempt raises it, the caller
+    gets it.
+    """
+    num_called = 0
+
+    @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+    def f():
+        nonlocal num_called
+        num_called += 1
+        raise TryAgain
+
+    with pytest.raises(TryAgain):
+        f()
+
+    assert 2 == num_called
+
+
+def test_try_again_raises_cause():
+    """
+    If TryAgain was raised from another exception, the caller gets that
+    exception unchanged when stamina runs out of attempts.
+    """
+    raised = []
+
+    def connect():
+        raise OSError
+
+    def request():
+        try:
+            connect()
+        except OSError as e:
+            raise RuntimeError from e
+
+    @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+    def f():
+        try:
+            request()
+        except RuntimeError as e:
+            raised.append(e)
+            raise TryAgain from e
+
+    with pytest.raises(RuntimeError) as ei:
+        f()
+
+    assert 2 == len(raised)
+    assert raised[-1] is ei.value
+    assert isinstance(ei.value.__cause__, OSError)
+    assert ei.value.__cause__ is ei.value.__context__
+
+
+def test_try_again_ignores_context():
+    """
+    An explicit cause replaces TryAgain.
+    """
+
+    @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+    def f():
+        raise TryAgain
+
+    try:
+        {}["missing"]
+    except KeyError:
+        with pytest.raises(TryAgain):
+            f()
+
+
+def test_try_again_raises_cause_when_inactive():
+    """
+    With retries deactivated, the caller gets the cause after the only
+    attempt.
+    """
+    stamina.set_active(False)
+
+    @stamina.retry(on=ValueError)
+    def f():
+        raise TryAgain from KeyError("cause")
+
+    with pytest.raises(KeyError, match="cause"):
+        f()
+
+
+@pytest.fixture(name="waits")
+def _waits():
+    """
+    Record the backoff of each scheduled retry.
+    """
+    waits = []
+    stamina.instrumentation.set_on_retry_hooks(
+        [lambda details: waits.append(details.wait_for)]
+    )
+
+    return waits
+
+
+def raise_try_again_once(after):
+    """
+    Create a function that raises TryAgain(after=after) on its first call and
+    returns 42 on its second.
+    """
+    num_called = 0
+
+    def f():
+        nonlocal num_called
+        num_called += 1
+        if num_called == 1:
+            raise TryAgain(after=after)
+
+        return 42
+
+    return f
+
+
+@pytest.mark.parametrize("after", [0.001, dt.timedelta(seconds=0.001)])
+def test_try_again_after(waits, after):
+    """
+    TryAgain(after=...) waits that long before the next attempt, even if it's
+    longer than wait_max. A server's Retry-After beats our own limits.
+    """
+    f = stamina.retry(
+        on=ValueError, wait_initial=0, wait_max=0.01, wait_jitter=0
+    )(raise_try_again_once(after))
+
+    assert 42 == f()
+    assert [0.001] == waits
+
+
+@pytest.mark.parametrize(
+    ("offset", "expected"),
+    [
+        (dt.timedelta(seconds=0.05), IsFloat(gt=0, le=0.05)),
+        (-dt.timedelta(hours=1), 0.0),
+    ],
+)
+def test_try_again_after_datetime(waits, offset, expected):
+    """
+    TryAgain(after=<datetime>) waits until then. A datetime in the past
+    doesn't add any wait.
+    """
+    f = stamina.retry(on=ValueError, wait_initial=0, wait_jitter=0)(
+        raise_try_again_once(dt.datetime.now(dt.timezone.utc) + offset)
+    )
+
+    assert 42 == f()
+    assert [expected] == waits
+
+
+def test_try_again_after_is_lower_bound(waits):
+    """
+    If the regular backoff is longer than after, stamina uses the regular
+    backoff.
+    """
+    f = stamina.retry(on=ValueError, wait_initial=0.002, wait_jitter=0)(
+        raise_try_again_once(0.001)
+    )
+
+    assert 42 == f()
+    assert [0.002] == waits
+
+
+def test_try_again_after_gets_jitter(waits):
+    """
+    stamina adds jitter to after, so clients that got the same Retry-After
+    don't come back at the same time.
+    """
+    f = stamina.retry(on=ValueError, wait_initial=0, wait_jitter=0.001)(
+        raise_try_again_once(0.001)
+    )
+
+    assert 42 == f()
+    assert [IsFloat(ge=0.001, le=0.002)] == waits
+
+
+def test_try_again_after_ignored_in_testing_mode(waits):
+    """
+    In testing mode, after is ignored like all other backoffs.
+    """
+    f = stamina.retry(on=ValueError)(raise_try_again_once(3600))
+
+    with stamina.set_testing(True, attempts=2):
+        assert 42 == f()
+
+    assert [0.0] == waits
+
+
+def test_try_again_after_naive_datetime():
+    """
+    A naive datetime is rejected right away, because stamina can't compare it
+    to the current time.
+    """
+    with pytest.raises(TypeError, match="timezone-aware"):
+        TryAgain(after=dt.datetime.now(dt.timezone.utc).replace(tzinfo=None))
+
+
+def test_tenacity_try_again_is_deprecated():
+    """
+    Raising Tenacity's TryAgain still forces a retry, but warns. The warning
+    points at the code that raised it, so users find what they must change.
+    """
+    i = 0
+
+    @stamina.retry(on=ValueError, wait_max=0)
+    def f():
+        nonlocal i
+        if i < 1:
+            i += 1
+            raise tenacity.TryAgain
+
+        return 42
+
+    with pytest.warns(
+        DeprecationWarning, match=r"Raise stamina\.exceptions\.TryAgain"
+    ) as ws:
+        rv = f()
+
+    assert 42 == rv
+    assert 1 == i
+    assert __file__ == ws.pop(DeprecationWarning).filename
+
+
+@pytest.mark.parametrize("mode", ["-c", "-"])
+def test_tenacity_try_again_in_main(mode):
+    """
+    Tenacity's TryAgain warns and retries from python -c or stdin, even when
+    __main__ has a built-in loader.
+    """
+    code = dedent("""\
+        import stamina
+        import tenacity
+
+        for attempt in stamina.retry_context(
+            on=ValueError, attempts=2, wait_max=0
+        ):
+            with attempt:
+                if attempt.num == 1:
+                    raise tenacity.TryAgain
+
+        assert 2 == attempt.num
+        """)
+    result = subprocess.run(  # noqa: S603 -- All inputs are defined in this test.
+        [sys.executable, "-Wdefault", mode, *([code] if mode == "-c" else [])],
+        input=code,
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=False,
+    )
+
+    assert 0 == result.returncode, result.stderr
+    assert "DeprecationWarning: Raising tenacity.TryAgain" in result.stderr
 
 
 def test_wrong_exception(on):
@@ -276,7 +584,10 @@ def test_backoff_computation_clamps():
         assert backoff <= 0.42
 
         jittered = rci._jittered_backoff_for_rcs(
-            SimpleNamespace(attempt_number=i)
+            SimpleNamespace(
+                attempt_number=i,
+                outcome=SimpleNamespace(exception=ValueError),
+            )
         )
         assert jittered <= 0.42
 
@@ -298,7 +609,10 @@ def test_backoff_no_overflow_on_high_attempt_numbers():
         assert 5.0 == backoff
 
         jittered = rci._jittered_backoff_for_rcs(
-            SimpleNamespace(attempt_number=num)
+            SimpleNamespace(
+                attempt_number=num,
+                outcome=SimpleNamespace(exception=ValueError),
+            )
         )
 
         assert jittered <= 5.0
