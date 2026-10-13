@@ -782,6 +782,10 @@ def _make_hook_callbacks(
             kwargs=kw,
         )
 
+        process_details = config.process_details
+        if process_details is not None:
+            details = process_details(details)
+
         for hook in config.on_retry:
             maybe_cm = hook(details)
 

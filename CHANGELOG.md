@@ -34,6 +34,11 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   Pass *after* to wait *at least* a number of seconds, a `datetime.timedelta`, or until a timezone-aware `datetime.datetime` before the next attempt.
   [#158](https://github.com/hynek/stamina/issues/158)
 
+- `stamina.instrumentation.set_process_details()` that lets you change the `stamina.instrumentation.RetryDetails` before *stamina* passes them to the retry hooks.
+  For example, you can remove secrets from the arguments before they are logged.
+  `stamina.instrumentation.get_process_details()` returns the current one.
+  [#160](https://github.com/hynek/stamina/issues/160)
+
 
 ### Changed
 

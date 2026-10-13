@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from collections.abc import AsyncGenerator, Generator
+from collections.abc import AsyncGenerator, Callable, Generator
 from contextlib import contextmanager
 
 from typing_extensions import assert_type
@@ -34,7 +34,9 @@ from stamina.instrumentation import (
     RetryHook,
     RetryHookFactory,
     get_on_retry_hooks,
+    get_process_details,
     set_on_retry_hooks,
+    set_process_details,
 )
 
 
@@ -184,6 +186,18 @@ def init() -> RetryHook:
 set_on_retry_hooks([hook, RetryHookFactory(init), cm_hook])
 
 hooks: tuple[RetryHook, ...] = get_on_retry_hooks()
+
+
+def process_details(details: RetryDetails) -> RetryDetails:
+    return details
+
+
+set_process_details(process_details)
+set_process_details(None)
+
+processor: Callable[[RetryDetails], RetryDetails] | None = (
+    get_process_details()
+)
 
 
 for attempt in retry_context(on=ValueError, timeout=13):
