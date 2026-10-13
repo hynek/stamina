@@ -4,6 +4,13 @@
 
 from __future__ import annotations
 
+
+__lazy_modules__ = [
+    "stamina.instrumentation",
+    "stamina.instrumentation._hooks",
+    "stamina.typing",
+]
+
 from collections.abc import Callable
 from threading import Lock
 from types import TracebackType

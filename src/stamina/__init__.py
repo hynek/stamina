@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 
+__lazy_modules__ = ["stamina", "stamina._config", "stamina._core"]
+
 from . import exceptions, instrumentation
 from ._config import is_active, is_testing, set_active, set_testing
 from ._core import (
