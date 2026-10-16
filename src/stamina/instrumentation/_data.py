@@ -44,7 +44,7 @@ class RetryDetails:
 
         caused_by: Exception that caused the retry attempt.
 
-    .. warning::
+    .. caution::
 
        **Modifying args or kwargs modifies the arguments of the next
        attempt.**
