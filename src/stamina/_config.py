@@ -15,7 +15,7 @@ from collections.abc import Callable
 from threading import Lock
 from types import TracebackType
 
-from .instrumentation import RetryHookFactory
+from .instrumentation import RetryDetails, RetryHookFactory
 from .instrumentation._hooks import get_default_hooks, init_hooks
 from .typing import RetryHook
 
@@ -63,6 +63,7 @@ class _Config:
         "_get_on_retry",
         "_is_active",
         "_on_retry",
+        "_process_details",
         "_testing",
         "lock",
     )
@@ -74,11 +75,13 @@ class _Config:
         tuple[RetryHook, ...] | tuple[RetryHook | RetryHookFactory, ...] | None
     )
     _get_on_retry: Callable[[], tuple[RetryHook, ...]]
+    _process_details: Callable[[RetryDetails], RetryDetails] | None
 
     def __init__(self, lock: Lock) -> None:
         self.lock = lock
         self._is_active = True
         self._testing = None
+        self._process_details = None
 
         # Prepare delayed initialization.
         self._on_retry = None
@@ -101,6 +104,19 @@ class _Config:
     def testing(self, value: _Testing | None) -> None:
         with self.lock:
             self._testing = value
+
+    @property
+    def process_details(
+        self,
+    ) -> Callable[[RetryDetails], RetryDetails] | None:
+        return self._process_details
+
+    @process_details.setter
+    def process_details(
+        self, value: Callable[[RetryDetails], RetryDetails] | None
+    ) -> None:
+        with self.lock:
+            self._process_details = value
 
     @property
     def on_retry(self) -> tuple[RetryHook, ...]:

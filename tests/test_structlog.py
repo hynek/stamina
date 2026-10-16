@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 
+import dataclasses
+
 import pytest
 
 import stamina
@@ -119,4 +121,47 @@ async def test_context_async(log_output):
             "event": "stamina.retry_scheduled",
             "log_level": "warning",
         }
+    ] == log_output
+
+
+def test_process_details(log_output):
+    """
+    If a details processor removes secrets from the arguments, the log entry
+    has the processed arguments and not the secrets.
+    """
+
+    def redact(d):
+        return {k: "[REDACTED]" if k == "api_key" else v for k, v in d.items()}
+
+    stamina.instrumentation.set_process_details(
+        lambda details: dataclasses.replace(
+            details,
+            args=tuple(redact(a) for a in details.args),
+            kwargs=redact(details.kwargs),
+        )
+    )
+
+    @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+    def f(creds, *, user, api_key):
+        raise ValueError
+
+    with pytest.raises(ValueError):
+        f(
+            {"bucket": "b", "api_key": "s3cret"},
+            user="alice",
+            api_key="hunter2",
+        )
+
+    assert [
+        {
+            "args": ("{'bucket': 'b', 'api_key': '[REDACTED]'}",),
+            "retry_num": 1,
+            "wait_for": 0.0,
+            "waited_so_far": 0.0,
+            "callable": "tests.test_structlog.test_process_details.<locals>.f",
+            "caused_by": "ValueError()",
+            "event": "stamina.retry_scheduled",
+            "kwargs": {"user": "alice", "api_key": "[REDACTED]"},
+            "log_level": "warning",
+        },
     ] == log_output

@@ -92,5 +92,43 @@ We recommend using [*structlog*] instead.
 
 You can activate it manually by adding {data}`stamina.instrumentation.LoggingOnRetryHook` to the list of hooks passed to {func}`stamina.instrumentation.set_on_retry_hooks`.
 
+
+## Processing retry details
+
+To change the {class}`stamina.instrumentation.RetryDetails` before *stamina* passes them to the hooks, use {func}`stamina.instrumentation.set_process_details`.
+*stamina* calls your callable once for each scheduled retry.
+All hooks get the {class}`~stamina.instrumentation.RetryDetails` that it returns – including the default ones.
+
+For example, you can remove secrets from the arguments before they are logged:
+
+```python
+import dataclasses
+
+import stamina
+
+
+def remove_secrets(
+    details: stamina.instrumentation.RetryDetails,
+) -> stamina.instrumentation.RetryDetails:
+    return dataclasses.replace(
+        details,
+        kwargs={
+            k: "[REDACTED]" if k == "password" else v
+            for k, v in details.kwargs.items()
+        },
+    )
+
+
+stamina.instrumentation.set_process_details(remove_secrets)
+```
+
+:::{warning}
+**Modifying `args` or `kwargs` modifies the arguments of the next attempt.**
+
+`args` and `kwargs` are the same objects that *stamina* passes to the next attempt.
+If you change them or anything inside them, you change the arguments of the next attempt.
+Build new objects instead – like the new `kwargs` dict in the example above – and put them into a new {class}`~stamina.instrumentation.RetryDetails`.
+:::
+
 [*structlog*]: https://www.structlog.org/
 [*prometheus-client*]: https://github.com/prometheus/client_python

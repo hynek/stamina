@@ -44,6 +44,15 @@ class RetryDetails:
 
         caused_by: Exception that caused the retry attempt.
 
+    .. caution::
+
+       **Modifying args or kwargs modifies the arguments of the next
+       attempt.**
+
+       *args* and *kwargs* are the same objects that *stamina* passes to the
+       next attempt. If you change them or anything inside them, you change
+       the arguments of the next attempt.
+
     .. versionadded:: 23.2.0
     """
 
