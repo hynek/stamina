@@ -49,6 +49,7 @@ dev = [
   "tomli; python_version < '3.11'",
   "trio",
 ]
+benchmarks = [{ include-group = "tests" }, "pytest-codspeed>=4"]
 
 [project.urls]
 Documentation = "https://stamina.hynek.me/"

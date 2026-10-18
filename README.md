@@ -6,6 +6,7 @@
 [![No AI slop inside.](https://img.shields.io/badge/no-slop-purple)](https://github.com/hynek/structlog/blob/main/.github/AI_POLICY.md)
 [![PyPI - Version](https://img.shields.io/pypi/v/stamina.svg)](https://pypi.org/project/stamina)
 [![Downloads](https://static.pepy.tech/badge/stamina/month)](https://pepy.tech/project/stamina)
+[![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://app.codspeed.io/hynek/stamina?utm_source=badge)
 
 ---
 

@@ -126,6 +126,18 @@ def tests(session: nox.Session, opt_deps: list[str]) -> None:
 
 
 @nox.session
+def benchmarks(session: nox.Session) -> None:
+    """
+    Run the benchmarks. Pass `--codspeed` to measure them with CodSpeed.
+    """
+    pkg, posargs = _get_pkg(session.posargs)
+
+    session.install(pkg, "--group", "benchmarks")
+
+    session.run("pytest", "bench", *posargs)
+
+
+@nox.session
 def coverage_report(session: nox.Session) -> None:
     session.install("coverage[toml]")
 
