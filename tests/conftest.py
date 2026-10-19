@@ -21,10 +21,12 @@ stamina: {version("stamina")}\
 @pytest.fixture(autouse=True)
 def _reset_config():
     """
-    Ensure we're active and have default on-retry hooks before each test.
+    Ensure we're active, have default on-retry hooks, and no details
+    processor before each test.
     """
     stamina.set_active(True)
     stamina.instrumentation.set_on_retry_hooks(None)
+    stamina.instrumentation.set_process_details(None)
 
 
 BACKENDS = [pytest.param(("asyncio", {}), id="asyncio")]

@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+import dataclasses
+
 from contextlib import contextmanager
 
 import pytest
@@ -15,7 +17,9 @@ import stamina
 from stamina.instrumentation import (
     RetryHookFactory,
     get_on_retry_hooks,
+    get_process_details,
     set_on_retry_hooks,
+    set_process_details,
 )
 from stamina.instrumentation._data import RetryDetails, guess_name
 from stamina.instrumentation._hooks import get_default_hooks
@@ -588,3 +592,82 @@ class TestSetOnRetryHooks:
                 await f()
 
         assert [1] * 6 == [cm.exits for cm in cms]
+
+
+class TestSetProcessDetails:
+    def test_none_by_default(self):
+        """
+        There is no details processor by default.
+        """
+        assert get_process_details() is None
+
+    def test_set_and_reset(self):
+        """
+        get_process_details() returns the processor that was set, until it is
+        reset with None.
+        """
+
+        def process(details):
+            return details
+
+        set_process_details(process)
+
+        assert process is get_process_details()
+
+        set_process_details(None)
+
+        assert get_process_details() is None
+
+    def test_hooks_get_processed_details(self):
+        """
+        The processor gets the original details once per scheduled retry, and
+        all hooks get the details that it returns. So one processor can remove
+        secrets for all hooks.
+        """
+        originals = []
+
+        def process(details):
+            originals.append(details)
+
+            return dataclasses.replace(details, kwargs={"api_key": "***"})
+
+        hook1_details = []
+        hook2_details = []
+        set_on_retry_hooks([hook1_details.append, hook2_details.append])
+        set_process_details(process)
+
+        @stamina.retry(on=ValueError, wait_max=0, attempts=3)
+        def f(api_key):
+            raise ValueError
+
+        with pytest.raises(ValueError):
+            f(api_key="hunter2")
+
+        assert [{"api_key": "hunter2"}] * 2 == [d.kwargs for d in originals]
+        assert (
+            [{"api_key": "***"}] * 2
+            == [d.kwargs for d in hook1_details]
+            == [d.kwargs for d in hook2_details]
+        )
+
+    @pytest.mark.anyio
+    async def test_hooks_get_processed_details_async(self):
+        """
+        Hooks get the processed details with async functions, too.
+        """
+        hook_details = []
+        set_on_retry_hooks([hook_details.append])
+        set_process_details(
+            lambda details: dataclasses.replace(
+                details, kwargs={"api_key": "***"}
+            )
+        )
+
+        @stamina.retry(on=ValueError, wait_max=0, attempts=2)
+        async def f(api_key):
+            raise ValueError
+
+        with pytest.raises(ValueError):
+            await f(api_key="hunter2")
+
+        assert [{"api_key": "***"}] == [d.kwargs for d in hook_details]

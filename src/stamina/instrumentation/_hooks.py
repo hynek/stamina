@@ -4,9 +4,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 
-from ._data import RetryHook, RetryHookFactory
+from ._data import RetryDetails, RetryHook, RetryHookFactory
 from ._logging import LoggingOnRetryHook
 from ._prometheus import PrometheusOnRetryHook
 from ._structlog import StructlogOnRetryHook
@@ -82,3 +82,53 @@ def get_on_retry_hooks() -> tuple[RetryHook, ...]:
     from .._config import CONFIG
 
     return CONFIG.on_retry
+
+
+def set_process_details(
+    process_details: Callable[[RetryDetails], RetryDetails] | None,
+) -> None:
+    """
+    Set a callable that processes :class:`RetryDetails` before *stamina*
+    passes them to the retry hooks.
+
+    *stamina* calls it once for each scheduled retry, before it calls the
+    hooks. All hooks get the :class:`RetryDetails` that it returns. For
+    example, you can use it to remove secrets from the arguments before they
+    are logged.
+
+    .. caution::
+
+       **Modifying args or kwargs modifies the arguments of the next
+       attempt.**
+
+       *args* and *kwargs* are the same objects that *stamina* passes to the
+       next attempt. If you change them or anything inside them, you change
+       the arguments of the next attempt. Build new objects instead and put
+       them into a new :class:`RetryDetails`, for example using
+       :func:`dataclasses.replace`.
+
+    Args:
+        process_details:
+            A callable that takes a :class:`RetryDetails` and returns a
+            :class:`RetryDetails`. Passing None removes it.
+
+    .. versionadded:: 26.2.0
+    """
+    from .._config import CONFIG
+
+    CONFIG.process_details = process_details
+
+
+def get_process_details() -> Callable[[RetryDetails], RetryDetails] | None:
+    """
+    Get the callable that processes :class:`RetryDetails` before *stamina*
+    passes them to the retry hooks.
+
+    Returns:
+        The callable, or None if there is none.
+
+    .. versionadded:: 26.2.0
+    """
+    from .._config import CONFIG
+
+    return CONFIG.process_details

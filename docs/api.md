@@ -73,6 +73,8 @@
 
 .. autofunction:: set_on_retry_hooks
 .. autofunction:: get_on_retry_hooks
+.. autofunction:: set_process_details
+.. autofunction:: get_process_details
 
 .. autoclass:: RetryHook()
 
