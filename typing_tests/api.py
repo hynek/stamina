@@ -200,7 +200,7 @@ processor: Callable[[RetryDetails], RetryDetails] | None = (
 )
 
 
-for attempt in retry_context(on=ValueError, timeout=13):
+for attempt in retry_context(on=ValueError, timeout=13, name="fetch-catalog"):
     with attempt:
         x: int = attempt.num
         y: float = attempt.next_wait
@@ -219,6 +219,7 @@ async def f() -> None:
         wait_initial=one_sec,
         wait_max=one_sec,
         wait_jitter=one_sec,
+        name="fetch-catalog",
     ):
         with attempt:
             pass
@@ -228,7 +229,7 @@ def sync_f(x: int, foo: str) -> bool:
     return True
 
 
-rc = RetryingCaller(timeout=13.0, attempts=10)
+rc = RetryingCaller(timeout=13.0, attempts=10, name="fetch-catalog")
 
 bound_rc: BoundRetryingCaller = rc.on(ValueError)
 
@@ -240,7 +241,7 @@ async def async_f(x: int, foo: str) -> bool:
     return True
 
 
-arc = AsyncRetryingCaller(timeout=13.0, attempts=10)
+arc = AsyncRetryingCaller(timeout=13.0, attempts=10, name="fetch-catalog")
 bound_arc: BoundAsyncRetryingCaller = arc.on(ValueError)
 
 

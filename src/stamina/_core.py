@@ -124,6 +124,8 @@ def retry_context(
     wait_max: float | dt.timedelta = 5.0,
     wait_jitter: float | dt.timedelta = 1.0,
     wait_exp_base: float = 2,
+    *,
+    name: str = "<context block>",
 ) -> _RetryContextIterator:
     """
     Iterator that yields context managers that can be used to retry code
@@ -131,8 +133,12 @@ def retry_context(
 
     Arguments have the same meaning as for :func:`stamina.retry`.
 
+    *name* identifies this operation in retry instrumentation, including the
+    Prometheus callable label. Use a stable name rather than per-request IDs.
+
     .. versionadded:: 23.1.0
     .. versionadded:: 23.3.0 `Trio <https://trio.readthedocs.io/>`_ support.
+    .. versionadded:: 26.2.0 The *name* parameter.
     """
 
     return _RetryContextIterator.from_params(
@@ -143,7 +149,7 @@ def retry_context(
         wait_max=wait_max,
         wait_jitter=wait_jitter,
         wait_exp_base=wait_exp_base,
-        name="<context block>",
+        name=name,
         args=(),
         kw={},
     )
@@ -248,6 +254,7 @@ class RetryKWs(TypedDict):
     wait_max: float | dt.timedelta
     wait_jitter: float | dt.timedelta
     wait_exp_base: float
+    name: str
 
 
 class BaseRetryingCaller:
@@ -268,6 +275,8 @@ class BaseRetryingCaller:
         wait_max: float | dt.timedelta = 5.0,
         wait_jitter: float | dt.timedelta = 1.0,
         wait_exp_base: float = 2,
+        *,
+        name: str = "<context block>",
     ):
         self._context_kws = {
             "attempts": attempts,
@@ -276,6 +285,7 @@ class BaseRetryingCaller:
             "wait_max": wait_max,
             "wait_jitter": wait_jitter,
             "wait_exp_base": wait_exp_base,
+            "name": name,
         }
 
     def __repr__(self) -> str:
@@ -283,6 +293,9 @@ class BaseRetryingCaller:
             f"{k}={self._context_kws[k]!r}"  # type: ignore[literal-required]
             for k in sorted(self._context_kws)
             if k != "on"
+            and not (
+                k == "name" and self._context_kws["name"] == "<context block>"
+            )
         )
         return f"<{self.__class__.__name__}({kws})>"
 
@@ -293,11 +306,16 @@ class RetryingCaller(BaseRetryingCaller):
 
     Arguments have the same meaning as for :func:`stamina.retry`.
 
+    *name* identifies the operation in retry instrumentation, as in
+    :func:`stamina.retry_context`. It also applies to callers bound with
+    :meth:`on` and defaults to ``<context block>``.
+
     Tip:
         Instances of ``RetryingCaller`` may be reused because they internally
         create a new :func:`retry_context` iterator on each call.
 
     .. versionadded:: 24.2.0
+    .. versionadded:: 26.2.0 The *name* parameter.
     """
 
     def __call__(
@@ -383,6 +401,7 @@ class AsyncRetryingCaller(BaseRetryingCaller):
     Same as :class:`RetryingCaller`, but for async callables.
 
     .. versionadded:: 24.2.0
+    .. versionadded:: 26.2.0 The *name* parameter.
     """
 
     async def __call__(

@@ -671,3 +671,76 @@ class TestSetProcessDetails:
             await f(api_key="hunter2")
 
         assert [{"api_key": "***"}] == [d.kwargs for d in hook_details]
+
+
+@pytest.fixture
+def retry_details():
+    """
+    Capture retry metadata and restore the previous hooks after the test.
+    """
+    previous = get_on_retry_hooks()
+    details = []
+    set_on_retry_hooks([details.append])
+    try:
+        yield details
+    finally:
+        set_on_retry_hooks(previous)
+
+
+@pytest.mark.parametrize(
+    ("options", "expected"),
+    [({}, "<context block>"), ({"name": "fetch-catalog"}, "fetch-catalog")],
+)
+def test_operation_name(options, expected, retry_details):
+    """
+    Contexts and callers pass their default or explicit name to retry hooks.
+    """
+    details = retry_details
+
+    def fail():
+        raise ValueError
+
+    for attempt in stamina.retry_context(
+        ValueError, attempts=2, wait_max=0, **options
+    ):
+        with attempt:
+            if attempt.num == 1:
+                fail()
+
+    caller = stamina.RetryingCaller(attempts=2, wait_max=0, **options)
+    with pytest.raises(ValueError):
+        caller(ValueError, fail)
+    with pytest.raises(ValueError):
+        caller.on(ValueError)(fail)
+
+    assert [expected] * 3 == [detail.name for detail in details]
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    ("options", "expected"),
+    [({}, "<context block>"), ({"name": "fetch-catalog"}, "fetch-catalog")],
+)
+async def test_async_operation_name(options, expected, retry_details):
+    """
+    Contexts and callers pass their default or explicit name to retry hooks.
+    """
+    details = retry_details
+
+    async def fail():
+        raise ValueError
+
+    async for attempt in stamina.retry_context(
+        ValueError, attempts=2, wait_max=0, **options
+    ):
+        with attempt:
+            if attempt.num == 1:
+                await fail()
+
+    caller = stamina.AsyncRetryingCaller(attempts=2, wait_max=0, **options)
+    with pytest.raises(ValueError):
+        await caller(ValueError, fail)
+    with pytest.raises(ValueError):
+        await caller.on(ValueError)(fail)
+
+    assert [expected] * 3 == [detail.name for detail in details]

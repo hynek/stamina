@@ -369,7 +369,11 @@ class TestAsyncRetryingCaller:
         assert (42,) == args
         assert {"foo": "bar"} == kw
 
-    def test_repr(self):
+    @pytest.mark.parametrize(
+        ("options", "name_repr"),
+        [({}, ""), ({"name": "fetch-catalog"}, "name='fetch-catalog', ")],
+    )
+    def test_repr(self, options, name_repr):
         """
         repr() is useful
         """
@@ -380,12 +384,13 @@ class TestAsyncRetryingCaller:
             wait_max=123,
             wait_jitter=0.42,
             wait_exp_base=666,
+            **options,
         )
 
         r = repr(arc)
 
         assert (
-            "<AsyncRetryingCaller(attempts=42, timeout=13.0, "
+            f"<AsyncRetryingCaller(attempts=42, {name_repr}timeout=13.0, "
             "wait_exp_base=666, wait_initial=23, wait_jitter=0.42, "
             "wait_max=123)>"
         ) == r
