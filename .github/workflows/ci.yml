@@ -24,12 +24,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: hynek/build-and-inspect-python-package@67230f7b8410ae0052b39c1efc89d89fff43ff10 # v3.0.2
+      - uses: hynek/build-and-inspect-python-package@v3.0.2
         id: baipp
 
     outputs:
@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Download pre-built packages
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        uses: actions/download-artifact@v8.0.2
         with:
           name: Packages
           path: dist
@@ -54,21 +54,21 @@ jobs:
         run: |
           tar xf dist/*.tar.gz --strip-components=1
           rm -rf src
-      - uses: hynek/setup-cached-uv@34e35d30f1ebc7421a5cc733bca38dcc62603960 # v2.6.0
+      - uses: hynek/setup-cached-uv@v2.6.0
       - name: Prepare & run Nox
         env:
           PYTHON: ${{ matrix.python-version }}
 
         run: >
           uvx
-          --with "tomli; python_version<'3.11'"
           nox
+          --parallel auto
           --python $PYTHON
           --sessions tests
           -- --installpkg dist/*.whl
 
       - name: Upload coverage data
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: coverage-data-${{ matrix.python-version }}
           path: .coverage.*
@@ -82,12 +82,12 @@ jobs:
     if: always()
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: hynek/setup-cached-uv@34e35d30f1ebc7421a5cc733bca38dcc62603960 # v2.6.0
+      - uses: hynek/setup-cached-uv@v2.6.0
 
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      - uses: actions/download-artifact@v8.0.2
         with:
           pattern: coverage-data-*
           merge-multiple: true
@@ -106,7 +106,7 @@ jobs:
           coverage report --fail-under=100
 
       - name: Upload HTML report if check failed.
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: html-report
           path: htmlcov
@@ -125,17 +125,16 @@ jobs:
 
     steps:
       - name: Download pre-built packages
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        uses: actions/download-artifact@v8.0.2
         with:
           name: Packages
           path: dist
       - run: tar xf dist/*.tar.gz --strip-components=1
-      - uses: hynek/setup-cached-uv@34e35d30f1ebc7421a5cc733bca38dcc62603960 # v2.6.0
+      - uses: hynek/setup-cached-uv@v2.6.0
 
       - name: Check using Mypy
         run: >
           uvx
-          --with "tomli; python_version<'3.11'"
           nox
           --python $PYTHON
           --sessions mypy_api
@@ -147,12 +146,12 @@ jobs:
 
     steps:
       - name: Download pre-built packages
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        uses: actions/download-artifact@v8.0.2
         with:
           name: Packages
           path: dist
       - run: tar xf dist/*.tar.gz --strip-components=1
-      - uses: hynek/setup-cached-uv@34e35d30f1ebc7421a5cc733bca38dcc62603960 # v2.6.0
+      - uses: hynek/setup-cached-uv@v2.6.0
 
       - name: Check package using Mypy
         run: >
@@ -166,6 +165,7 @@ jobs:
           uvx
           --python $(cat .python-version-default)
           nox
+          --parallel auto
           --sessions typing_api
 
   docs:
@@ -174,12 +174,12 @@ jobs:
     needs: build-package
     steps:
       - name: Download pre-built packages
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        uses: actions/download-artifact@v8.0.2
         with:
           name: Packages
           path: dist
       - run: tar xf dist/*.tar.gz --strip-components=1
-      - uses: hynek/setup-cached-uv@34e35d30f1ebc7421a5cc733bca38dcc62603960 # v2.6.0
+      - uses: hynek/setup-cached-uv@v2.6.0
 
       - name: Prepare & run Nox
         run: uvx nox --session docs -- doctest
@@ -192,10 +192,10 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: hynek/setup-cached-uv@34e35d30f1ebc7421a5cc733bca38dcc62603960 # v2.6.0
+      - uses: hynek/setup-cached-uv@v2.6.0
 
       - name: Install in dev mode
         run: |
@@ -231,6 +231,6 @@ jobs:
 
     steps:
       - name: Decide whether the needed jobs succeeded or failed
-        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
+        uses: re-actors/alls-green@v1.3.0
         with:
           jobs: ${{ toJSON(needs) }}

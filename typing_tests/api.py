@@ -13,8 +13,7 @@ import datetime as dt
 
 from collections.abc import AsyncGenerator, Callable, Generator
 from contextlib import contextmanager
-
-from typing_extensions import assert_type
+from typing import assert_type
 
 from stamina import (
     AsyncRetryingCaller,
@@ -136,7 +135,7 @@ TryAgain("message")
 TryAgain(after=1)
 TryAgain(after=1.0)
 TryAgain(after=one_sec)
-TryAgain(after=dt.datetime.now(dt.timezone.utc))
+TryAgain(after=dt.datetime.now(dt.UTC))
 
 
 set_active(False)

@@ -8,15 +8,9 @@ import os
 import pathlib
 import re
 import shutil
-import sys
+import tomllib
 
 import nox
-
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 
 nox.options.sessions = [
@@ -32,7 +26,7 @@ nox.options.sessions = [
 nox.options.reuse_existing_virtualenvs = True
 nox.options.error_on_external_run = True
 
-nox.needs_version = ">=2025.5.1"
+nox.needs_version = ">=2026.08.10"
 nox.options.default_venv_backend = "uv|virtualenv"
 
 
@@ -50,14 +44,14 @@ DOCS_PYTHON = re.search(  # type: ignore[union-attr]
 ).group(1)
 
 
-@nox.session
+@nox.session(allow_parallel=True)
 def pre_commit(session: nox.Session) -> None:
     session.install("prek")
 
     session.run("prek", "run", "--all-files")
 
 
-@nox.session(python=ALL_SUPPORTED, tags=["typing"])
+@nox.session(python=ALL_SUPPORTED, tags=["typing"], allow_parallel=True)
 def mypy_api(session: nox.Session) -> None:
     session.install(
         ".", "--group", "typing", "mypy", "structlog", "prometheus-client"
@@ -66,7 +60,7 @@ def mypy_api(session: nox.Session) -> None:
     session.run("mypy", "typing_tests")
 
 
-@nox.session(tags=["typing"])
+@nox.session(tags=["typing"], allow_parallel=True)
 def mypy_pkg(session: nox.Session) -> None:
     session.install(
         ".", "--group", "typing", "mypy", "structlog", "prometheus-client"
@@ -75,7 +69,7 @@ def mypy_pkg(session: nox.Session) -> None:
     session.run("mypy", "src", "typing_tests", "noxfile.py")
 
 
-@nox.session(python=ALL_SUPPORTED[-1], tags=["typing"])
+@nox.session(python=ALL_SUPPORTED[-1], tags=["typing"], allow_parallel=True)
 @nox.parametrize("tool", ["pyright", "pyrefly", "ty"])
 def typing_api(session: nox.Session, tool: str) -> None:
     """
@@ -110,7 +104,7 @@ def _get_pkg(posargs: list[str]) -> tuple[str, list[str]]:
     return pkg, posargs
 
 
-@nox.session(python=ALL_SUPPORTED)
+@nox.session(python=ALL_SUPPORTED, allow_parallel=True)
 @nox.parametrize(
     "opt_deps", [[], ["structlog", "prometheus-client"], ["trio"]]
 )
@@ -121,11 +115,8 @@ def tests(session: nox.Session, opt_deps: list[str]) -> None:
 
     session.run("coverage", "run", "-m", "pytest", *posargs)
 
-    if os.environ.get("CI") != "true":
-        session.notify("coverage_report")
 
-
-@nox.session
+@nox.session(requires=ALL_SUPPORTED)
 def coverage_report(session: nox.Session) -> None:
     session.install("coverage[toml]")
 

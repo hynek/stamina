@@ -155,7 +155,8 @@ You will find the built documentation in `docs/_build/html`.
   assert "foo" == x._a_private_attribute
   ```
 
-- You can run  the test suite runs with all (optional) dependencies against all supported Python versions just as it will in our CI by running `nox`.
+- You can run the test suite runs with all (optional) dependencies against all supported Python versions just as it will in our CI by running `nox`.
+  Note that Nox now has a parallel mode that is **much** faster: `nox -j auto`
 
 - Write [good test docstrings](https://jml.io/test-docstrings/).
 

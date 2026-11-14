@@ -7,14 +7,13 @@ build-backend = "hatchling.build"
 dynamic = ["version", "readme"]
 name = "stamina"
 description = "Production-grade retries made easy."
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "MIT"
 keywords = ["retry", "retries", "reliability"]
 authors = [{ name = "Hynek Schlawack", email = "hs@ox.cx" }]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "License :: OSI Approved :: MIT License",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -24,10 +23,10 @@ classifiers = [
   "Framework :: AsyncIO",
   "Framework :: Trio",
 ]
-dependencies = ["tenacity>=8.3.0"]
+dependencies = ["tenacity >= 8.3.0"]
 
 [dependency-groups]
-tests = ["pytest>=9", "anyio", "dirty-equals"]
+tests = ["pytest >= 9", "anyio", "dirty-equals"]
 typing = []
 docs = [
   "sphinx >= 7.2.2",
@@ -42,11 +41,10 @@ dev = [
   { include-group = "tests" },
   { include-group = "typing" },
   "mypy",
-  # First version with uv support.
-  "nox >= 2024.3.2",
+  # First version with parallel support.
+  "nox >= 2026.08.10",
   "prometheus-client",
   "structlog",
-  "tomli; python_version < '3.11'",
   "trio",
 ]
 
