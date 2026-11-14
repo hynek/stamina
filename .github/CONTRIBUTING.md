@@ -56,21 +56,19 @@ If you don't, our test suite will fail because we use Git tags for packaging.
 
 Finally, **clone** it using one of the alternatives that you can copy-paste by pressing the big green button labeled `<> Code`.
 
-You can (and should) run our test suite using [*tox*](https://tox.wiki/) (and keep in mind that `tox run-parallel` is about 5x faster than `tox run`).
+You can (and should) run our test suite using [*Nox*](https://nox.thea.codes/) (and keep in mind that `nox --parallel auto` is much faster than `nox`).
 However, you'll probably want a more traditional environment as well.
 
-We recommend using the Python version from the `.python-version-default` file in the project's root directory, because that's the one that is used in the CI by default, too.
+We recommend using the Python version from the `.python-version` file in the project's root directory, because that's the one that is used in the CI by default, too.
 
-If you're using [*direnv*](https://direnv.net), you can automate the creation of the project virtual environment with the correct Python version by adding the following `.envrc` to the project root:
+We use a fully-locked development environment based on [*uv*](https://docs.astral.sh/uv/) and a checked-in `uv.lock`, so the easiest way to get started is to [install *uv*] and run `uv run pytest` to run the tests immediately.
 
-```bash
-layout python python$(cat .python-version-default)
-```
+If you'd like a traditional virtual environment, run `uv sync` and it will create one named `.venv` with the correct Python version and all the dependencies installed – including *Nox*.
 
-or, if you like [*uv*](https://github.com/astral-sh/uv):
+If you're using [*direnv*](https://direnv.net), you can automate the creation and activation of the project's virtual environment with the correct Python version by adding the following `.envrc` to the project root:
 
 ```bash
-test -d .venv || (uv venv --python $(cat .python-version-default) && uv pip install -e . --group dev)
+uv sync
 . .venv/bin/activate
 ```
 
@@ -80,18 +78,10 @@ test -d .venv || (uv venv --python $(cat .python-version-default) && uv pip inst
 >   Yes, you can work on `main` in your fork and submit pull requests.
 >   But this will *inevitably* lead to you not being able to synchronize your fork with upstream and having to start over.
 
-Change into the newly created directory and after activating a virtual environment, install an editable version of this project along with its tests requirements:
-
-```console
-$ pip install -e . --group dev  # or `uv pip install -e . --group dev`
-```
-
-This will also install Nox for you.
-
 Now you can run the test suite:
 
 ```console
-$ python -Im pytest
+$ uv run pytest
 ```
 
 When working on the documentation, use:
@@ -246,3 +236,4 @@ Please report any harm to [Hynek Schlawack](https://hynek.me/about/) in any way 
 
 [semantic newlines]: https://rhodesmill.org/brandon/2012/one-sentence-per-line/
 [llm]: AI_POLICY.md
+[install *uv*]: https://docs.astral.sh/uv/getting-started/installation/

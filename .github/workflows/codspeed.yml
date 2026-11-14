@@ -19,6 +19,7 @@ concurrency:
 
 env:
   FORCE_COLOR: "1"
+  UV_LOCKED: "1" # Crash loudly on uv.lock vs pyproject.toml inconsistencies
 
 permissions: {}
 
@@ -36,11 +37,13 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v7.1.0
         with:
-          python-version-file: .python-version-default
+          python-version-file: .python-version
       - uses: hynek/setup-cached-uv@v2.6.0
 
-      - name: Install stamina
-        run: uv pip install --system --compile-bytecode .
+      - name: Install stamina with locked dependencies
+        run: |
+          uv sync --no-default-groups --no-editable --compile-bytecode
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Run import benchmarks
         uses: CodSpeedHQ/action@v5.6.3
