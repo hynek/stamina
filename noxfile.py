@@ -8,9 +8,9 @@ import os
 import pathlib
 import re
 import shutil
+import tomllib
 
 import nox
-import tomllib
 
 
 nox.options.sessions = [

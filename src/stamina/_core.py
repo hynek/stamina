@@ -705,7 +705,7 @@ def _seconds_until(after: float | dt.timedelta | dt.datetime) -> float:
     Convert *after* of a TryAgain into seconds from now.
     """
     if isinstance(after, dt.datetime):
-        return (after - dt.datetime.now(dt.timezone.utc)).total_seconds()
+        return (after - dt.datetime.now(dt.UTC)).total_seconds()
 
     if isinstance(after, dt.timedelta):
         return after.total_seconds()
@@ -972,7 +972,7 @@ def retry(  # noqa: C901
                             while True:
                                 try:
                                     to_send = yield item
-                                except GeneratorExit:  # noqa: PERF203
+                                except GeneratorExit:
                                     await agen.aclose()
                                     raise
                                 except BaseException as thrown:  # noqa: BLE001

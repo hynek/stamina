@@ -322,7 +322,7 @@ def test_try_again_after_datetime(waits, offset, expected):
     doesn't add any wait.
     """
     f = stamina.retry(on=ValueError, wait_initial=0, wait_jitter=0)(
-        raise_try_again_once(dt.datetime.now(dt.timezone.utc) + offset)
+        raise_try_again_once(dt.datetime.now(dt.UTC) + offset)
     )
 
     assert 42 == f()
@@ -373,7 +373,7 @@ def test_try_again_after_naive_datetime():
     to the current time.
     """
     with pytest.raises(TypeError, match="timezone-aware"):
-        TryAgain(after=dt.datetime.now(dt.timezone.utc).replace(tzinfo=None))
+        TryAgain(after=dt.datetime.now(dt.UTC).replace(tzinfo=None))
 
 
 def test_tenacity_try_again_is_deprecated():
