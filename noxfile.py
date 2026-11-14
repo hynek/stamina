@@ -8,15 +8,9 @@ import os
 import pathlib
 import re
 import shutil
-import sys
 
 import nox
-
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
+import tomllib
 
 
 nox.options.sessions = [
