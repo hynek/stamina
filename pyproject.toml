@@ -41,8 +41,8 @@ dev = [
   { include-group = "tests" },
   { include-group = "typing" },
   "mypy",
-  # First version with uv support.
-  "nox >= 2024.3.2",
+  # First version with parallel support.
+  "nox >= 2026.08.10",
   "prometheus-client",
   "structlog",
   "trio",
