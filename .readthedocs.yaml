@@ -4,7 +4,7 @@ version: 2
 build:
   os: ubuntu-lts-latest
   tools:
-    python: "3.14"
+    python: latest
   jobs:
     create_environment:
       # Need the tags to calculate the version (sometimes).
@@ -16,4 +16,4 @@ build:
 
     build:
       html:
-        - uvx nox -e docs -- html
+        - uv run --locked --only-group nox nox -e docs -- html

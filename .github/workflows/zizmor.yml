@@ -17,7 +17,7 @@ permissions: {}
 jobs:
   zizmor:
     name: Run zizmor 🌈
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       security-events: write # Required for upload-sarif (used by zizmor-action) to upload SARIF files.
     steps:
