@@ -27,25 +27,40 @@ dependencies = ["tenacity >= 8.3.0"]
 
 [dependency-groups]
 tests = ["pytest >= 9", "anyio", "dirty-equals"]
-typing = []
+cov = [{ include-group = "tests" }, "coverage"]
+# Optional integrations that stamina detects at runtime.
+instrumentation = ["structlog", "prometheus-client"]
+trio = ["trio"]
+typing = [{ include-group = "instrumentation" }]
+mypy = [{ include-group = "typing" }, "mypy"]
+pyright = [{ include-group = "typing" }, "pyright"]
+pyrefly = [{ include-group = "typing" }, "pyrefly"]
+ty = [{ include-group = "typing" }, "ty"]
 docs = [
+  { include-group = "instrumentation" },
   "sphinx >= 7.2.2",
   "furo",
   "myst-parser",
   "sphinx-notfound-page",
   "sphinx-copybutton",
-  "structlog",
-  "prometheus-client",
+  "watchfiles",
 ]
-dev = [
-  { include-group = "tests" },
-  { include-group = "typing" },
-  "mypy",
+lint = ["prek", "ruff"]
+nox = [
   # First version with parallel support.
   "nox >= 2026.08.10",
-  "prometheus-client",
-  "structlog",
-  "trio",
+  "nox-uv"
+]
+dev = [
+  { include-group = "cov" },
+  { include-group = "instrumentation" },
+  { include-group = "trio" },
+  { include-group = "mypy" },
+  { include-group = "pyright" },
+  { include-group = "pyrefly" },
+  { include-group = "ty" },
+  { include-group = "lint" },
+  { include-group = "nox" },
 ]
 
 [project.urls]
@@ -221,5 +236,5 @@ lines-after-imports = 2
 
 
 [tool.uv]
-# Ensure Nox always gets a fresh package.
-reinstall-package = ["stamina"]
+# Dependency cooldown
+exclude-newer = "1 week"

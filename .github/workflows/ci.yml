@@ -13,8 +13,7 @@ concurrency:
 
 env:
   FORCE_COLOR: "1" # Make tools pretty.
-  PIP_DISABLE_PIP_VERSION_CHECK: "1"
-  PIP_NO_PYTHON_VERSION_WARNING: "1"
+  UV_LOCKED: "1" # Crash loudly on uv.lock vs pyproject.toml inconsistencies
 
 permissions: {}
 
@@ -60,7 +59,7 @@ jobs:
           PYTHON: ${{ matrix.python-version }}
 
         run: >
-          uvx
+          uv run --only-group nox
           nox
           --parallel auto
           --python $PYTHON
@@ -94,16 +93,14 @@ jobs:
 
       - name: Combine coverage & fail if it's <100%.
         run: |
-          uv tool install --python $(cat .python-version-default) coverage
-
-          coverage combine
-          coverage html --skip-covered --skip-empty
+          uv run --only-group cov coverage combine
+          uv run --only-group cov coverage html --skip-covered --skip-empty
 
           # Report and write to summary.
-          coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+          uv run --only-group cov coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
 
           # Report again and fail if under 100%.
-          coverage report --fail-under=100
+          uv run --only-group cov coverage report --fail-under=100
 
       - name: Upload HTML report if check failed.
         uses: actions/upload-artifact@v7.0.2
@@ -134,7 +131,7 @@ jobs:
 
       - name: Check using Mypy
         run: >
-          uvx
+          uv run --only-group nox
           nox
           --python $PYTHON
           --sessions mypy_api
@@ -155,15 +152,13 @@ jobs:
 
       - name: Check package using Mypy
         run: >
-          uvx
-          --python $(cat .python-version-default)
+          uv run --only-group nox
           nox
           --sessions mypy_pkg
 
       - name: Check API
         run: >
-          uvx
-          --python $(cat .python-version-default)
+          uv run --only-group nox
           nox
           --parallel auto
           --sessions typing_api
@@ -182,10 +177,23 @@ jobs:
       - uses: hynek/setup-cached-uv@v2.6.0
 
       - name: Prepare & run Nox
-        run: uvx nox --session docs -- doctest
+        run: uv run --only-group nox nox --session docs -- doctest
+
+  lint:
+    name: Lint repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: hynek/setup-cached-uv@v2.6.0
+
+      - name: Run linters
+        run: uv run --only-group nox nox --parallel auto --tags lint
 
   install-dev:
-    name: Verify dev env
+    name: Verify locked dev env
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -197,24 +205,10 @@ jobs:
           persist-credentials: false
       - uses: hynek/setup-cached-uv@v2.6.0
 
-      - name: Install in dev mode
-        run: |
-          uv venv --python $(cat .python-version-default)
-          uv pip install -e .[dev]
+      - run: uv sync
 
-      - name: Try to import on Linux
-        run: |
-          source .venv/bin/activate
-
-          python -Ic 'import stamina; print(stamina.__version__)'
-        if: runner.os == 'Linux'
-
-      - name: Try to import on Windows
-        run: |
-          .venv\Scripts\activate
-
-          python -Ic 'import stamina; print(stamina.__version__)'
-        if: runner.os == 'Windows'
+      - name: Import public modules
+        run: uv run python -Ic 'import stamina; print(stamina.__version__)'
 
   required-checks-pass:
     name: Ensure everything required is passing for branch protection
@@ -224,6 +218,7 @@ jobs:
       - coverage
       - install-dev
       - docs
+      - lint
       - type-check-api-mypy
       - typing
 
