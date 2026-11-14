@@ -15,6 +15,11 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/26.1.0...HEAD)
 
+### Removed
+
+- Support for Python 3.10.
+
+
 ### Deprecated
 
 - Raising `tenacity.TryAgain` in code that *stamina* retries now emits a `DeprecationWarning`.
