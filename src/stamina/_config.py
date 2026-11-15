@@ -173,7 +173,7 @@ def is_testing() -> bool:
     """
     Check whether test mode is enabled.
 
-    .. versionadded:: 24.3.0
+    !!! version-added "Added in 24.3.0"
     """
     return CONFIG.testing is not None
 
@@ -208,9 +208,13 @@ def set_testing(
 
     Is idempotent and can be called repeatedly with the same values.
 
-    .. versionadded:: 24.3.0
-    .. versionadded:: 25.1.0 *cap*
-    .. versionadded:: 25.1.0 Can be used as a context manager.
+    !!! version-added "Added in 24.3.0"
+
+    !!! version-added "Added in 25.1.0"
+        *cap*
+
+    !!! version-added "Added in 25.1.0"
+        Can be used as a context manager.
     """
     old = CONFIG.testing
     CONFIG.testing = _Testing(attempts, cap) if testing else None

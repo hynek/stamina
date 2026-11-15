@@ -36,15 +36,7 @@ mypy = [{ include-group = "typing" }, "mypy"]
 pyright = [{ include-group = "typing" }, "pyright"]
 pyrefly = [{ include-group = "typing" }, "pyrefly"]
 ty = [{ include-group = "typing" }, "ty"]
-docs = [
-  { include-group = "instrumentation" },
-  "sphinx >= 7.2.2",
-  "furo",
-  "myst-parser",
-  "sphinx-notfound-page",
-  "sphinx-copybutton",
-  "watchfiles",
-]
+docs = ["mkdocstrings-python", "zensical"]
 lint = ["prek", "ruff"]
 nox = [
   # First version with parallel support.
@@ -182,7 +174,7 @@ replace-imports-with-any = ["tenacity.*"]
 
 
 [tool.ruff]
-src = ["src", "tests", "noxfile.py", "docs/conf.py"]
+src = ["src", "tests", "noxfile.py"]
 line-length = 79
 
 [tool.ruff.lint]

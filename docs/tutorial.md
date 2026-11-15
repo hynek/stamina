@@ -1,13 +1,12 @@
 # Tutorial
 
-:::{tip}
-If you're not sure why you should use retries in general or _stamina_ in particular, head over to {doc}`motivation` first.
-:::
+!!! tip
+    If you're not sure why you should use retries in general or _stamina_ in particular, head over to [Motivation](motivation.md) first.
 
 
 ## Decorators
 
-The easiest way to add smart retries to your code is to decorate a callable with {func}`stamina.retry()`:
+The easiest way to add smart retries to your code is to decorate a callable with [`stamina.retry()`][stamina.retry]:
 
 ```python
 import httpx2
@@ -27,8 +26,8 @@ def do_it(code: int) -> httpx2.Response:
 # note: Revealed type is "def (code: builtins.int) -> httpx2._models.Response"
 ```
 
-This will retry the function up to 3 times if it raises an {class}`httpx2.HTTPError` (or any subclass thereof).
-Since retrying on {class}`Exception` is an [attractive nuisance](https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html), *stamina* doesn't do it by default and forces you to be explicit.
+This will retry the function up to 3 times if it raises an [`httpx2.HTTPError`][] (or any subclass thereof).
+Since retrying on [`Exception`][] is an [attractive nuisance](https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html), *stamina* doesn't do it by default and forces you to be explicit.
 
 
 ## Arbitrary code blocks
@@ -36,7 +35,7 @@ Since retrying on {class}`Exception` is an [attractive nuisance](https://blog.ga
 Sometimes you only want to retry a part of a function.
 
 Since iterators can't catch exceptions and context managers can't execute the same block multiple times, we need to combine them to achieve that.
-*stamina* gives you the {func}`stamina.retry_context()` iterator which yields the necessary context managers:
+*stamina* gives you the [`stamina.retry_context()`][stamina.retry_context] iterator which yields the necessary context managers:
 
 ```python
 for attempt in stamina.retry_context(on=httpx2.HTTPError):
@@ -48,7 +47,7 @@ for attempt in stamina.retry_context(on=httpx2.HTTPError):
 
 ## Retry one function or method call
 
-If you want to retry just one function or method call, *stamina* comes with an even easier way in the shape of {class}`stamina.RetryingCaller` and {class}`stamina.AsyncRetryingCaller`:
+If you want to retry just one function or method call, *stamina* comes with an even easier way in the shape of [`stamina.RetryingCaller`][] and [`stamina.AsyncRetryingCaller`][]:
 
 ```python
 def do_something_with_url(url, some_kw):
@@ -78,14 +77,14 @@ Both `rc` and `bound_rc` run:
 do_something_with_url(f"https://httpbin.org/status/404", some_kw=42)
 ```
 
-and retry on {class}`httpx2.HTTPError` and as before, the type hints are preserved.
+and retry on [`httpx2.HTTPError`][] and as before, the type hints are preserved.
 It's up to you whether you want to share only the retry configuration or the exception type to retry on, too.
 
 
 ## Backoff hooks
 
 Sometimes, an exception is too broad, though.
-For example, *httpx2* raises {class}`httpx2.HTTPStatusError` on all HTTP errors.
+For example, *httpx2* raises [`httpx2.HTTPStatusError`][] on all HTTP errors.
 But some errors, like 404 (Not Found) or 403 (Forbidden), usually shouldn't be retried!
 
 To solve problems like this, you can pass a *backoff hook* to `on`.
@@ -111,7 +110,7 @@ def do_it(code: int) -> httpx2.Response:
     return resp
 ```
 
-If you need more control, you can return a {class}`float` of seconds or a {class}`datetime.timedelta` to specify a custom backoff that overrides the default backoff instead of a boolean.
+If you need more control, you can return a [`float`][] of seconds or a [`datetime.timedelta`][] to specify a custom backoff that overrides the default backoff instead of a boolean.
 This is useful when the error carries information like a [`Retry-After`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After) header.
 A custom backoff is **not** part of the exponential backoff machinery so none of the other backoff parameters apply to it.
 
@@ -120,7 +119,7 @@ A custom backoff is **not** part of the exponential backoff machinery so none of
 
 Sometimes, the reason to retry isn't an exception at all.
 For example, an API might answer with a *200 OK* and tell you that your job is still pending.
-In that case, raise {class}`stamina.exceptions.TryAgain` to force a retry, whatever *on* says:
+In that case, raise [`stamina.exceptions.TryAgain`][] to force a retry, whatever *on* says:
 
 ```python
 from stamina.exceptions import TryAgain
@@ -148,7 +147,7 @@ That way, `TryAgain` doesn't leak into your API.
 ---
 
 You can also tell *stamina* how long to wait at least before the next attempt by passing *after*.
-It takes a number of seconds, a {class}`datetime.timedelta`, or a timezone-aware {class}`datetime.datetime`.
+It takes a number of seconds, a [`datetime.timedelta`][], or a timezone-aware [`datetime.datetime`][].
 That's the easiest way to honor a `Retry-After` header:
 
 ```python
@@ -167,7 +166,7 @@ def do_it(code: int) -> httpx2.Response:
 ```
 
 A `Retry-After` header can also contain an HTTP date.
-{func}`email.utils.parsedate_to_datetime` turns it into a datetime that you can pass as *after*, too.
+[`email.utils.parsedate_to_datetime()`][email.utils.parsedate_to_datetime] turns it into a datetime that you can pass as *after*, too.
 
 *stamina* waits for *after* plus some jitter, or for its regular backoff if that's longer.
 
@@ -208,7 +207,7 @@ async def with_block(code: int) -> httpx2.Response:
     return resp
 ```
 
-Note how you can also pass {class}`datetime.timedelta` objects to *timeout*, *wait_initial*, *wait_max*, and *wait_jitter*.
+Note how you can also pass [`datetime.timedelta`][] objects to *timeout*, *wait_initial*, *wait_max*, and *wait_jitter*.
 
 
 ## Testing
@@ -217,11 +216,11 @@ Testing software with retries can be tricky, so *stamina* comes with dedicated t
 
 You can *globally* turn them off altogether, remove backoff, and limit the number of retries.
 
-Check out {doc}`testing` to learn more!
+Check out [Testing](testing.md) to learn more!
 
 
 ## Observability
 
-To give you observability of your application's retrying, *stamina* will count the retries using [*prometheus-client*](https://github.com/prometheus/client_python) in the `stamina_retries_total` counter (if installed) and log them out using [*structlog*](https://www.structlog.org/) with a fallback to {mod}`logging`.
+To give you observability of your application's retrying, *stamina* will count the retries using [*prometheus-client*](https://github.com/prometheus/client_python) in the `stamina_retries_total` counter (if installed) and log them out using [*structlog*](https://www.structlog.org/) with a fallback to [`logging`][logging].
 
-{doc}`instrumentation` has more details.
+[Instrumentation](instrumentation.md) has more details.

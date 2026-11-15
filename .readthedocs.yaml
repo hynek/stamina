@@ -4,6 +4,8 @@ version: 2
 build:
   os: ubuntu-lts-latest
   tools:
+    # Mandatory field. We allow uv to install Python to avoid manual
+    # duplication, but latest is usually the correct version.
     python: latest
   jobs:
     create_environment:
@@ -16,4 +18,10 @@ build:
 
     build:
       html:
-        - uv run --locked --only-group nox nox -e docs -- html
+        # Set canonical URL
+        - sed -i "s|https://stamina.hynek.me/|$READTHEDOCS_CANONICAL_URL|g" zensical.toml
+        - uv run --locked --only-group nox nox -e docs
+        # Zensical builds into site/; hand it to Read the Docs.
+        # https://docs.readthedocs.com/platform/latest/intro/zensical.html
+        - mkdir -p $READTHEDOCS_OUTPUT/html/
+        - cp --recursive site/* $READTHEDOCS_OUTPUT/html/

@@ -5,7 +5,7 @@ Testing code with retry logic can be tricky, so *stamina* provides dedicated tes
 
 ## Turn off retries
 
-The easiest way is to turn off retries using {func}`stamina.set_active`:
+The easiest way is to turn off retries using [`stamina.set_active()`][stamina.set_active]:
 
 ```python
 import pytest
@@ -22,15 +22,14 @@ This is a great approach when you're only using our decorator-based API.
 
 ## Limiting retries
 
-:::{versionadded} 24.3.0
-:::
+!!! version-added "Added in 24.3.0"
 
-When you need more control, you can use the iterator-based APIs around {func}`stamina.retry_context`.
+When you need more control, you can use the iterator-based APIs around [`stamina.retry_context()`][stamina.retry_context].
 
 In that case, triggering retries and testing what happens can make sense.
 However, you don't want the backoff and probably want to avoid going to the full number of attempts -- otherwise, your test suite will run forever.
 
-For this use-case, *stamina* comes with a dedicated testing mode that turns off backoff and caps retries -- by default to a single attempt: {func}`stamina.set_testing`.
+For this use-case, *stamina* comes with a dedicated testing mode that turns off backoff and caps retries -- by default to a single attempt: [`stamina.set_testing()`][stamina.set_testing].
 
 Therefore, this script will only print "trying 1" and "trying 2" very quickly and raise a `ValueError`:
 

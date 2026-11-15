@@ -1,5 +1,3 @@
 # Credits
 
-```{include} ../README.md
-:start-after: "## Credits"
-```
+--8<-- "README.md:credits"

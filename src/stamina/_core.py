@@ -131,14 +131,18 @@ def retry_context(
     Iterator that yields context managers that can be used to retry code
     blocks.
 
-    Arguments have the same meaning as for :func:`stamina.retry`.
+    Arguments have the same meaning as for [`stamina.retry()`][stamina.retry].
 
     *name* identifies this operation in retry instrumentation, including the
     Prometheus callable label. Use a stable name rather than per-request IDs.
 
-    .. versionadded:: 23.1.0
-    .. versionadded:: 23.3.0 `Trio <https://trio.readthedocs.io/>`_ support.
-    .. versionadded:: 26.2.0 The *name* parameter.
+    !!! version-added "Added in 23.1.0"
+
+    !!! version-added "Added in 23.3.0"
+        [Trio](https://trio.readthedocs.io/) support.
+
+    !!! version-added "Added in 26.2.0"
+        The *name* parameter.
     """
 
     return _RetryContextIterator.from_params(
@@ -159,9 +163,10 @@ class Attempt:
     """
     A context manager that can be used to retry code blocks.
 
-    Instances are yielded by the :func:`stamina.retry_context` iterator.
+    Instances are yielded by the
+    [`stamina.retry_context()`][stamina.retry_context] iterator.
 
-    .. versionadded:: 23.2.0
+    !!! version-added "Added in 23.2.0"
     """
 
     __slots__ = ("_next_wait_fn", "_t_attempt")
@@ -192,14 +197,15 @@ class Attempt:
         The number of seconds of backoff before the *next* attempt if *this*
         attempt fails.
 
-        .. warning::
+        !!! warning
             This value does **not** include a possible random jitter and is
             therefore just a *lower bound* of the actual value.
 
-        .. versionadded:: 24.3.0
-        .. versionchanged:: 25.2.0
-           Fixed off-by-one error when passing the attempt number to the
-           next_wait_fn.
+        !!! version-added "Added in 24.3.0"
+
+        !!! version-changed "Changed in 25.2.0"
+            Fixed off-by-one error when passing the attempt number to the
+            `next_wait_fn`.
         """
         return (
             # The next wait time is computed based on the current attempt number.
@@ -304,18 +310,52 @@ class RetryingCaller(BaseRetryingCaller):
     """
     Call your callables with retries.
 
-    Arguments have the same meaning as for :func:`stamina.retry`.
+    Arguments have the same meaning as for [`stamina.retry()`][stamina.retry].
+
+    For example:
+
+    ```python
+    def do_something_with_url(url, some_kw):
+        resp = httpx2.get(url).raise_for_status()
+        ...
+
+    rc = stamina.RetryingCaller(attempts=5)
+
+    rc(
+        httpx2.HTTPError,
+        do_something_with_url,
+        "https://httpbin.org/status/404",
+        some_kw=42,
+    )
+
+    # Equivalent:
+    bound_rc = rc.on(httpx2.HTTPError)
+
+    bound_rc(do_something_with_url, "https://httpbin.org/status/404", some_kw=42)
+    ```
+
+    Both calls to `rc` and `bound_rc` run
+
+    ```python
+    do_something_with_url("https://httpbin.org/status/404", some_kw=42)
+    ```
+
+    and retry on [`httpx2.HTTPError`][].
 
     *name* identifies the operation in retry instrumentation, as in
-    :func:`stamina.retry_context`. It also applies to callers bound with
-    :meth:`on` and defaults to ``<context block>``.
+    [`retry_context()`][stamina.retry_context]. It also applies to callers
+    bound with [`on()`][stamina.RetryingCaller.on] and defaults to
+    `<context block>`.
 
     Tip:
-        Instances of ``RetryingCaller`` may be reused because they internally
-        create a new :func:`retry_context` iterator on each call.
+        Instances of `RetryingCaller` may be reused because they internally
+        create a new [`retry_context()`][stamina.retry_context] iterator on
+        each call.
 
-    .. versionadded:: 24.2.0
-    .. versionadded:: 26.2.0 The *name* parameter.
+    !!! version-added "Added in 24.2.0"
+
+    !!! version-added "Added in 26.2.0"
+        The *name* parameter.
     """
 
     def __call__(
@@ -326,17 +366,17 @@ class RetryingCaller(BaseRetryingCaller):
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> T:
-        r"""
-        Call ``callable_(*args, **kw)`` with retries if *on* is raised.
+        """
+        Call `callable_(*args, **kwargs)` with retries if *on* is raised.
 
         Args:
             on: Exception(s) to retry on.
 
-            callable\_: Callable to call.
+            callable_: Callable to call.
 
             args: Positional arguments to pass to *callable_*.
 
-            kw: Keyword arguments to pass to *callable_*.
+            kwargs: Keyword arguments to pass to *callable_*.
         """
         for attempt in retry_context(on, **self._context_kws):
             with attempt:
@@ -346,10 +386,11 @@ class RetryingCaller(BaseRetryingCaller):
 
     def on(self, on: ExcOrBackoffHook, /) -> BoundRetryingCaller:
         """
-        Create a new instance of :class:`BoundRetryingCaller` with the same
+        Create a new instance of
+        [`BoundRetryingCaller`][stamina.BoundRetryingCaller] with the same
         parameters, but bound to a specific exception type.
 
-        .. versionadded:: 24.2.0
+        !!! version-added "Added in 24.2.0"
         """
         # This should be a `functools.partial`, but unfortunately it's
         # impossible to provide a nicely typed API with it, so we use a
@@ -359,13 +400,14 @@ class RetryingCaller(BaseRetryingCaller):
 
 class BoundRetryingCaller:
     """
-    Same as :class:`RetryingCaller`, but pre-bound to a specific exception
-    type.
+    Same as [`RetryingCaller`][stamina.RetryingCaller], but pre-bound to a
+    specific exception type.
 
     Caution:
-        Returned by :meth:`RetryingCaller.on` -- do not instantiate directly.
+        Returned by [`RetryingCaller.on()`][stamina.RetryingCaller.on] -- do
+        not instantiate directly.
 
-    .. versionadded:: 24.2.0
+    !!! version-added "Added in 24.2.0"
     """
 
     __slots__ = ("_caller", "_on")
@@ -390,18 +432,21 @@ class BoundRetryingCaller:
         self, callable_: Callable[P, T], /, *args: P.args, **kwargs: P.kwargs
     ) -> T:
         """
-        Same as :func:`RetryingCaller.__call__`, except retry on the exception
-        that is bound to this instance.
+        Same as [`RetryingCaller.__call__()`][stamina.RetryingCaller.__call__],
+        except retry on the exception that is bound to this instance.
         """
         return self._caller(self._on, callable_, *args, **kwargs)
 
 
 class AsyncRetryingCaller(BaseRetryingCaller):
     """
-    Same as :class:`RetryingCaller`, but for async callables.
+    Same as [`RetryingCaller`][stamina.RetryingCaller], but for async
+    callables.
 
-    .. versionadded:: 24.2.0
-    .. versionadded:: 26.2.0 The *name* parameter.
+    !!! version-added "Added in 24.2.0"
+
+    !!! version-added "Added in 26.2.0"
+        The *name* parameter.
     """
 
     async def __call__(
@@ -413,7 +458,8 @@ class AsyncRetryingCaller(BaseRetryingCaller):
         **kwargs: P.kwargs,
     ) -> T:
         """
-        Same as :meth:`RetryingCaller.__call__`, but *callable_* is awaited.
+        Same as [`RetryingCaller.__call__()`][stamina.RetryingCaller.__call__],
+        but *callable_* is awaited.
         """
         async for attempt in retry_context(on, **self._context_kws):
             with attempt:
@@ -423,23 +469,25 @@ class AsyncRetryingCaller(BaseRetryingCaller):
 
     def on(self, on: ExcOrBackoffHook, /) -> BoundAsyncRetryingCaller:
         """
-        Create a new instance of :class:`BoundAsyncRetryingCaller` with the
+        Create a new instance of
+        [`BoundAsyncRetryingCaller`][stamina.BoundAsyncRetryingCaller] with the
         same parameters, but bound to a specific exception type.
 
-        .. versionadded:: 24.2.0
+        !!! version-added "Added in 24.2.0"
         """
         return BoundAsyncRetryingCaller(self, on)
 
 
 class BoundAsyncRetryingCaller:
     """
-    Same as :class:`BoundRetryingCaller`, but for async callables.
+    Same as [`BoundRetryingCaller`][stamina.BoundRetryingCaller], but for
+    async callables.
 
     Caution:
-        Returned by :meth:`AsyncRetryingCaller.on` -- do not instantiate
-        directly.
+        Returned by [`AsyncRetryingCaller.on()`][stamina.AsyncRetryingCaller.on]
+        -- do not instantiate directly.
 
-    .. versionadded:: 24.2.0
+    !!! version-added "Added in 24.2.0"
     """
 
     __slots__ = ("_caller", "_on")
@@ -466,8 +514,9 @@ class BoundAsyncRetryingCaller:
         **kwargs: P.kwargs,
     ) -> T:
         """
-        Same as :func:`AsyncRetryingCaller.__call__`, except retry on the
-        exception that is bound to this instance.
+        Same as
+        [`AsyncRetryingCaller.__call__()`][stamina.AsyncRetryingCaller.__call__],
+        except retry on the exception that is bound to this instance.
         """
         return await self._caller(self._on, callable_, *args, **kwargs)
 
@@ -854,15 +903,15 @@ def retry(  # noqa: C901
 
     The backoff for retry attempt number *attempt* is computed as:
 
-    .. keep in-sync with docs/motivation.md
-    .. math::
+    <!-- keep in-sync with docs/motivation.md -->
+    $$
+    min(wait\_max, wait\_initial * wait\_exp\_base^{attempt - 1} + random(0,
+    wait\_jitter))
+    $$
 
-       min(wait\_max, wait\_initial * wait\_exp\_base^{attempt - 1} + random(0,
-       wait\_jitter))
-
-    Since :math:`x^0` is always 1, the first backoff is within the interval
-    :math:`[wait\_initial,wait\_initial+wait\_jitter]`. Thus, with default
-    values between 0.1 and 1.1 seconds.
+    Since $x^0$ is always 1, the first backoff is within the interval
+    $[wait\_initial,wait\_initial+wait\_jitter]$. Thus, with default values
+    between 0.1 and 1.1 seconds.
 
     If all retries fail, the *last* exception is let through.
 
@@ -870,15 +919,16 @@ def retry(  # noqa: C901
 
     Generators are restarted from the beginning on each retry.
 
-    .. note::
-       Being able to :meth:`~agen.asend` and :meth:`~agen.athrow` into wrapped
-       async generators introduced nontrivial complexity in the implementation
-       and is therefore **provisional**. If supporting these features causes
-       problems, they may be removed again in a future version.
+    !!! note
+        Being able to [`asend()`][agen.asend] and [`athrow()`][agen.athrow]
+        into wrapped async generators introduced nontrivial complexity in the
+        implementation and is therefore **provisional**. If supporting these
+        features causes problems, they may be removed again in a future
+        version.
 
-    .. warning::
-       It is possible to get unbounded retries by passing `None` for *attempts*
-       (= infinite attempts) and *timeout* (= no timeout).
+    !!! warning
+        It is possible to get unbounded retries by passing `None` for
+        *attempts* (= infinite attempts) and *timeout* (= no timeout).
 
     Args:
         on:
@@ -895,10 +945,10 @@ def retry(  # noqa: C901
             client error.
 
             For even more control, the hook may return a float or a
-            :class:`datetime.timedelta` to specify a custom backoff that
+            [`datetime.timedelta`][] to specify a custom backoff that
             overrides the default backoff. This is useful when the error
-            carries information like a `Retry-After
-            <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After>`_
+            carries information like a
+            [`Retry-After`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After)
             header. A custom backoff is not part of the exponential backoff
             machinery so none of the other backoff parameters apply to it.
 
@@ -924,30 +974,33 @@ def retry(  # noqa: C901
 
         wait_exp_base: The exponential base used to compute the retry backoff.
 
-    .. versionchanged:: 23.1.0
-       All time-related parameters can now be specified as a
-       :class:`datetime.timedelta`.
+    !!! version-changed "Changed in 23.1.0"
+        All time-related parameters can now be specified as a
+        [`datetime.timedelta`][].
 
-    .. versionadded:: 23.3.0 `Trio <https://trio.readthedocs.io/>`_ support.
+    !!! version-added "Added in 23.3.0"
+        [Trio](https://trio.readthedocs.io/) support.
 
-    .. versionadded:: 24.3.0 *on* can be a callable now.
+    !!! version-added "Added in 24.3.0"
+        *on* can be a callable now.
 
-    .. versionadded:: 25.2.0
-       Generator functions and async generator functions are now retried, too.
+    !!! version-added "Added in 25.2.0"
+        Generator functions and async generator functions are now retried,
+        too.
 
-    .. versionadded:: 25.2.0
-       An *on* backoff hook can now return a float or a `datetime.timedelta` to
-       specify a custom backoff that overrides the default backoff.
+    !!! version-added "Added in 25.2.0"
+        An *on* backoff hook can now return a float or a
+        [`datetime.timedelta`][] to specify a custom backoff that overrides
+        the default backoff.
 
-    .. versionchanged:: 26.2.0
-       The type hints of *on* now accept subclasses of :class:`BaseException`,
-       and backoff hooks are typed to receive a :class:`BaseException`. This
-       matches the runtime behavior.
+    !!! version-changed "Changed in 26.2.0"
+        The type hints of *on* now accept subclasses of [`BaseException`][],
+        and backoff hooks are typed to receive a [`BaseException`][]. This
+        matches the runtime behavior.
 
-    .. versionchanged:: 26.2.0
-       If a backoff would end after *timeout*, *stamina* gives up right away.
-       Before, it waited past *timeout* and attempted once more.
-
+    !!! version-changed "Changed in 26.2.0"
+        If a backoff would end after *timeout*, *stamina* gives up right away.
+        Before, it waited past *timeout* and attempted once more.
     """
     retry_ctx = _RetryContextIterator.from_params(
         on=on,

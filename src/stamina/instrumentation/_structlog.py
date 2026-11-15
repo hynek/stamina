@@ -11,7 +11,7 @@ def init_structlog() -> RetryHook:
     """
     Initialize structlog instrumentation.
 
-    .. versionadded:: 23.2.0
+    !!! version-added "Added in 23.2.0"
     """
     import structlog
 
@@ -33,3 +33,15 @@ def init_structlog() -> RetryHook:
 
 
 StructlogOnRetryHook = RetryHookFactory(init_structlog)
+"""
+Pass this object to
+[`set_on_retry_hooks()`][stamina.instrumentation.set_on_retry_hooks] to
+activate *structlog* integration.
+
+Is active by default if *structlog* can be imported.
+
+!!! info "See also"
+    [*structlog*](instrumentation.md#structlog)
+
+!!! version-added "Added in 23.2.0"
+"""

@@ -50,11 +50,11 @@ def get_prometheus_counter() -> Counter | None:
     Return the Prometheus counter for the number of retries.
 
     Returns:
-        If active, the Prometheus `counter
-        <https://github.com/prometheus/client_python>`_ for the number of
-        retries. None otherwise.
+        If active, the Prometheus
+        [counter](https://github.com/prometheus/client_python) for the number
+        of retries. None otherwise.
 
-    .. versionadded:: 23.2.0
+    !!! version-added "Added in 23.2.0"
     """
     from . import get_on_retry_hooks
 
@@ -65,3 +65,15 @@ def get_prometheus_counter() -> Counter | None:
 
 
 PrometheusOnRetryHook = RetryHookFactory(init_prometheus)
+"""
+Pass this object to
+[`set_on_retry_hooks()`][stamina.instrumentation.set_on_retry_hooks] to
+activate Prometheus integration.
+
+Is active by default if *prometheus-client* can be imported.
+
+!!! info "See also"
+    [Prometheus](instrumentation.md#prometheus)
+
+!!! version-added "Added in 23.2.0"
+"""

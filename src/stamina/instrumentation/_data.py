@@ -22,8 +22,9 @@ def guess_name(obj: object) -> str:
 
 @dataclass(frozen=True)
 class RetryDetails:
-    r"""
-    Details about a retry attempt that are passed into :class:`RetryHook`\ s.
+    """
+    Details about a retry attempt that are passed into
+    [`RetryHook`][stamina.instrumentation.RetryHook]s.
 
     Attributes:
         name: Name of the callable that is being retried.
@@ -44,16 +45,15 @@ class RetryDetails:
 
         caused_by: Exception that caused the retry attempt.
 
-    .. caution::
+    !!! caution
+        **Modifying args or kwargs modifies the arguments of the next
+        attempt.**
 
-       **Modifying args or kwargs modifies the arguments of the next
-       attempt.**
+        *args* and *kwargs* are the same objects that *stamina* passes to the
+        next attempt. If you change them or anything inside them, you change
+        the arguments of the next attempt.
 
-       *args* and *kwargs* are the same objects that *stamina* passes to the
-       next attempt. If you change them or anything inside them, you change
-       the arguments of the next attempt.
-
-    .. versionadded:: 23.2.0
+    !!! version-added "Added in 23.2.0"
     """
 
     __slots__ = (
@@ -80,16 +80,26 @@ class RetryHook(Protocol):
     A callable that gets called after an attempt has failed and a retry has
     been scheduled.
 
-    This is a :class:`typing.Protocol` that can be implemented by any callable
-    that takes one argument of type :class:`RetryDetails` and returns None.
+    This is a [`typing.Protocol`][] that can be implemented by any callable
+    that takes one argument of type
+    [`RetryDetails`][stamina.instrumentation.RetryDetails] and returns None.
 
     If the hook returns a context manager, it will be entered when the retry is
     scheduled and exited right before the retry is attempted.
 
-    .. versionadded:: 23.2.0
+    For example:
 
-    .. versionadded:: 25.1.0
-       Added support for context managers.
+    ```python
+    def print_hook(details: stamina.instrumentation.RetryDetails) -> None:
+        print("a retry has been scheduled!", details)
+
+    stamina.instrumentation.set_on_retry_hooks([print_hook])
+    ```
+
+    !!! version-added "Added in 23.2.0"
+
+    !!! version-added "Added in 25.1.0"
+        Added support for context managers.
     """
 
     def __call__(
@@ -100,13 +110,35 @@ class RetryHook(Protocol):
 @dataclass(frozen=True)
 class RetryHookFactory:
     """
-    Wraps a callable that returns a :class:`RetryHook`.
+    Wraps a callable that returns a
+    [`RetryHook`][stamina.instrumentation.RetryHook].
 
     They are called on the first scheduled retry and can be used to delay
     initialization. If you need to pass arguments, you can do that using
-    :func:`functools.partial`.
+    [`functools.partial()`][functools.partial].
 
-    .. versionadded:: 23.2.0
+    For example, if your instrumentation needs to import a module
+    `something_expensive` which takes a long time to import, you can delay it
+    until the first retry (or call to
+    [`get_on_retry_hooks()`][stamina.instrumentation.get_on_retry_hooks]):
+
+    ```python
+    from stamina.instrumentation import RetryDetails, RetryHookFactory
+
+    def init_with_expensive_import():
+        import something_expensive
+
+        def do_something(details: RetryDetails) -> None:
+            something_expensive.do_something(details)
+
+        return do_something
+
+    stamina.instrumentation.set_on_retry_hooks(
+        [RetryHookFactory(init_with_expensive_import)]
+    )
+    ```
+
+    !!! version-added "Added in 23.2.0"
     """
 
     hook_factory: Callable[[], RetryHook]
