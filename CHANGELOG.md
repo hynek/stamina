@@ -13,7 +13,7 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 <!-- changelog follows -->
 
 
-## [Unreleased](https://github.com/hynek/stamina/compare/26.1.0...HEAD)
+## [26.2.0](https://github.com/hynek/stamina/compare/26.1.0...26.2.0) - 2026-11-15
 
 ### Removed
 
