@@ -44,6 +44,10 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   `stamina.instrumentation.get_process_details()` returns the current one.
   [#160](https://github.com/hynek/stamina/issues/160)
 
+- `stamina.retry_context()`, `stamina.RetryingCaller()`, and `stamina.AsyncRetryingCaller()` now accept a keyword-only *name* for retry instrumentation, like Prometheus labels.
+  The default remains `<context block>`.
+  [#165](https://github.com/hynek/stamina/issues/165)
+
 
 ### Changed
 

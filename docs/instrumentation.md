@@ -29,6 +29,21 @@ To disable instrumentation, set the on-retry hooks to an empty iterable using {f
 stamina.instrumentation.set_on_retry_hooks([])
 ```
 
+
+## Operation names
+
+{func}`stamina.retry_context`, {class}`stamina.RetryingCaller`, and {class}`stamina.AsyncRetryingCaller` accept an optional keyword-only *name* for instrumentation.
+The default is `<context block>`.
+Callers returned by `.on()` retain the name.
+
+```python
+retry_api = stamina.RetryingCaller(name="fetch-catalog").on(OSError)
+```
+
+The name is passed to retry hooks as {attr}`stamina.instrumentation.RetryDetails.name`, including the `callable` label in Prometheus and the callable fields in logs.
+Choose a stable operation name rather than a per-request ID to avoid creating an unbounded number of metric labels.
+
+
 (prometheus)=
 
 ## Prometheus
@@ -36,7 +51,7 @@ stamina.instrumentation.set_on_retry_hooks([])
 *stamina* offers Prometheus integration using the official [*prometheus-client*].
 When it's active, retries are counted using the [counter](https://prometheus.io/docs/concepts/metric_types/) `stamina_retries_total` with the following labels:
 
-- `callable`: The name of the decorated callable.
+- `callable`: The name of the decorated callable or the operation name.
 - `retry_num`: The number of the current *retry*.
   So, if your callable failed once, this is set to 1.
 - `error_type`: The name of the exception **class** that caused the retry.
@@ -53,7 +68,7 @@ You can activate it manually by adding {data}`stamina.instrumentation.Prometheus
 
 If *structlog* instrumentation is active, scheduled retries are logged using a *structlog* logger at warning level with the following keys:
 
-- `callable`: The name of the decorated callable.
+- `callable`: The name of the decorated callable or the operation name.
 - `args`: The positional arguments passed to the callable.
 - `kwargs`: The keyword arguments passed to the callable.
 - `retry_num`: The number of the current *retry*.
@@ -77,7 +92,7 @@ Use `structlog.stdlib.BoundLogger` and explicit async methods like `ainfo()` ins
 
 If standard library's `logging` integration is active, logging happens at warning level and includes the following *extra fields*:
 
-- `stamina.callable`: The name of the decorated callable.
+- `stamina.callable`: The name of the decorated callable or the operation name.
 - `stamina.args`: The positional arguments passed to the callable.
 - `stamina.kwargs`: The keyword arguments passed to the callable.
 - `stamina.retry_num`: The number of the current *retry*.
