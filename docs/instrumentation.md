@@ -118,6 +118,43 @@ def print_hook(details: stamina.instrumentation.RetryDetails) -> None:
 stamina.instrumentation.set_on_retry_hooks([print_hook])
 ```
 
+
+### Context managers
+
+If you need to know when the backoff ends (for example, to emit a span for the time spent waiting) a hook can also return a context manager.
+*stamina* enters it when it schedules the retry and exits it right before the next attempt.
+The easiest way is [`contextlib.contextmanager`][]:
+
+```python
+import contextlib
+import time
+
+from collections.abc import Iterator
+
+import stamina
+
+
+@contextlib.contextmanager
+def print_wait_hook(
+    details: stamina.instrumentation.RetryDetails,
+) -> Iterator[None]:
+    print("Waiting before retry:", details)
+    start = time.monotonic()
+
+    yield
+
+    print(f"Retrying now after {time.monotonic() - start:.2f}s.")
+
+
+stamina.instrumentation.set_on_retry_hooks([print_wait_hook])
+```
+
+!!! note
+    *stamina* only supports synchronous context managers.
+
+
+### Hook factories
+
 If your hook needs setup that is expensive, wrap a function that creates the hook in a [`RetryHookFactory`][stamina.instrumentation.RetryHookFactory].
 *stamina* calls the factory only once: when it schedules the first retry or an earlier call to [`stamina.instrumentation.get_on_retry_hooks()`][stamina.instrumentation.get_on_retry_hooks].
 
