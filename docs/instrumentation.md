@@ -119,7 +119,7 @@ stamina.instrumentation.set_on_retry_hooks([print_hook])
 ```
 
 If your hook needs setup that is expensive, wrap a function that creates the hook in a [`RetryHookFactory`][stamina.instrumentation.RetryHookFactory].
-*stamina* calls the factory only once: when it schedules the first retry or an earlier call to get_on_retry_hooks().
+*stamina* calls the factory only once: when it schedules the first retry or an earlier call to [`stamina.instrumentation.get_on_retry_hooks()`][stamina.instrumentation.get_on_retry_hooks].
 
 ```python
 import stamina
