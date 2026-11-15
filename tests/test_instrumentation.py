@@ -673,8 +673,8 @@ class TestSetProcessDetails:
         assert [{"api_key": "***"}] == [d.kwargs for d in hook_details]
 
 
-@pytest.fixture
-def retry_details():
+@pytest.fixture(name="retry_details")
+def _retry_details():
     """
     Capture retry metadata and restore the previous hooks after the test.
     """
