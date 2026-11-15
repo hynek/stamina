@@ -38,10 +38,7 @@ nav = [
   { "Reference" = ["api.md"] },
   { "Meta" = [
     "credits.md",
-    { "PyPI" = "https://pypi.org/project/stamina/" },
-    { "GitHub" = "https://github.com/hynek/stamina" },
     { "Changelog" = "https://github.com/hynek/stamina/blob/main/CHANGELOG.md" },
-    { "Contributing" = "https://github.com/hynek/stamina/blob/main/.github/CONTRIBUTING.md" },
     { "Security Policy" = "https://github.com/hynek/stamina/blob/main/.github/SECURITY.md" },
     { "Funding" = "https://hynek.me/say-thanks/" },
   ] },
