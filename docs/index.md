@@ -1,6 +1,8 @@
 # *stamina*
 _Production-grade Retries Made Easy_
 
+---
+
 --8<-- "README.md:intro"
 
 ---
