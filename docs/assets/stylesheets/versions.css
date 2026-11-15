@@ -1,0 +1,50 @@
+/*
+ * Version notes, like Sphinx's versionadded, versionchanged, and deprecated.
+ *
+ * Use them in docstrings and Markdown pages like this:
+ *
+ *     !!! version-added "Added in 24.3.0"
+ *
+ *     !!! version-changed "Changed in 25.2.0"
+ *         What changed.
+ *
+ *     !!! version-deprecated "Deprecated in 26.1.0"
+ *         What to use instead.
+ */
+:root {
+  --version-added-color: #00c853;
+  --version-changed-color: #ff9100;
+  --version-deprecated-color: #ff1744;
+}
+
+.md-typeset .admonition.version-added {
+  background-color: color-mix(in srgb, var(--version-added-color) 10%, transparent);
+}
+
+.md-typeset .version-added > .admonition-title::before {
+  background-color: var(--version-added-color);
+  mask-image: var(--md-admonition-icon--success);
+}
+
+.md-typeset .admonition.version-changed {
+  background-color: color-mix(in srgb, var(--version-changed-color) 10%, transparent);
+}
+
+.md-typeset .version-changed > .admonition-title::before {
+  background-color: var(--version-changed-color);
+  mask-image: var(--md-admonition-icon--note);
+}
+
+.md-typeset .admonition.version-deprecated {
+  background-color: color-mix(in srgb, var(--version-deprecated-color) 10%, transparent);
+}
+
+.md-typeset .version-deprecated > .admonition-title::before {
+  background-color: var(--version-deprecated-color);
+  mask-image: var(--md-admonition-icon--warning);
+}
+
+/* Keep runs of version notes compact. */
+.md-typeset .admonition[class*="version-"] {
+  margin: 0.6em 0;
+}

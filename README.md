@@ -9,6 +9,8 @@
 
 ---
 
+<!-- --8<-- [start:intro] -->
+
 Transient failures are common in distributed systems.
 To make your systems resilient, you need to **retry** failed operations.
 But bad retries can make things *much worse*.
@@ -41,7 +43,7 @@ def do_it(code: int) -> httpx2.Response:
     return resp
 ```
 
-<!-- end docs index -->
+<!-- --8<-- [end:intro] -->
 
 **Async** callables work use the same API and it's possible to retry **arbitrary blocks**, too.
 Check out our [tutorial](https://stamina.hynek.me/en/latest/tutorial.html) for more examples!
@@ -61,6 +63,8 @@ Or, if you prefer video, here's a brief introduction into retries and *stamina*:
 
 ## Credits
 
+<!-- --8<-- [start:credits] -->
+
 *stamina* is written by [Hynek Schlawack](https://hynek.me/) and distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
 
 The development is kindly supported by my employer [Variomedia AG](https://www.variomedia.de/) and all my amazing [GitHub Sponsors](https://github.com/sponsors/hynek).
@@ -74,3 +78,4 @@ Available as part of the [Tidelift Subscription](https://tidelift.com/?utm_sourc
 
 The maintainers of *stamina* and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open-source packages you use to build your applications.
 Save time, reduce risk, and improve code health, while paying the maintainers of the exact packages you use.
+<!-- --8<-- [end:credits] -->

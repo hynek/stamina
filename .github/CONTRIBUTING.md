@@ -87,24 +87,24 @@ $ uv run pytest
 When working on the documentation, use:
 
 ```console
-$ nox --session docs -- watch
+$ nox --session docs_serve
 ```
 
 This will build the documentation, watch for changes, and rebuild it whenever you save a file.
 
-To just build the documentation and run doctests, use:
+To just build the documentation and exit immediately, use:
 
 ```console
 $ nox --session docs
 ```
 
-You will find the built documentation in `docs/_build/html`.
+You will find the built documentation in `site/`.
 
 
 ## Code
 
 - Obey [PEP 8](https://peps.python.org/pep-0008/) and [PEP 257](https://peps.python.org/pep-0257/).
-  We use the `"""`-on-separate-lines style for docstrings with [Napoleon](https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html)-style API documentation:
+  We use the `"""`-on-separate-lines style for docstrings with [Google](https://mkdocstrings.github.io/griffe/reference/docstrings/#google-style)-style API documentation:
 
   ```python
   def func(x: str, y: int) -> str:
@@ -124,9 +124,18 @@ You will find the built documentation in `docs/_build/html`.
       """
   ```
 
-  Please note that unlike everything else, the API docstrings are still reStructuredText.
+  Docstrings are Markdown, just like the rest of our documentation.
+  Link to other APIs using their full paths, like ``[`stamina.retry()`][stamina.retry]`` or ``[`datetime.timedelta`][]``.
 
-- If you add or change public APIs, tag the docstring using `..  versionadded:: 24.1.0 WHAT` or `..  versionchanged:: 24.1.0 WHAT`.
+- If you add or change public APIs, tag the docstring at its end with a version note:
+
+  ```markdown
+  !!! version-added "Added in 24.2.0"
+
+  !!! version-changed "Changed in 24.2.0"
+      What changed.
+  ```
+
   We follow CalVer, so the next version will be the current with with the middle number incremented (for example, `24.1.0` -> `24.2.0`).
 
 - We use [Ruff](https://ruff.rs/) to sort our imports and format our code with a line length of 79 characters.
@@ -153,7 +162,7 @@ You will find the built documentation in `docs/_build/html`.
 
 ## Documentation
 
-- Use [semantic newlines] in [reStructuredText](https://www.sphinx-doc.org/en/stable/usage/restructuredtext/basics.html) (`*.rst`) and [Markdown](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax) (`*.md`) files:
+- Use [semantic newlines] in [Markdown](https://zensical.org/docs/authoring/markdown/) (`*.md`) files:
 
   ```markdown
   This is a sentence.

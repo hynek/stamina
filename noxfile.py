@@ -4,9 +4,7 @@
 
 from __future__ import annotations
 
-import os
 import pathlib
-import shutil
 import tomllib
 
 import nox
@@ -157,42 +155,34 @@ def coverage_report(session: nox.Session) -> None:
     session.run("coverage", "report")
 
 
-@nox_uv.session(uv_groups=["docs"], uv_no_install_project=True)
+@nox_uv.session(uv_only_groups=["docs"])
 def docs(session: nox.Session) -> None:
-    shutil.rmtree("docs/_build", ignore_errors=True)
+    """
+    Build the documentation site strictly with Zensical into site/.
 
-    if session.posargs and session.posargs[0] == "watch":
-        _install_pkg(session, editable=True)
-        session.run(
-            "watchfiles",
-            "--ignore-paths",
-            "docs/_build",
-            "python -Im sphinx "
-            "-T -E "
-            "-W --keep-going "
-            "-b html "
-            "-d docs/_build/doctrees "
-            "-D language=en "
-            "-n "
-            "docs "
-            "docs/_build/html",
-        )
+    This is also what Read the Docs runs.
+
+    zensical.toml enables strict mode, but it doesn't catch Griffe's warnings
+    about broken docstrings, so we fail on them ourselves. And since Zensical
+    doesn't repeat warnings for cached pages, always build from scratch.
+    """
+    out = session.run(
+        "zensical", "build", "--clean", *session.posargs, silent=True
+    )
+    if not isinstance(out, str):  # e.g., --install-only
         return
 
-    _install_pkg(session)
-    cmds = session.posargs or ["html", "doctest"]
+    session.log(out.strip())
 
-    dest = os.environ.get("READTHEDOCS_OUTPUT", "docs/_build/")
+    if griffe := [ln for ln in out.splitlines() if ln.startswith("griffe:")]:
+        session.error(
+            f"Found {len(griffe)} docstring problem(s):\n" + "\n".join(griffe)
+        )
 
-    for cmd in cmds:
-        session.run(
-            "python", "-Im", "sphinx",
-            "-T", "-E",
-            "-W", "--keep-going",
-            "-b", cmd,
-            "-d", "docs/_build/doctrees",
-            "-D", "language=en",
-            "-n",
-            "docs",
-            pathlib.Path(dest, "html")
-        )  # fmt: skip
+
+@nox_uv.session(uv_only_groups=["docs"], default=False)
+def docs_serve(session: nox.Session) -> None:
+    """
+    Serve the documentation with live-reloading.
+    """
+    session.run("zensical", "serve", *session.posargs)

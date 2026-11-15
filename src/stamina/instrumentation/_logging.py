@@ -13,7 +13,7 @@ def init_logging(log_level: int = 30) -> RetryHook:
 
     Returned hook logs scheduled retries at *log_level*.
 
-    .. versionadded:: 23.2.0
+    !!! version-added "Added in 23.2.0"
     """
     import logging
 
@@ -38,3 +38,15 @@ def init_logging(log_level: int = 30) -> RetryHook:
 
 
 LoggingOnRetryHook = RetryHookFactory(init_logging)
+"""
+Pass this object to
+[`set_on_retry_hooks()`][stamina.instrumentation.set_on_retry_hooks] to
+activate [`logging`][logging] integration.
+
+Is active by default if *structlog* can **not** be imported.
+
+!!! info "See also"
+    [Standard library's `logging`](instrumentation.md#logging)
+
+!!! version-added "Added in 23.2.0"
+"""

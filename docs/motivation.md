@@ -1,8 +1,7 @@
 # Motivation
 
-:::{tip}
-If you prefer video to text, check out [this video](https://www.youtube.com/watch?v=BxikFuvaT1Y) that explains both the motivation for retries as well as the creation of *stamina*.
-:::
+!!! tip
+    If you prefer video to text, check out [this video](https://www.youtube.com/watch?v=BxikFuvaT1Y) that explains both the motivation for retries as well as the creation of *stamina*.
 
 
 ## The need for retries
@@ -52,17 +51,17 @@ A jitter between 0 and 1 second is added at every step until it reaches the maxi
 
 Or, more formally:
 
-% keep in-sync with stamina.retry's docstring
-```{math}
+<!-- keep in-sync with stamina.retry's docstring -->
+$$
 min(5.0, 0.1 * 2^{attempt - 1} + random(0, 1.0))
-```
+$$
 
 That means that, by default, the first backoff is no longer than 1.1 seconds, and the last is no longer than 5 seconds.
 Note that no jitter is added once the maximum timeout is reached; there should be enough variance in the backoff due to the jitter added underway.
 
-You can [tune all these parameters](stamina.retry) to your liking, but the defaults are a good starting point.
+You can [tune all these parameters][stamina.retry] to your liking, but the defaults are a good starting point.
 
-I hope you're now all motivated and ready to jump into our {doc}`tutorial`!
+I hope you're now all motivated and ready to jump into our [Tutorial](tutorial.md)!
 
 
 ## Supplemental literature
