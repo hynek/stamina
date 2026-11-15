@@ -32,10 +32,6 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ### Added
 
-- `stamina.retry_context()`, `stamina.RetryingCaller()`, and `stamina.AsyncRetryingCaller()` accept a keyword-only *name* for retry instrumentation, including Prometheus labels.
-  The default remains `<context block>`.
-  [#110](https://github.com/hynek/stamina/issues/110)
-
 - `stamina.exceptions.TryAgain` that you can raise to force a retry, whatever *on* says.
   If *stamina* runs out of attempts, it raises the exception that you raised `TryAgain` from.
   Without one, your caller gets the `TryAgain`.
@@ -47,6 +43,10 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
   For example, you can remove secrets from the arguments before they are logged.
   `stamina.instrumentation.get_process_details()` returns the current one.
   [#160](https://github.com/hynek/stamina/issues/160)
+
+- `stamina.retry_context()`, `stamina.RetryingCaller()`, and `stamina.AsyncRetryingCaller()` now accept a keyword-only *name* for retry instrumentation, like Prometheus labels.
+  The default remains `<context block>`.
+  [#165](https://github.com/hynek/stamina/issues/165)
 
 
 ### Changed
