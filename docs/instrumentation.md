@@ -101,6 +101,65 @@ We recommend using [*structlog*] instead.
 You can activate it manually by adding [`stamina.instrumentation.LoggingOnRetryHook`][] to the list of hooks passed to [`stamina.instrumentation.set_on_retry_hooks()`][stamina.instrumentation.set_on_retry_hooks].
 
 
+## Writing your own hooks
+
+If the instrumentation hooks shipped by _stamina_ don't fit your needs, you can easily implement your own, because a hook is just a callable that takes a [`RetryDetails`][stamina.instrumentation.RetryDetails] and does whatever it wants.
+
+For example, this hook prints the details of each scheduled retry:
+
+```python
+import stamina
+
+
+def print_hook(details: stamina.instrumentation.RetryDetails) -> None:
+    print("Retry scheduled:", details)
+
+
+stamina.instrumentation.set_on_retry_hooks([print_hook])
+```
+
+If your hook needs setup that is expensive, wrap a function that creates the hook in a [`RetryHookFactory`][stamina.instrumentation.RetryHookFactory].
+*stamina* calls the factory only once: when it schedules the first retry or an earlier call to get_on_retry_hooks().
+
+```python
+import stamina
+
+
+def make_print_hook() -> stamina.instrumentation.RetryHook:
+    print("Initializing the print hook.")
+
+    def print_hook(details: stamina.instrumentation.RetryDetails) -> None:
+        print("Retry scheduled:", details)
+
+    return print_hook
+
+
+stamina.instrumentation.set_on_retry_hooks(
+    [stamina.instrumentation.RetryHookFactory(make_print_hook)]
+)
+```
+
+Now, if you run something like this:
+
+```python
+@stamina.retry(on=Exception)
+def do_it(arg, kw):
+    raise ValueError(arg)
+
+
+do_it(67, kw=42)
+```
+
+You get output like this:
+
+```plain
+Initializing the print hook.
+Retry scheduled: RetryDetails(name='__main__.do_it', args=(67,), kwargs={'kw': 42}, retry_num=1, wait_for=1.0369990140298804, waited_so_far=0.0, caused_by=ValueError(67))
+Retry scheduled: RetryDetails(name='__main__.do_it', args=(67,), kwargs={'kw': 42}, retry_num=2, wait_for=0.2118614697618475, waited_so_far=1.0369990140298804, caused_by=ValueError(67))
+...
+```
+
+
 ## Processing retry details
 
 To change the [`stamina.instrumentation.RetryDetails`][] before *stamina* passes them to the hooks, use [`stamina.instrumentation.set_process_details()`][stamina.instrumentation.set_process_details].
