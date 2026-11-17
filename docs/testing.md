@@ -1,3 +1,7 @@
+---
+icon: material/test-tube
+---
+
 # Testing
 
 Testing code with retry logic can be tricky, so *stamina* provides dedicated testing helpers that allow you to affect retrying behavior *globally*.

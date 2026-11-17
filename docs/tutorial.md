@@ -1,3 +1,7 @@
+---
+icon: material/rocket-launch
+---
+
 # Tutorial
 
 !!! tip

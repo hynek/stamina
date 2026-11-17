@@ -1,3 +1,7 @@
+---
+icon: material/chart-line
+---
+
 # Instrumentation
 
 *stamina* calls instrumentation hooks whenever a retry is scheduled, but **before** it waits for the backoff.

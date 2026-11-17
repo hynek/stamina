@@ -1,3 +1,7 @@
+---
+icon: material/lightbulb-on
+---
+
 # Motivation
 
 !!! tip
