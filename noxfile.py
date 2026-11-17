@@ -149,7 +149,7 @@ def tests(session: nox.Session, opt_group: str | None) -> None:
     session.run("coverage", "run", "-m", "pytest", *posargs)
 
 
-@nox_uv.session(requires=ALL_SUPPORTED, uv_only_groups=["cov"])
+@nox_uv.session(requires=["tests"], uv_only_groups=["cov"])
 def coverage_report(session: nox.Session) -> None:
     session.run("coverage", "combine")
     session.run("coverage", "report")
