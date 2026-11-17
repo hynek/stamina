@@ -34,7 +34,13 @@ nav = [
   "motivation.md",
   "tutorial.md",
   "testing.md",
-  "instrumentation.md",
+  { "Instrumentation" = [
+    "instrumentation/index.md",
+    "instrumentation/prometheus.md",
+    "instrumentation/structlog.md",
+    "instrumentation/logging.md",
+    "instrumentation/custom.md",
+  ] },
   { "Reference" = ["api.md"] },
   { "Meta" = [
     "credits.md",

@@ -24,7 +24,7 @@ It is the result of years of copy-pasting the same configuration over and over a
 - Limit the number of retries **and** total time.
 - Automatic **async** support – including [Trio](https://trio.readthedocs.io/).
 - Preserve **type hints** of the decorated callable.
-- Flexible **instrumentation** with [Prometheus](https://github.com/prometheus/client_python), [*structlog*](https://www.structlog.org/), and standard library's `logging` support out-of-the-box.
+- Flexible **instrumentation** with [Prometheus](https://github.com/prometheus/client_python), [*structlog*](https://www.structlog.org/), and standard library's [`logging`](https://docs.python.org/3/library/logging.html) support out-of-the-box.
 - Dedicated support for **testing** that allows to _globally_ deactivate retries, or to limit the number of retries and to remove backoffs.
 
 For example:

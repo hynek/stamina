@@ -46,7 +46,7 @@ activate [`logging`][logging] integration.
 Is active by default if *structlog* can **not** be imported.
 
 !!! info "See also"
-    [Standard library's `logging`](instrumentation.md#logging)
+    [Standard library's `logging`](instrumentation/logging.md)
 
 !!! version-added "Added in 23.2.0"
 """

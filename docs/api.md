@@ -36,7 +36,7 @@
 ## Instrumentation
 
 !!! info "See also"
-    [Instrumentation](instrumentation.md)
+    [Instrumentation](instrumentation/index.md)
 
 ::: stamina.instrumentation
     options:

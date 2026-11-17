@@ -73,7 +73,7 @@ activate Prometheus integration.
 Is active by default if *prometheus-client* can be imported.
 
 !!! info "See also"
-    [Prometheus](instrumentation.md#prometheus)
+    [Prometheus](instrumentation/prometheus.md)
 
 !!! version-added "Added in 23.2.0"
 """

@@ -41,7 +41,7 @@ activate *structlog* integration.
 Is active by default if *structlog* can be imported.
 
 !!! info "See also"
-    [*structlog*](instrumentation.md#structlog)
+    [*structlog*](instrumentation/structlog.md)
 
 !!! version-added "Added in 23.2.0"
 """
