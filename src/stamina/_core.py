@@ -44,17 +44,18 @@ except ImportError:  # pragma: no cover -- we always have sniffio in tests
 async def _smart_sleep(delay: float) -> None:
     io = current_async_library()
 
-    if io == "asyncio":
-        import asyncio
+    match io:
+        case "asyncio":
+            import asyncio
 
-        await asyncio.sleep(delay)
-    elif io == "trio":
-        import trio
+            await asyncio.sleep(delay)
+        case "trio":
+            import trio
 
-        await trio.sleep(delay)
-    else:  # pragma: no cover
-        msg = f"Unknown async library: {io!r}"
-        raise RuntimeError(msg)
+            await trio.sleep(delay)
+        case _:  # pragma: no cover
+            msg = f"Unknown async library: {io!r}"
+            raise RuntimeError(msg)
 
 
 T = TypeVar("T")
