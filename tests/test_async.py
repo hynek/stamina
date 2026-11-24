@@ -693,6 +693,27 @@ class TestBackoffHookAsync:
 
     @pytest.mark.anyio
     @pytest.mark.usefixtures("anyio_backend")
+    async def test_backoff_hook_negative_backoff_async(self):
+        """
+        A negative custom backoff is treated as an immediate retry instead of
+        being passed to the async backend's sleep(), which would raise a
+        ValueError on Trio.
+        """
+        attempts = 0
+
+        @stamina.retry(on=lambda exc: -42.0, wait_initial=5, attempts=3)
+        async def f():
+            nonlocal attempts
+            attempts += 1
+            if attempts < 3:
+                raise ValueError("retry")
+            return 42
+
+        assert 42 == await f()
+        assert 3 == attempts
+
+    @pytest.mark.anyio
+    @pytest.mark.usefixtures("anyio_backend")
     async def test_backoff_hook_with_async_retry_context(self):
         """
         Backoff hooks work with async retry_context.

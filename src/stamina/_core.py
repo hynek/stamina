@@ -745,7 +745,9 @@ class _RetryContextIterator:
             if CONFIG.testing is not None:
                 return 0.0
 
-            return cast(float, custom_backoff)
+            # Negative backoffs mean "retry immediately" -- passing them on to
+            # the backend's sleep() would raise a ValueError on some backends.
+            return max(0.0, cast(float, custom_backoff))
 
         backoff = _compute_backoff(
             rcs.attempt_number,

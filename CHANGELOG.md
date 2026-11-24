@@ -15,6 +15,12 @@ You can find our backwards-compatibility policy [here](https://github.com/hynek/
 
 ## [Unreleased](https://github.com/hynek/stamina/compare/26.2.0...HEAD)
 
+### Fixed
+
+- A negative duration returned by an *on* backoff hook no longer crashes the retry loop with a `ValueError` from the sleep backend.
+  It is now treated as "retry immediately", matching how a `datetime` in the past is handled for `stamina.exceptions.TryAgain.after`.
+
+
 
 ## [26.2.0](https://github.com/hynek/stamina/compare/26.1.0...26.2.0) - 2026-11-15
 

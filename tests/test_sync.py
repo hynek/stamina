@@ -1041,6 +1041,24 @@ class TestBackoffHookSync:
         assert 2 == attempts
         assert duration < 1
 
+    def test_backoff_hook_negative_backoff(self):
+        """
+        A negative custom backoff is treated as an immediate retry instead of
+        being passed to sleep(), which would raise a ValueError.
+        """
+        attempts = 0
+
+        @stamina.retry(on=lambda exc: -42.0, wait_initial=5, attempts=3)
+        def f():
+            nonlocal attempts
+            attempts += 1
+            if attempts < 3:
+                raise ValueError("retry")
+            return 42
+
+        assert 42 == f()
+        assert 3 == attempts
+
     def test_backoff_hook_custom_backoff_from_exception(self):
         """
         A backoff hook can extract a custombackoff from exception attributes.
