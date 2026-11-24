@@ -23,7 +23,6 @@ extra_javascript = [
   "https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js",
 ]
 extra_css = [
-  # Custom fonts (Inter + Berkeley Mono).
   "assets/stylesheets/fonts.css",
   # Styles for version notes in docstrings: !!! version-added "Added in 1.2.3"
   "assets/stylesheets/versions.css",

@@ -1,18 +1,7 @@
-@import url('https://rsms.me/inter/inter.css');
-@import url('https://assets.hynek.me/css/bm.css');
+@import url('https://assets.hynek.me/mlc/mlc.css');
+@import url('https://assets.hynek.me/mlt/mlt.css');
 
-/*
- * Adapted from https://rsms.me/inter/.
- */
 :root {
-  --md-text-font: "Inter";
-  --md-code-font: "BerkeleyMono";
-}
-@supports (font-variation-settings: normal) {
-  :root { --md-text-font: "InterVariable"; }
-}
-
-aside, body, input {
-  /* Keep Zensical's features and add the fix for Chrome. */
-  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  --md-text-font: "MonoLisaText";
+  --md-code-font: "MonoLisaCode";
 }
